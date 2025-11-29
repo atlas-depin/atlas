@@ -10,4 +10,6 @@ option go_package = "nebulix/x/storage/types";
 message Params {
   option (amino.name) = "nebulix/x/storage/Params";
   option (gogoproto.equal) = true;
+
+  int64 price_per_gb_day = 1;
 }

@@ -10,7 +10,7 @@ import (
 
 func (k Keeper) ResetStorageCredits(ctx sdk.Context, address string, credits math.Int) error {
 	// [TBD]: send existing credits to dump here?
-
+	return nil
 	account, err := k.StorageAccountStore.Get(ctx, address)
 	if err != nil {
 		account = types.StorageAccountInfo{Credits: math.ZeroInt()}

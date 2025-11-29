@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"cosmossdk.io/errors"
@@ -65,7 +66,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// [TBD]: do I need to return duration?
-	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, msg.PaymentDenom)
+	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, "unblx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate buy request")
 	}
@@ -73,7 +74,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	/// --- Compute storage cost
 	storageCost := k.GetStorageCost(ctx, gbs, msg.Duration)
 
-	toPay := sdk.NewCoin(msg.PaymentDenom, storageCost)
+	toPay := sdk.NewCoin("unblx", storageCost)
 
 	/// --- Process payment
 	accExists := k.authKeeper.HasAccount(ctx, recipient)
@@ -92,6 +93,8 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		Address:        recipient.String(),
 	}
 
+	test := toPay.Amount.Int64()
+	log.Println(test)
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spender, types.ModuleName, sdk.NewCoins(toPay))
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot send tokens from %s", msg.Creator)

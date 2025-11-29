@@ -75,6 +75,12 @@ func NewKeeper(
 		Params:     collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 
 		// TODO: use keys/prefix instead of NewPrefix(<int>)
+		// PaymentStore: collections.NewMap(
+		// 	sb, collections.NewPrefix(0), "subscriptions",
+		// 	collections.StringKey,
+		// 	codec.CollValue[types.StoragePaymentInfo](cdc),
+		// ),
+
 		FileStore: collections.NewMap(
 			sb, collections.NewPrefix(0), "files",
 			collections.StringKey,
@@ -125,7 +131,6 @@ func (k Keeper) SetBinRoot(ctx sdk.Context, binId uint64, root []byte) {
 
 	bin.Root = root
 	k.BinStore.Set(ctx, binKey, bin)
-	return
 }
 
 // CalculateBinID deterministically maps a file ID to a bin ID.

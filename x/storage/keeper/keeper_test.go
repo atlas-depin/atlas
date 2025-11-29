@@ -84,7 +84,7 @@ func (suite *KeeperTestSuite) reset() {
 // setupMsgServer is the helper function that sets up everything needed for message server tests
 func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
 	// Initialize genesis state
-	genesis := types.DefaultGenesis()
+	types.DefaultGenesis()
 
 	// Set default parameters
 	params := types.DefaultParams()

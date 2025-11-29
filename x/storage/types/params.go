@@ -7,7 +7,9 @@ func NewParams() Params {
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
-	return NewParams()
+	return Params{
+		PricePerGbDay: 1000,
+	}
 }
 
 // Validate validates the set of params.

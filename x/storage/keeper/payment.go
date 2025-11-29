@@ -9,23 +9,27 @@ import (
 
 // NOTE: I know I can pull this from the bankkeeper but this is just way more efficient and we should never be changing this anyways....
 const (
-	unblxUnit int64 = 1000000
+	unblxUnit int64 = 1_000_000
 )
 
 func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int {
 	params, _ := k.Params.Get(ctx)
-	pricePerGBDay := math.NewInt(params.PricePerGBDay)
+	pricePerGbDay := math.NewInt(params.PricePerGbDay)
 
 	// [TBD]: verify this can't overflow in an attack attempt
-	totalCost := pricePerGBDay.MulRaw(gbs).MulRaw(days)
+	totalCost := pricePerGbDay.Mul(math.NewInt(gbs)).Mul(math.NewInt(days))
 
 	// [TODO]: oracle for price fetching
-	nblxPrice, _ := math.LegacyNewDecFromStr("1000")
+	totalCostDec := math.LegacyNewDecFromBigInt(totalCost.BigInt())
+	nblxPrice, _ := math.LegacyNewDecFromStr("100")
 	// ^ temporary price for testing
-	nblxCost := math.LegacyDec(totalCost).Quo(nblxPrice)
-	unblxCost := math.NewInt(nblxCost.MulInt64(unblxUnit).Ceil().BigInt().Int64())
 
-	return unblxCost
+	nblxCost := totalCostDec.Quo(nblxPrice)
+
+	unblxUnit := math.LegacyNewDec(1_000_000)
+	unblxCost := nblxCost.Mul(unblxUnit)
+
+	return unblxCost.Ceil().TruncateInt()
 }
 
 // [TODO]
@@ -44,7 +48,7 @@ func (k Keeper) GetStoragePaymentInfo(
 
 	// k.cdc.MustUnmarshal(b, &val)
 	// k.FixStoragePaymentInfo(ctx, val)
-	return val, true
+	return val, false
 }
 
 // [TODO]

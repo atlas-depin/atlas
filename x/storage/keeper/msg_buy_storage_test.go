@@ -21,6 +21,11 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success() {
 	creatorAddr, err := suite.addressCodec.StringToBytes(creator)
 	suite.Require().NoError(err)
 
+	// Configure loose mock expectations
+	suite.authKeeper.EXPECT().
+		NewAccountWithAddress(gomock.Any(), gomock.Any()).
+		AnyTimes()
+
 	// Configure mock expectations
 	suite.authKeeper.EXPECT().
 		HasAccount(gomock.Any(), gomock.Any()).
@@ -31,7 +36,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success() {
 		SetAccount(gomock.Any(), gomock.Any()).
 		Times(1)
 
-	expectedPayment := sdk.NewCoin("unblx", math.NewInt(30000000))
+	expectedPayment := sdk.NewCoin("unblx", math.NewInt(300000000))
 	suite.bankKeeper.EXPECT().
 		SendCoinsFromAccountToModule(gomock.Any(), creatorAddr, types.ModuleName, sdk.NewCoins(expectedPayment)).
 		Return(nil).
@@ -42,7 +47,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success() {
 		Creator:  creator,
 		Receiver: receiver,
 		Duration: 30,
-		Bytes:    1_000_000_000_000,
+		Bytes:    1_000_000_000,
 	}
 
 	response, err := msgServer.BuyStorage(ctx, msg)
@@ -64,7 +69,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidAddress() {
 		Creator:  "invalid_address",
 		Receiver: "invalid_address",
 		Duration: 30,
-		Bytes:    1_000_000_000_000,
+		Bytes:    1_000_000_000,
 	}
 
 	_, err := msgServer.BuyStorage(ctx, msg)
@@ -99,7 +104,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ExistingSubscription() {
 		Creator:  creator,
 		Receiver: creator,
 		Duration: 30,
-		Bytes:    1_000_000_000_000,
+		Bytes:    1_000_000_000,
 	}
 
 	_, err = msgServer.BuyStorage(ctx, msg)
