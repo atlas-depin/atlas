@@ -50,12 +50,3 @@ func (k Keeper) GetStoragePaymentInfo(
 	// k.FixStoragePaymentInfo(ctx, val)
 	return val, false
 }
-
-// [TODO]
-func (k Keeper) SetStoragePaymentInfo(ctx sdk.Context, payInfo types.StoragePaymentInfo) {
-	// store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.StoragePaymentInfoKeyPrefix))
-	// b := k.cdc.MustMarshal(&payInfo)
-	// store.Set(types.StoragePaymentInfoKey(
-	// 	payInfo.Address,
-	// ), b)
-}

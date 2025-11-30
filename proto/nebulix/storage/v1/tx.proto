@@ -62,6 +62,7 @@ message MsgBuyStorage {
   string receiver = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   int64 duration = 3;
   int64 bytes = 4;
+  int64 replicas = 5;
 }
 message MsgBuyStorageResponse { }
 

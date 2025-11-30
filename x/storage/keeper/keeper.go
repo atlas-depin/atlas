@@ -8,6 +8,7 @@ import (
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -35,12 +36,16 @@ type Keeper struct {
 	Params collections.Item[types.Params]
 
 	// Collections
-	PaymentStore        collections.Map[string, types.StoragePaymentInfo]
-	StorageAccountStore collections.Map[string, types.StorageAccountInfo]
-	FileStore           collections.Map[string, types.File]      // file_id -> File
-	BinStore            collections.Map[string, types.Bin]       // file_id -> File
-	ProviderStore       collections.Map[string, types.Provider]  // address -> Provider
-	ChallengeStore      collections.Map[string, types.Challenge] // challenge_id -> Challenge
+	StorageCreditPool collections.Item[math.Int]
+	SubscriptionStore collections.Map[collections.Pair[string, string], types.StorageSubscription]
+	//// [TBD]: I added this to enable having multiple subscriptions created for the same account in the same block, but idk if its the best way.
+	// Can't use block height or timestamp because then you would have a conflict of subscription IDs.
+	SubscriptionSequence collections.Sequence
+	////
+	FileStore      collections.Map[string, types.File]      // file_id -> File
+	BinStore       collections.Map[string, types.Bin]       // file_id -> File
+	ProviderStore  collections.Map[string, types.Provider]  // address -> Provider
+	ChallengeStore collections.Map[string, types.Challenge] // challenge_id -> Challenge
 
 	// Indicies
 	FilesByProvider collections.KeySet[string] // provider_address|file_id -> {}
@@ -75,20 +80,27 @@ func NewKeeper(
 		Params:     collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 
 		// TODO: use keys/prefix instead of NewPrefix(<int>)
-		// PaymentStore: collections.NewMap(
-		// 	sb, collections.NewPrefix(0), "subscriptions",
-		// 	collections.StringKey,
-		// 	codec.CollValue[types.StoragePaymentInfo](cdc),
-		// ),
+		StorageCreditPool: collections.NewItem(
+			sb, collections.NewPrefix(0), "storage_credit_pool",
+			sdk.IntValue,
+		),
+
+		SubscriptionStore: collections.NewMap(
+			sb, collections.NewPrefix(1), "subscriptions",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			codec.CollValue[types.StorageSubscription](cdc),
+		),
+
+		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(2), "subscription_seq"),
 
 		FileStore: collections.NewMap(
-			sb, collections.NewPrefix(0), "files",
+			sb, collections.NewPrefix(3), "files",
 			collections.StringKey,
 			codec.CollValue[types.File](cdc),
 		),
 
 		ProviderStore: collections.NewMap(
-			sb, collections.NewPrefix(1), "providers",
+			sb, collections.NewPrefix(4), "providers",
 			collections.StringKey,
 			codec.CollValue[types.Provider](cdc),
 		),

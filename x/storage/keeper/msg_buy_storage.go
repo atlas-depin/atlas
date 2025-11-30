@@ -49,7 +49,10 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		msg.Receiver = msg.Creator
 	}
 
-	// [TBD]: do I need error handling for this?
+	if msg.Replicas < 2 {
+		return nil, errors.Wrapf(sdkerrors.ErrInvalidRequest, "at least two file replicas are required")
+	}
+
 	spender, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot parse creator address %s", msg.Creator)
@@ -71,28 +74,29 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "failed to validate buy request")
 	}
 
-	/// --- Compute storage cost
+	/// --- compute storage cost --- ///
 	storageCost := k.GetStorageCost(ctx, gbs, msg.Duration)
-
 	toPay := sdk.NewCoin("unblx", storageCost)
 
-	/// --- Process payment
-	accExists := k.authKeeper.HasAccount(ctx, recipient)
-	if !accExists {
+	/// --- create new storage subscription --- ///
+	// create recipient account if it doesn't exist
+	if !k.authKeeper.HasAccount(ctx, recipient) {
 		defer telemetry.IncrCounter(1, "new", "account") // [TBD]: do I want/need this?
 		k.authKeeper.SetAccount(ctx, k.authKeeper.NewAccountWithAddress(ctx, recipient))
 	}
 
+	// create subscription object
 	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(60 * 60))
 	credits := math.NewInt(msg.Bytes).Mul(seconds)
-	payInfo := types.StoragePaymentInfo{
+	subscription := types.StorageSubscription{
 		Start:          ctx.BlockTime().Truncate(time.Second),
 		End:            ctx.BlockTime().Truncate(time.Second).Add(duration),
 		SpaceAvailable: msg.Bytes * 3,
 		SpaceUsed:      0,
-		Address:        recipient.String(),
+		Credits:        credits,
 	}
 
+	// transfer tokens to pay
 	test := toPay.Amount.Int64()
 	log.Println(test)
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spender, types.ModuleName, sdk.NewCoins(toPay))
@@ -100,11 +104,10 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "cannot send tokens from %s", msg.Creator)
 	}
 
-	// [TBD]: do I need error handling here?
-	k.ResetStorageCredits(ctx, msg.Receiver, credits)
-	k.SetStoragePaymentInfo(ctx, payInfo)
+	// commit subscription to kvstore
+	k.SetNewStorageSubscription(ctx, recipient.String(), subscription)
 
-	/// --- Emit events
+	/// --- Emit events --- ///
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,

@@ -6,6 +6,14 @@ import (
 	"cosmossdk.io/math"
 )
 
+type StorageSubscription struct {
+	Start          time.Time
+	End            time.Time
+	SpaceAvailable int64
+	SpaceUsed      int64
+	Credits        math.Int
+}
+
 type StoragePaymentInfo struct {
 	Start          time.Time `protobuf:"bytes,1,opt,name=start,proto3,stdtime" json:"start"`
 	End            time.Time `protobuf:"bytes,2,opt,name=end,proto3,stdtime" json:"end"`
