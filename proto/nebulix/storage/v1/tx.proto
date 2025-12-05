@@ -63,6 +63,7 @@ message MsgBuyStorage {
   int64 duration = 3;
   int64 bytes = 4;
   int64 replicas = 5;
+  bool default = 6;
 }
 message MsgBuyStorageResponse { 
   string SubscriptionId = 1;

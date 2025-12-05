@@ -59,11 +59,6 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "for address is not a proper bech32")
 	}
 
-	_, found := k.GetStoragePaymentInfo(ctx, recipient.String())
-	if found {
-		return nil, errors.Wrapf(err, "account has an active storage subscription, consider upgrading storage")
-	}
-
 	// [TBD]: do I need to return duration?
 	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, "unblx")
 	if err != nil {
@@ -85,12 +80,12 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(24 * 60 * 60))
 	credits := math.NewInt(msg.Bytes * 3).Mul(seconds)
 	subscription := types.StorageSubscription{
-		Start:          ctx.BlockTime().Truncate(time.Second),
-		End:            ctx.BlockTime().Truncate(time.Second).Add(duration),
-		SpaceAvailable: msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
-		SpaceUsed:      0,
-		ExtraSpaceUsed: 0,
-		Credits:        credits,
+		Start:            ctx.BlockTime().Truncate(time.Second),
+		End:              ctx.BlockTime().Truncate(time.Second).Add(duration),
+		SpaceAvailable:   msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
+		SpaceUsed:        0,
+		ReplicaSpaceUsed: 0,
+		Credits:          credits,
 		// [TBD]: StandardReplicas field for front-end calcs?
 	}
 
@@ -103,9 +98,13 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// commit subscription to kvstore
-	subscriptionId, err := k.SetNewStorageSubscription(ctx, recipient.String(), subscription)
+	subscriptionId, err := k.SetNewStorageSubscription(ctx, msg.Receiver, subscription)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to commit new storage subscription")
+	}
+
+	if msg.Default {
+		k.SetDefaultStorageSubscriptionId(ctx, msg.Receiver, subscriptionId)
 	}
 
 	/// --- Emit events --- ///

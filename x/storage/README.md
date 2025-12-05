@@ -93,3 +93,9 @@ TODO
 
 ## 6. Rewards Distribution & Slashing
 TODO
+
+
+## TODO
+- Add 100TB limit on file size
+- Add 200year limit on subscription
+- default storage subscription

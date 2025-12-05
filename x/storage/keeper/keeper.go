@@ -1,9 +1,7 @@
 package keeper
 
 import (
-	"crypto/sha256"
 	"fmt"
-	"math/big"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -36,8 +34,9 @@ type Keeper struct {
 	Params collections.Item[types.Params]
 
 	// Collections
-	StorageCreditPool collections.Item[math.Int]
-	SubscriptionStore collections.Map[collections.Pair[string, string], types.StorageSubscription]
+	StorageCreditPool        collections.Item[math.Int]
+	SubscriptionStore        collections.Map[collections.Pair[string, string], types.StorageSubscription]
+	DefaultSubscriptionIndex collections.Map[string, string]
 	//// [TBD]: I added this to enable having multiple subscriptions created for the same account in the same block, but idk if its the best way.
 	// Can't use block height or timestamp because then you would have a conflict of subscription IDs.
 	SubscriptionSequence collections.Sequence
@@ -91,7 +90,13 @@ func NewKeeper(
 			codec.CollValue[types.StorageSubscription](cdc),
 		),
 
-		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(2), "subscription_seq"),
+		DefaultSubscriptionIndex: collections.NewMap(
+			sb, collections.NewPrefix(2), "default_subscriptions",
+			collections.StringKey,
+			collections.StringValue,
+		),
+
+		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(3), "subscription_seq"),
 
 		FileStore: collections.NewMap(
 			sb, collections.NewPrefix(3), "files",
@@ -118,39 +123,6 @@ func NewKeeper(
 	k.Schema = schema
 
 	return k
-}
-
-// GetBinRoot retrieves the current Merkle Root of a specific SMT bin.
-func (k Keeper) GetBinRoot(ctx sdk.Context, binId uint64) []byte {
-
-	bin, err := k.BinStore.Get(ctx, string(types.GetBinRootKey(uint16(binId))))
-	if err != nil {
-		// [TBD]: is this what I should do?
-		return make([]byte, 32)
-	}
-	return bin.Root
-}
-
-// SetBinRoot sets new merkle root for a specific SMT bin.
-func (k Keeper) SetBinRoot(ctx sdk.Context, binId uint64, root []byte) {
-
-	binKey := string(types.GetBinRootKey(uint16(binId)))
-	bin, err := k.BinStore.Get(ctx, binKey)
-	if err != nil {
-		// [TODO]: error - bin does not exist
-		return
-	}
-
-	bin.Root = root
-	k.BinStore.Set(ctx, binKey, bin)
-}
-
-// CalculateBinID deterministically maps a file ID to a bin ID.
-func CalculateBinID(fileID string) uint16 {
-	fileHash := sha256.Sum256([]byte(fileID))
-	fileHashInt := new(big.Int).SetBytes(fileHash[:])
-
-	return uint16(fileHashInt.Mod(fileHashInt, big.NewInt(MAX_BINS)).Uint64())
 }
 
 // GetAuthority returns the module's authority.
