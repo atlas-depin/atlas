@@ -89,18 +89,6 @@ func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
 	return suite.setupMsgServerWithParams(types.DefaultParams())
 }
 
-// [TODO]: make this accessible from testutils module
-func (suite *KeeperTestSuite) createTestAddresses(count int) []string {
-	addresses := make([]string, count)
-	for i := 0; i < count; i++ {
-		addr := sdk.AccAddress([]byte{byte(i + 1), byte(i + 1), byte(i + 1), byte(i + 1), byte(i + 1)})
-		addrStr, err := suite.addressCodec.BytesToString(addr)
-		suite.Require().NoError(err)
-		addresses[i] = addrStr
-	}
-	return addresses
-}
-
 func (suite *KeeperTestSuite) CreateTestAddress(index int) string {
 	addr := sdk.AccAddress([]byte{byte(index)})
 	addrStr, err := suite.addressCodec.BytesToString(addr)

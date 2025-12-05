@@ -215,9 +215,8 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_BytesTooSmall()
 //// ------
 
 func (suite *KeeperTestSuite) assertSubscription(address string, subsId string, bytes int64, duration int64) {
-	subscription, found := suite.keeper.GetStorageSubscription(suite.ctx, address, subsId)
-	suite.Require().True(found, "subscription should be created for %s", address)
-	// [TODO]: make it work with found instead of err
+	subscription, err := suite.keeper.GetStorageSubscription(suite.ctx, address, subsId)
+	suite.Require().True(err == nil, "subscription should be created for %s", address)
 
 	expectedAvailable := bytes * 3
 	expectedCredits := math.NewInt(bytes).Mul(math.NewInt(duration * 24 * 60 * 60))

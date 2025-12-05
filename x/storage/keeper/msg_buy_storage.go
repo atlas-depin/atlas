@@ -89,7 +89,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		End:            ctx.BlockTime().Truncate(time.Second).Add(duration),
 		SpaceAvailable: msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
 		SpaceUsed:      0,
-		ExcessUsed:     0,
+		ExtraSpaceUsed: 0,
 		Credits:        credits,
 		// [TBD]: StandardReplicas field for front-end calcs?
 	}

@@ -3,16 +3,13 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
-	"time"
 
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/errors"
-	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	// sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*types.MsgPostFileResponse, error) {
@@ -34,45 +31,45 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 	}
 	k.SetFile(ctx, file)
 
-	/// --- Handle storage usage
-	if subscription, found := k.GetStoragePaymentInfo(ctx, msg.Creator); found {
-		if subscription.End.Before(ctx.BlockTime()) {
-			// [TBD]: can I handle storage account expiry here? appstate remains unchanged on error so, idk how
-			return nil, errors.Wrapf(sdkerrors.ErrUnauthorized, "storage account is expired")
-		}
+	// /// --- Handle storage usage
+	// if subscription, found := k.GetStoragePaymentInfo(ctx, msg.Creator); found {
+	// 	if subscription.End.Before(ctx.BlockTime()) {
+	// 		// [TBD]: can I handle storage account expiry here? appstate remains unchanged on error so, idk how
+	// 		return nil, errors.Wrapf(sdkerrors.ErrUnauthorized, "storage account is expired")
+	// 	}
 
-		credits := math.NewInt(msg.FileSize).Mul(math.NewInt(int64(subscription.End.Sub(ctx.BlockTime()) / time.Second)))
+	// 	credits := math.NewInt(msg.FileSize).Mul(math.NewInt(int64(subscription.End.Sub(ctx.BlockTime()) / time.Second)))
 
-		subscription.SpaceUsed += msg.FileSize
-		k.TransferStorageCredits(ctx, msg.Creator, types.ModuleAddress.String(), credits)
+	// 	subscription.SpaceUsed += msg.FileSize
+	// 	k.TransferStorageCredits(ctx, msg.Creator, types.ModuleAddress.String(), credits)
 
-		// sub credits
+	// 	// sub credits
 
-		if subscription.SpaceUsed > subscription.SpaceAvailable {
-			return nil, errors.Wrapf(sdkerrors.ErrUnauthorized, "storage account does not have enough space available %d > %d", subscription.SpaceUsed, subscription.SpaceAvailable)
-		}
+	// 	if subscription.SpaceUsed > subscription.SpaceAvailable {
+	// 		return nil, errors.Wrapf(sdkerrors.ErrUnauthorized, "storage account does not have enough space available %d > %d", subscription.SpaceUsed, subscription.SpaceAvailable)
+	// 	}
 
-		k.SetStoragePaymentInfo(ctx, subscription)
-	} else {
-		return nil, errors.Wrapf(sdkerrors.ErrKeyNotFound, "storage account does not exist")
-	}
+	// 	k.SetStoragePaymentInfo(ctx, subscription)
+	// } else {
+	// 	return nil, errors.Wrapf(sdkerrors.ErrKeyNotFound, "storage account does not exist")
+	// }
 
-	/// --- Emit events
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-		),
-	)
+	// /// --- Emit events
+	// ctx.EventManager().EmitEvent(
+	// 	sdk.NewEvent(
+	// 		sdk.EventTypeMessage,
+	// 		sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+	// 	),
+	// )
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeSignContract,
-			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyContract, hex.EncodeToString(msg.Merkle)),
-			sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", ctx.BlockHeight())),
-		),
-	)
+	// ctx.EventManager().EmitEvent(
+	// 	sdk.NewEvent(
+	// 		types.EventTypeSignContract,
+	// 		sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
+	// 		sdk.NewAttribute(types.AttributeKeyContract, hex.EncodeToString(msg.Merkle)),
+	// 		sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", ctx.BlockHeight())),
+	// 	),
+	// )
 
 	return &types.MsgPostFileResponse{StartBlock: ctx.BlockHeight()}, nil
 }
