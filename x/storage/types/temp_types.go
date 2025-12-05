@@ -11,6 +11,7 @@ type StorageSubscription struct {
 	End            time.Time
 	SpaceAvailable int64
 	SpaceUsed      int64
+	ExcessUsed     int64
 	Credits        math.Int
 }
 

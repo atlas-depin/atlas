@@ -49,10 +49,6 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		msg.Receiver = msg.Creator
 	}
 
-	if msg.Replicas < 2 {
-		return nil, errors.Wrapf(sdkerrors.ErrInvalidRequest, "at least two file replicas are required")
-	}
-
 	spender, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot parse creator address %s", msg.Creator)
@@ -91,9 +87,11 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	subscription := types.StorageSubscription{
 		Start:          ctx.BlockTime().Truncate(time.Second),
 		End:            ctx.BlockTime().Truncate(time.Second).Add(duration),
-		SpaceAvailable: msg.Bytes * 3,
+		SpaceAvailable: msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
 		SpaceUsed:      0,
+		ExcessUsed:     0,
 		Credits:        credits,
+		// [TBD]: StandardReplicas field for front-end calcs?
 	}
 
 	// transfer tokens to pay

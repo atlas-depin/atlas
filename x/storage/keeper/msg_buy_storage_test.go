@@ -1,113 +1,234 @@
 package keeper_test
 
 import (
+	"time"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/golang/mock/gomock"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"nebulix/x/storage/types"
 )
 
-func (suite *KeeperTestSuite) TestMsgBuyStorage_Success() {
+func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 	msgServer, ctx := suite.setupMsgServer()
 
-	// Create test addresses
-	testAddresses := suite.createTestAddresses(2)
-	creator := testAddresses[0]
-	receiver := testAddresses[1]
-
-	// [NOTE]: not `sdk.AccAddressFromBech32`
-	// This []bytes argument forces usage of the dependency-injected address codec from keeper
-	creatorAddr, err := suite.addressCodec.StringToBytes(creator)
+	// Create test address using helper
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	// Configure loose mock expectations
-	suite.authKeeper.EXPECT().
-		NewAccountWithAddress(gomock.Any(), gomock.Any()).
-		AnyTimes()
+	// Mock account exists using helper
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
 
-	// Configure mock expectations
-	suite.authKeeper.EXPECT().
-		HasAccount(gomock.Any(), gomock.Any()).
-		Return(false).
-		Times(1)
+	// Calculate cost and mock payment using helper
+	cost := suite.keeper.GetStorageCost(suite.ctx, 1, 30)
+	//cost := math.NewInt(300000000)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
 
-	suite.authKeeper.EXPECT().
-		SetAccount(gomock.Any(), gomock.Any()).
-		Times(1)
-
-	expectedPayment := sdk.NewCoin("unblx", math.NewInt(300000000))
-	suite.bankKeeper.EXPECT().
-		SendCoinsFromAccountToModule(gomock.Any(), creatorAddr, types.ModuleName, sdk.NewCoins(expectedPayment)).
-		Return(nil).
-		Times(1)
-
-	// Execute
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: receiver,
+		Receiver: "",
 		Duration: 30,
 		Bytes:    1_000_000_000,
 	}
 
 	response, err := msgServer.BuyStorage(ctx, msg)
-
-	// Verify
 	suite.Require().NoError(err)
 	suite.Require().NotNil(response)
 
-	// Check state
-	payInfo, err := suite.keeper.PaymentStore.Get(suite.ctx, receiver)
-	suite.Require().NoError(err)
-	suite.Require().Equal(msg.Bytes*3, payInfo.SpaceAvailable)
+	// Verify subscription
+	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
 }
 
-func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidAddress() {
+func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_NewAccount() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	// Create test addresses
+	creator := suite.CreateTestAddress(0)
+	receiver := suite.CreateTestAddress(1)
+
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+	receiverAddr, err := sdk.AccAddressFromBech32(receiver)
+	suite.Require().NoError(err)
+
+	// Mock: Receiver doesn't exist, will be created
+	suite.helpers.Account.MockAccountDoesNotExist(suite.authKeeper, receiverAddr)
+
+	// Create a mock account object for NewAccountWithAddress
+	mockAccount := authtypes.NewBaseAccountWithAddress(receiverAddr)
+	suite.helpers.Account.MockNewAccount(suite.authKeeper, receiverAddr, mockAccount)
+
+	// Calculate and mock payment
+	// cost := suite.keeper.GetStorageCost(suite.ctx, 2, 60)
+	cost := math.NewInt(300000000)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: receiver,
+		Duration: 60,
+		Bytes:    2_000_000_000,
+	}
+
+	response, err := msgServer.BuyStorage(ctx, msg)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(response)
+
+	// Verify subscription
+	suite.assertSubscription(receiver, response.SubscriptionId, msg.Bytes, msg.Duration)
+}
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+
+	// Mock account exists
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+
+	// Calculate and mock payment for large storage
+	cost := suite.keeper.GetStorageCost(suite.ctx, 100000, 730) // 100TB for 2 years
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: "",
+		Duration: 730,                 // 2 years
+		Bytes:    100_000_000_000_000, // 100TB
+	}
+
+	response, err := msgServer.BuyStorage(ctx, msg)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(response)
+
+	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
+}
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
 	msgServer, ctx := suite.setupMsgServer()
 
 	msg := &types.MsgBuyStorage{
-		Creator:  "invalid_address",
-		Receiver: "invalid_address",
+		Creator:  "invalid_bech32_address",
+		Receiver: "",
 		Duration: 30,
 		Bytes:    1_000_000_000,
 	}
 
 	_, err := msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "decoding bech32 failed")
+	suite.Require().Contains(err.Error(), "cannot parse creator address")
 }
 
-func (suite *KeeperTestSuite) TestMsgBuyStorage_ExistingSubscription() {
+func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidReceiverAddress() {
 	msgServer, ctx := suite.setupMsgServer()
 
-	testAddresses := suite.createTestAddresses(1)
-	creator := testAddresses[0]
-
-	// Set up existing storage
-	payInfo := types.StoragePaymentInfo{
-		Address:        creator,
-		Start:          suite.ctx.BlockTime(),
-		End:            suite.ctx.BlockTime().AddDate(0, 1, 0),
-		SpaceAvailable: 3_000_000_000,
-		SpaceUsed:      0,
-	}
-	err := suite.keeper.PaymentStore.Set(suite.ctx, creator, payInfo)
-	suite.Require().NoError(err)
-
-	// Mock expectations
-	suite.authKeeper.EXPECT().
-		HasAccount(gomock.Any(), gomock.Any()).
-		Return(true).
-		Times(1)
+	creator := suite.CreateTestAddress(0)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: creator,
+		Receiver: "invalid_bech32_address",
 		Duration: 30,
+		Bytes:    1_000_000_000,
+	}
+
+	_, err := msgServer.BuyStorage(ctx, msg)
+	suite.Require().Error(err)
+	suite.Require().Contains(err.Error(), "for address is not a proper bech32")
+}
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+
+	// Mock account exists
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+
+	// Mock failed payment
+	cost := suite.keeper.GetStorageCost(suite.ctx, 10, 365)
+	suite.helpers.Bank.MockFailedPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName, "insufficient funds")
+
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: "",
+		Duration: 365,
+		Bytes:    10_000_000_000,
+	}
+
+	_, err = msgServer.BuyStorage(ctx, msg)
+	suite.Require().Error(err)
+	suite.Require().Contains(err.Error(), "cannot send tokens")
+}
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_DurationTooShort() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+
+	// Mock account exists
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+
+	// Test with invalid duration
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: "",
+		Duration: 0, // Invalid: less than 1 day
 		Bytes:    1_000_000_000,
 	}
 
 	_, err = msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "account has an active storage subscription")
+	suite.Require().Contains(err.Error(), "failed to validate buy request")
 }
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_BytesTooSmall() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+
+	// Mock account exists
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+
+	// Test with bytes less than 1GB
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: "",
+		Duration: 30,
+		Bytes:    500_000_000, // 0.5GB
+	}
+
+	_, err = msgServer.BuyStorage(ctx, msg)
+	suite.Require().Error(err)
+	suite.Require().Contains(err.Error(), "failed to validate buy request")
+}
+
+//// ------
+
+func (suite *KeeperTestSuite) assertSubscription(address string, subsId string, bytes int64, duration int64) {
+	subscription, found := suite.keeper.GetStorageSubscription(suite.ctx, address, subsId)
+	suite.Require().True(found, "subscription should be created for %s", address)
+	// [TODO]: make it work with found instead of err
+
+	expectedAvailable := bytes * 3
+	expectedCredits := math.NewInt(bytes).Mul(math.NewInt(duration * 24 * 60 * 60))
+	expectedEnd := suite.ctx.BlockTime().Truncate(time.Second).Add(time.Duration(duration) * 24 * time.Hour)
+
+	suite.Require().Equal(expectedAvailable, subscription.SpaceAvailable)
+	suite.Require().Equal(int64(0), subscription.SpaceUsed)
+	// suite.Require().Equal(int64(0), subscription.ExcessUsed)
+	suite.Require().Equal(expectedCredits, subscription.Credits)
+	suite.Require().Equal(suite.ctx.BlockTime().Truncate(time.Second), subscription.Start)
+	suite.Require().Equal(expectedEnd, subscription.End)
+}
+
+//////////////////////

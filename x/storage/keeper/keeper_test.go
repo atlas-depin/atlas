@@ -18,9 +18,9 @@ import (
 
 	modtestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
+	"nebulix/testutils"
 	"nebulix/x/storage/keeper"
 	module "nebulix/x/storage/module"
-	mocks "nebulix/x/storage/testutil"
 	"nebulix/x/storage/types"
 )
 
@@ -29,78 +29,64 @@ type KeeperTestSuite struct {
 
 	ctx          sdk.Context
 	keeper       keeper.Keeper
-	bankKeeper   *mocks.MockBankKeeper
-	authKeeper   *mocks.MockAuthKeeper
+	bankKeeper   *testutils.MockBankKeeper
+	authKeeper   *testutils.MockAuthKeeper
 	addressCodec address.Codec
 	storeKey     *storetypes.KVStoreKey
 	ctrl         *gomock.Controller
+
+	helpers *testutils.MockHelpers
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
 	suite.ctrl = gomock.NewController(suite.T())
-	suite.reset()
+	encCfg := modtestutil.MakeTestEncodingConfig(module.AppModule{})
+
+	suite.storeKey = storetypes.NewKVStoreKey(types.StoreKey)
+	storeService := runtime.NewKVStoreService(suite.storeKey)
+	authority := authtypes.NewModuleAddress(types.GovModuleName)
+
+	suite.helpers = testutils.NewMockHelpers()
+	suite.bankKeeper = testutils.NewMockBankKeeper(suite.ctrl)
+	suite.authKeeper = testutils.NewMockAuthKeeper(suite.ctrl)
+
+	suite.addressCodec = addresscodec.NewBech32Codec("cosmos")
+	suite.keeper = keeper.NewKeeper(
+		storeService,
+		encCfg.Codec,
+		suite.addressCodec,
+		authority,
+		suite.bankKeeper,
+		suite.authKeeper,
+	)
+
+	suite.ctx = sdktestutil.DefaultContextWithDB(suite.T(), suite.storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
+
+	// Initialize params
+	if err := suite.keeper.Params.Set(suite.ctx, types.DefaultParams()); err != nil {
+		suite.T().Fatalf("failed to set params: %v", err)
+	}
 }
 
 func (suite *KeeperTestSuite) TearDownTest() {
 	suite.ctrl.Finish()
 }
 
-func (suite *KeeperTestSuite) reset() {
-	encCfg := modtestutil.MakeTestEncodingConfig(module.AppModule{})
-	addressCodec := addresscodec.NewBech32Codec("cosmos")
-	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
-
-	storeService := runtime.NewKVStoreService(storeKey)
-	ctx := sdktestutil.DefaultContextWithDB(suite.T(), storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
-
-	authority := authtypes.NewModuleAddress(types.GovModuleName)
-
-	// Initialize gomock keepers
-	bankKeeper := mocks.NewMockBankKeeper(suite.ctrl)
-	authKeeper := mocks.NewMockAuthKeeper(suite.ctrl)
-
-	k := keeper.NewKeeper(
-		storeService,
-		encCfg.Codec,
-		addressCodec,
-		authority,
-		bankKeeper,
-		authKeeper,
-	)
-
-	// Initialize params
-	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
-		suite.T().Fatalf("failed to set params: %v", err)
-	}
-
-	suite.ctx = ctx
-	suite.keeper = k
-	suite.bankKeeper = bankKeeper
-	suite.authKeeper = authKeeper
-	suite.addressCodec = addressCodec
-	suite.storeKey = storeKey
-}
-
-// setupMsgServer is the helper function that sets up everything needed for message server tests
-func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
+func (suite *KeeperTestSuite) setupMsgServerWithParams(params types.Params) (types.MsgServer, sdk.Context) {
 	// Initialize genesis state
 	types.DefaultGenesis()
 
-	// Set default parameters
-	params := types.DefaultParams()
+	// Set params
 	err := suite.keeper.Params.Set(suite.ctx, params)
-	suite.Require().NoError(err)
-
-	// Create test addresses for use in tests
-	// testAddresses := suite.createTestAddresses(3)
-
-	// Update params with test addresses if needed
-	// params.DepositAccount = testAddresses[0]
-	err = suite.keeper.Params.Set(suite.ctx, params)
 	suite.Require().NoError(err)
 
 	// Return the message server and context
 	return keeper.NewMsgServerImpl(suite.keeper), suite.ctx
+}
+
+// setupMsgServer is the helper function that sets up everything needed for message server tests
+func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
+	return suite.setupMsgServerWithParams(types.DefaultParams())
 }
 
 // [TODO]: make this accessible from testutils module
@@ -113,6 +99,13 @@ func (suite *KeeperTestSuite) createTestAddresses(count int) []string {
 		addresses[i] = addrStr
 	}
 	return addresses
+}
+
+func (suite *KeeperTestSuite) CreateTestAddress(index int) string {
+	addr := sdk.AccAddress([]byte{byte(index)})
+	addrStr, err := suite.addressCodec.BytesToString(addr)
+	suite.Require().NoError(err)
+	return addrStr
 }
 
 func TestKeeperTestSuite(t *testing.T) {
