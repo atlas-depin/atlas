@@ -89,23 +89,21 @@ func NewKeeper(
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageSubscription](cdc),
 		),
-
 		DefaultSubscriptionIndex: collections.NewMap(
 			sb, collections.NewPrefix(2), "default_subscriptions",
 			collections.StringKey,
 			collections.StringValue,
 		),
-
 		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(3), "subscription_seq"),
 
 		FileStore: collections.NewMap(
-			sb, collections.NewPrefix(3), "files",
+			sb, collections.NewPrefix(4), "files",
 			collections.StringKey,
 			codec.CollValue[types.File](cdc),
 		),
 
 		ProviderStore: collections.NewMap(
-			sb, collections.NewPrefix(4), "providers",
+			sb, collections.NewPrefix(5), "providers",
 			collections.StringKey,
 			codec.CollValue[types.Provider](cdc),
 		),

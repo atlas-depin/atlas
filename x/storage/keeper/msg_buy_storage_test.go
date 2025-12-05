@@ -78,6 +78,40 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_NewAccount() {
 	suite.assertSubscription(receiver, response.SubscriptionId, msg.Bytes, msg.Duration)
 }
 
+func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	// Create test address using helper
+	creator := suite.CreateTestAddress(0)
+	creatorAddr, err := sdk.AccAddressFromBech32(creator)
+	suite.Require().NoError(err)
+
+	// Mock account exists using helper
+	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+
+	// Calculate cost and mock payment using helper
+	cost := math.NewInt(12000000)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Receiver: "",
+		Duration: 30,
+		Bytes:    1_000_000_000_000,
+		Default:  true,
+	}
+
+	response, err := msgServer.BuyStorage(ctx, msg)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(response)
+
+	// Verify subscription
+	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
+
+	subsId, _ := suite.keeper.GetDefaultStorageSubscriptionId(ctx, creator)
+	suite.Require().Equal(response.SubscriptionId, subsId)
+}
+
 func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 	msgServer, ctx := suite.setupMsgServer()
 
