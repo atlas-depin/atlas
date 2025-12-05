@@ -8,7 +8,7 @@ func NewParams() Params {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		PricePerGbDay: 1000,
+		PricePerGbDay: 400, // $0.0004 * 10^6
 	}
 }
 

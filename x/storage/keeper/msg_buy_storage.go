@@ -82,8 +82,8 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// create subscription object
-	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(60 * 60))
-	credits := math.NewInt(msg.Bytes).Mul(seconds)
+	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(24 * 60 * 60))
+	credits := math.NewInt(msg.Bytes * 3).Mul(seconds)
 	subscription := types.StorageSubscription{
 		Start:          ctx.BlockTime().Truncate(time.Second),
 		End:            ctx.BlockTime().Truncate(time.Second).Add(duration),
@@ -103,7 +103,10 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// commit subscription to kvstore
-	k.SetNewStorageSubscription(ctx, recipient.String(), subscription)
+	subscriptionId, err := k.SetNewStorageSubscription(ctx, recipient.String(), subscription)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to commit new storage subscription")
+	}
 
 	/// --- Emit events --- ///
 	ctx.EventManager().EmitEvent(
@@ -123,7 +126,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		),
 	)
 
-	return &types.MsgBuyStorageResponse{}, nil
+	return &types.MsgBuyStorageResponse{SubscriptionId: subscriptionId}, nil
 }
 
 // TODO: upgrade storage duration

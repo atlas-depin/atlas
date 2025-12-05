@@ -16,12 +16,11 @@ func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int 
 	params, _ := k.Params.Get(ctx)
 	pricePerGbDay := math.NewInt(params.PricePerGbDay)
 
-	// [TBD]: verify this can't overflow in an attack attempt
 	totalCost := pricePerGbDay.Mul(math.NewInt(gbs)).Mul(math.NewInt(days))
 
 	// [TODO]: oracle for price fetching
-	totalCostDec := math.LegacyNewDecFromBigInt(totalCost.BigInt())
-	nblxPrice, _ := math.LegacyNewDecFromStr("100")
+	totalCostDec := math.LegacyNewDecFromBigInt(totalCost.BigInt()).Quo(math.LegacyNewDec(1000000))
+	nblxPrice, _ := math.LegacyNewDecFromStr("1")
 	// ^ temporary price for testing
 
 	nblxCost := totalCostDec.Quo(nblxPrice)

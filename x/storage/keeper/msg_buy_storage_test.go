@@ -22,15 +22,14 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
 
 	// Calculate cost and mock payment using helper
-	cost := suite.keeper.GetStorageCost(suite.ctx, 1, 30)
-	//cost := math.NewInt(300000000)
+	cost := math.NewInt(12000000)
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
 		Receiver: "",
 		Duration: 30,
-		Bytes:    1_000_000_000,
+		Bytes:    1_000_000_000_000,
 	}
 
 	response, err := msgServer.BuyStorage(ctx, msg)
@@ -61,15 +60,14 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_NewAccount() {
 	suite.helpers.Account.MockNewAccount(suite.authKeeper, receiverAddr, mockAccount)
 
 	// Calculate and mock payment
-	// cost := suite.keeper.GetStorageCost(suite.ctx, 2, 60)
-	cost := math.NewInt(300000000)
+	cost := math.NewInt(12000000)
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
 		Receiver: receiver,
-		Duration: 60,
-		Bytes:    2_000_000_000,
+		Duration: 30,
+		Bytes:    1_000_000_000_000,
 	}
 
 	response, err := msgServer.BuyStorage(ctx, msg)
@@ -115,7 +113,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
 		Creator:  "invalid_bech32_address",
 		Receiver: "",
 		Duration: 30,
-		Bytes:    1_000_000_000,
+		Bytes:    1_000_000_000_000,
 	}
 
 	_, err := msgServer.BuyStorage(ctx, msg)
@@ -132,7 +130,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidReceiverAddress() {
 		Creator:  creator,
 		Receiver: "invalid_bech32_address",
 		Duration: 30,
-		Bytes:    1_000_000_000,
+		Bytes:    1_000_000_000_000,
 	}
 
 	_, err := msgServer.BuyStorage(ctx, msg)
@@ -170,21 +168,16 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_DurationTooShor
 	msgServer, ctx := suite.setupMsgServer()
 
 	creator := suite.CreateTestAddress(0)
-	creatorAddr, err := sdk.AccAddressFromBech32(creator)
-	suite.Require().NoError(err)
-
-	// Mock account exists
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
 
 	// Test with invalid duration
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
 		Receiver: "",
 		Duration: 0, // Invalid: less than 1 day
-		Bytes:    1_000_000_000,
+		Bytes:    1_000_000_000_000,
 	}
 
-	_, err = msgServer.BuyStorage(ctx, msg)
+	_, err := msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "failed to validate buy request")
 }
@@ -193,11 +186,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_BytesTooSmall()
 	msgServer, ctx := suite.setupMsgServer()
 
 	creator := suite.CreateTestAddress(0)
-	creatorAddr, err := sdk.AccAddressFromBech32(creator)
-	suite.Require().NoError(err)
-
-	// Mock account exists
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
 
 	// Test with bytes less than 1GB
 	msg := &types.MsgBuyStorage{
@@ -207,7 +195,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_BytesTooSmall()
 		Bytes:    500_000_000, // 0.5GB
 	}
 
-	_, err = msgServer.BuyStorage(ctx, msg)
+	_, err := msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "failed to validate buy request")
 }
@@ -219,7 +207,7 @@ func (suite *KeeperTestSuite) assertSubscription(address string, subsId string, 
 	suite.Require().True(err == nil, "subscription should be created for %s", address)
 
 	expectedAvailable := bytes * 3
-	expectedCredits := math.NewInt(bytes).Mul(math.NewInt(duration * 24 * 60 * 60))
+	expectedCredits := math.NewInt(expectedAvailable).Mul(math.NewInt(duration * 24 * 60 * 60))
 	expectedEnd := suite.ctx.BlockTime().Truncate(time.Second).Add(time.Duration(duration) * 24 * time.Hour)
 
 	suite.Require().Equal(expectedAvailable, subscription.SpaceAvailable)

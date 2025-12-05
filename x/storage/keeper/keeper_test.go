@@ -90,7 +90,7 @@ func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
 }
 
 func (suite *KeeperTestSuite) CreateTestAddress(index int) string {
-	addr := sdk.AccAddress([]byte{byte(index)})
+	addr := sdk.AccAddress([]byte{byte(index + 1), byte(index + 1), byte(index + 1), byte(index + 1)})
 	addrStr, err := suite.addressCodec.BytesToString(addr)
 	suite.Require().NoError(err)
 	return addrStr

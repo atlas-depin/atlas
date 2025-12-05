@@ -8,15 +8,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subscription types.StorageSubscription) error {
+func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subscription types.StorageSubscription) (string, error) {
 	seq, err := k.SubscriptionSequence.Next(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	subscriptionId := fmt.Sprintf("sub_%d", seq)
 	key := collections.Join(address, subscriptionId)
-	return k.SubscriptionStore.Set(ctx, key, subscription)
+	return subscriptionId, k.SubscriptionStore.Set(ctx, key, subscription)
 }
 
 func (k Keeper) SetStorageSubscription(ctx sdk.Context, address string, subscriptionId string, subscription types.StorageSubscription) error {
