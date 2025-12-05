@@ -64,7 +64,9 @@ message MsgBuyStorage {
   int64 bytes = 4;
   int64 replicas = 5;
 }
-message MsgBuyStorageResponse { }
+message MsgBuyStorageResponse { 
+  string SubscriptionId = 1;
+}
 
 // MsgPostFile defines the MsgPostFile message.
 message MsgPostFile {

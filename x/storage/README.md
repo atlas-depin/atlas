@@ -36,6 +36,7 @@ message StorageSubscription {
   string status;          // subscription status: ACTIVE (default), PENDING, EXPIRED
   int64 spaceAvailable;   // total space reserved by the subscription
   int64 spaceUsed;        // total space actively used by the subscription
+  int64 extraSpaceUsed;   // space used by extra replicas after standard replicas (mainly useful for UI/UX)
   string credits;         // string represented math.Int of available storage credits
 }
 ```
