@@ -1,4 +1,3 @@
-// x/storage/keeper/provider.go
 package keeper
 
 import (
