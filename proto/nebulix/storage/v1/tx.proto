@@ -76,6 +76,7 @@ message MsgPostFile {
   int64 file_size = 3;
   repeated string providers = 4;
   int64 replicas = 5;
+  string subscription = 6;
 }
 
 // MsgPostFileResponse defines the MsgPostFileResponse message.
