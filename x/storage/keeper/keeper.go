@@ -41,7 +41,8 @@ type Keeper struct {
 	// Can't use block height or timestamp because then you would have a conflict of subscription IDs.
 	SubscriptionSequence collections.Sequence
 	////
-	FileStore      collections.Map[string, types.File]      // file_id -> File
+	FileStore *collections.IndexedMap[string, types.File, fileIndexes]
+
 	BinStore       collections.Map[string, types.Bin]       // file_id -> File
 	ProviderStore  collections.Map[string, types.Provider]  // address -> Provider
 	ChallengeStore collections.Map[string, types.Challenge] // challenge_id -> Challenge
@@ -79,6 +80,7 @@ func NewKeeper(
 		Params:     collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 
 		// TODO: use keys/prefix instead of NewPrefix(<int>)
+		// [TODO]: how do I set this value to 0 at genesis?
 		StorageCreditPool: collections.NewItem(
 			sb, collections.NewPrefix(0), "storage_credit_pool",
 			sdk.IntValue,
@@ -96,10 +98,13 @@ func NewKeeper(
 		),
 		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(3), "subscription_seq"),
 
-		FileStore: collections.NewMap(
-			sb, collections.NewPrefix(4), "files",
+		FileStore: collections.NewIndexedMap(
+			sb,
+			collections.NewPrefix(4),
+			"files",
 			collections.StringKey,
 			codec.CollValue[types.File](cdc),
+			NewFileIndexes(sb),
 		),
 
 		ProviderStore: collections.NewMap(

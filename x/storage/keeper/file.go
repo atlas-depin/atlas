@@ -8,11 +8,9 @@ import (
 )
 
 // StoreFile stores a new file with a provider
-func (k Keeper) SetFile(ctx context.Context, file types.File) error {
-	// sdkCtx := sdk.UnwrapSDKContext(ctx)
-
+func (k Keeper) SetNewFile(ctx context.Context, fileId string, file types.File) error {
 	// Check if file already exists
-	exists, err := k.FileStore.Has(ctx, file.Merkle)
+	exists, err := k.FileStore.Has(ctx, fileId)
 	if err != nil {
 		return err
 	}
@@ -20,40 +18,10 @@ func (k Keeper) SetFile(ctx context.Context, file types.File) error {
 		return types.ErrFileAlreadyExists
 	}
 
-	// Check if provider exists and is active
-	provider, err := k.ProviderStore.Get(ctx, file.Providers[0])
-	if err != nil {
-		return types.ErrProviderNotFound
-	}
-	// if provider.Status != types.ProviderStatusActive {
-	// 	return types.ErrProviderNotActive
-	// }
-
-	// MOVE TO MSG SERVER
-	// // Create file
-	// file := types.File{
-	// 	Hash:       fileId,
-	// 	FileSize:   size,
-	// 	Providers:  []string{providerAddr},
-	// 	StartBlock: sdkCtx.BlockHeight(),
-	// }
-
 	// Save file
-	if err := k.FileStore.Set(ctx, file.Merkle, file); err != nil {
+	if err := k.FileStore.Set(ctx, fileId, file); err != nil {
 		return err
 	}
-
-	// TODO: update provider space used
-	// provider.TotalFiles++
-	if err := k.ProviderStore.Set(ctx, provider.Address, provider); err != nil {
-		return err
-	}
-
-	// Add to provider index
-	// providerFileKey := collections.Join(providerAddr, fileId)
-	// if err := k.FilesByProvider.Set(ctx, providerFileKey); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

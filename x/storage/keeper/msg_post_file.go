@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/errors"
 
+	"github.com/cespare/xxhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -35,6 +37,9 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		Providers: msg.Providers,
 		Replicas:  msg.Replicas,
 	}
+	// [TODO]: fix protoc
+	fidString := file.Merkle + file.Owner + strconv.FormatInt(ctx.BlockHeight(), 10)
+	fid := xxhash.Sum64([]byte(fidString))
 
 	// update subscription usage stats
 	subscriptionId, err := k.UpdateStorageSubscriptionUsage(ctx, msg.Creator, msg.Subscription, msg.FileSize, msg.Replicas)
@@ -44,7 +49,8 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		file.Subscription = subscriptionId
 	}
 	// commit file to kvstore
-	k.SetFile(ctx, file)
+
+	k.SetNewFile(ctx, fmt.Sprintf("%x", fid), file)
 
 	/// --- Emit events
 	ctx.EventManager().EmitEvent(

@@ -252,4 +252,22 @@ func (suite *KeeperTestSuite) assertSubscription(address string, subsId string, 
 	suite.Require().Equal(expectedEnd, subscription.End)
 }
 
+func (suite *KeeperTestSuite) createTestSubscription(address string, subscriptionId string, spaceAvailable int64, spaceUsed int64, endTime time.Time) types.StorageSubscription {
+	subscription := types.StorageSubscription{
+		Id:               subscriptionId,
+		Start:            suite.ctx.BlockTime().AddDate(0, -1, 0),
+		End:              endTime,
+		SpaceAvailable:   spaceAvailable,
+		SpaceUsed:        spaceUsed,
+		ReplicaSpaceUsed: 0,
+		Credits:          math.NewInt(100_000_000_000), // Large initial credits
+	}
+
+	// Store the subscription
+	err := suite.keeper.SetStorageSubscription(suite.ctx, address, subscription)
+	suite.Require().NoError(err)
+
+	return subscription
+}
+
 //////////////////////

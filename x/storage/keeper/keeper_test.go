@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"cosmossdk.io/core/address"
+	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -78,6 +79,9 @@ func (suite *KeeperTestSuite) setupMsgServerWithParams(params types.Params) (typ
 
 	// Set params
 	err := suite.keeper.Params.Set(suite.ctx, params)
+	suite.Require().NoError(err)
+
+	suite.keeper.StorageCreditPool.Set(suite.ctx, math.ZeroInt())
 	suite.Require().NoError(err)
 
 	// Return the message server and context

@@ -4,10 +4,17 @@ import (
 	"context"
 
 	"nebulix/x/storage/types"
+
+	"cosmossdk.io/math"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
+	// Write it to the store
+	if err := k.StorageCreditPool.Set(ctx, math.ZeroInt()); err != nil {
+		panic(err)
+	}
+
 	return k.Params.Set(ctx, genState.Params)
 }
 
