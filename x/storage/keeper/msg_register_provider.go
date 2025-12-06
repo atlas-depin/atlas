@@ -1,69 +1,61 @@
 package keeper
 
-// import (
-// 	"context"
-// 	"fmt"
+import (
+	"context"
 
-// 	"nebulix/x/storage/types"
+	"nebulix/x/storage/types"
 
-// 	sdk "github.com/cosmos/cosmos-sdk/types"
-// 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-// )
+	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
-// func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgInitProvider) (*types.MsgInitProviderResponse, error) {
-// 	ctx := sdk.UnwrapSDKContext(goCtx)
+func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgInitProvider) (*types.MsgInitProviderResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-// 	// Check if provider already exists
-// 	exists, err := k.ProviderStore.Has(ctx, msg.Creator)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if exists {
-// 		return nil, types.ErrProviderAlreadyExists
-// 	}
+	// Check if provider already exists
+	exists, err := k.ProviderStore.Has(ctx, msg.Creator)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, types.ErrProviderAlreadyExists
+	}
 
-// 	// Verify minimum deposit
-// 	params, err := k.Params.Get(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Verify minimum deposit
+	params, err := k.Params.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-// 	coin := sdk.NewInt64Coin("unblx", params.ProviderDeposit)
-// 	coins := sdk.NewCoins(coin)
+	coin := sdk.NewInt64Coin("unblx", params.ProviderDeposit)
+	coins := sdk.NewCoins(coin)
 
-// 	account, err := sdk.AccAddressFromBech32(msg.Creator)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	account, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// [TODO]: make sure this provider collector module account is created at genesis
-// 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ProviderDepositCollectorName, coins)
-// 	if err != nil {
-// 		return nil, sdkerrors.Wrapf(err, "%s does not have %s", account, coin.String())
-// 	}
+	// [TODO]: make sure this provider collector module account is created at genesis
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ProviderDepositCollectorName, coins)
+	if err != nil {
+		return nil, errors.Wrapf(err, "%s does not have %s", account, coin.String())
+	}
 
-// 	provider := types.Providers{
-// 		Address:         msg.Creator,
-// 		Ip:              msg.Ip,
-// 		Totalspace:      fmt.Sprintf("%d", msg.TotalSpace),
-// 		Creator:         msg.Creator,
-// 		BurnedContracts: "0",
-// 		KeybaseIdentity: msg.Keybase,
-// 		AuthClaimers:    []string{},
-// 		Deposit:         params.ProviderDeposit,
-// 	}
+	/// --- Register the provider
+	provider := types.Provider{
+		Address:     msg.Creator,
+		Hostname:    msg.Hostname,
+		Capacity:    msg.Capacity,
+		CreatedAt:   ctx.BlockHeight(),
+		CreditDelta: 0,
+	}
 
-// 	k.SetProviders(ctx, provider)
+	k.SetProvider(ctx, provider)
 
-// 	ctx.EventManager().EmitEvent(
-// 		sdk.NewEvent(
-// 			types2.EventTypeJackalMessage,
-// 			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
-// 		),
-// 	)
+	// [TOOD]: event emission
 
-// 	return &types.MsgInitProviderResponse{}, nil
-// }
+	return &types.MsgInitProviderResponse{}, nil
+}
 
 // func (k msgServer) ShutdownProvider(goCtx context.Context, msg *types.MsgShutdownProvider) (*types.MsgShutdownProviderResponse, error) {
 // 	ctx := sdk.UnwrapSDKContext(goCtx)
