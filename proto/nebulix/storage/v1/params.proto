@@ -12,4 +12,5 @@ message Params {
   option (gogoproto.equal) = true;
 
   int64 price_per_gb_day = 1;
+  int64 provider_deposit = 2;
 }

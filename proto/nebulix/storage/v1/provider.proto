@@ -7,7 +7,7 @@ option go_package = "nebulix/x/storage/types";
 message Provider {
   string address = 1;
   string hostname = 2;
-  string creator = 3;
+  int64 capacity = 3;
   int64 created_at = 4;
-  uint64 capacity = 5;
+  int64 credit_delta = 5;
 }
