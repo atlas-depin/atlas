@@ -74,7 +74,7 @@ message MsgPostFile {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   bytes merkle = 2;
-  int64 ddi = 3;
+  int64 dedupIndex = 3;
   int64 file_size = 4;
   int64 replicas = 5;
   string subscription = 6;
