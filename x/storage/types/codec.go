@@ -32,7 +32,7 @@ func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 	)
 
 	registrar.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgInitProvider{},
+		&MsgRegisterProvider{},
 	)
 
 	registrar.RegisterImplementations((*sdk.Msg)(nil),

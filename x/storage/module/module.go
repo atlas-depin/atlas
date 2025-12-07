@@ -138,6 +138,12 @@ func (am AppModule) BeginBlock(_ context.Context) error {
 
 // EndBlock contains the logic that is automatically triggered at the end of each block.
 // The end block implementation is optional.
-func (am AppModule) EndBlock(_ context.Context) error {
+func (am AppModule) EndBlock(goCtx context.Context) error {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	if err := am.keeper.EndBlocker(ctx); err != nil {
+		// Handle error appropriately
+		ctx.Logger().Error("failed to process end block", "module", "storage", "error", err)
+	}
+
 	return nil
 }

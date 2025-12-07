@@ -25,6 +25,8 @@ type BankKeeper interface {
 	GetDenomMetaData(ctx context.Context, denom string) (banktypes.Metadata, bool)
 
 	SendCoinsFromAccountToModule(context.Context, sdk.AccAddress, string, sdk.Coins) error
+	SendCoinsFromModuleToAccount(context.Context, string, sdk.AccAddress, sdk.Coins) error
+	GetBalance(context.Context, sdk.AccAddress, string) sdk.Coin
 	// Methods imported from bank should be defined here
 }
 

@@ -42,7 +42,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	)
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgInitProvider,
-		storagesimulation.SimulateMsgInitProvider(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+		storagesimulation.SimulateMsgRegisterProvider(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
 
 	const (

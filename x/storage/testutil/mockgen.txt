@@ -1,1 +1,2 @@
+export PATH=$PATH:$(go env GOPATH)/bin
 mockgen -source=x\storage\types\expected_keepers.go -package testutil -destination x/storage/testutil/expected_keepers_mocks.go
