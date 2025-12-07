@@ -5,13 +5,15 @@ option go_package = "nebulix/x/storage/types";
 
 // File defines the File message.
 message File {
-  string merkle = 1;
-  string owner = 2;
-  string subscription = 3;
-  repeated string providers = 4;
-  int64 file_size = 5;
-  int64 start = 6;
-  int64 replicas = 7;
+  string file_id = 1;
+  string merkle = 2;
+  string owner = 3;
+  string subscription = 4;
+  repeated string providers = 5;
+  int64 file_size = 6;
+  int64 start = 7;
+  int64 replicas = 8;
+  int64 last_challenged_height = 9;
 }
 
 message StagedFile {

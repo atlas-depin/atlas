@@ -40,5 +40,13 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 		)
 	}
 
+	if ctx.BlockHeight() > 0 && (ctx.BlockHeight()+1)%2400 == 0 {
+		// [TODO]: cleanup challenges & apply penalties
+	}
+
+	if ctx.BlockHeight() > 0 && ctx.BlockHeight()%2400 == 0 {
+		k.ChallengeFiles(ctx)
+	}
+
 	return nil
 }

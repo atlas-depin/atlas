@@ -13,4 +13,6 @@ message Params {
 
   int64 price_per_gb_day = 1;
   int64 provider_deposit = 2;
+  int64 challenge_window = 3;
+  int64 max_challenges_per_round = 4;
 }

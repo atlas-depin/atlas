@@ -14,4 +14,5 @@ var (
 	ErrProviderAlreadyExists = errors.Register(ModuleName, 2102, "provider already exists")
 	ErrInsufficientDeposit   = errors.Register(ModuleName, 2103, "insufficient provider deposit")
 	ErrFileAlreadyExists     = errors.Register(ModuleName, 3100, "file already exists")
+	ErrNoFilesAvailable      = errors.Register(ModuleName, 3101, "no files available")
 )

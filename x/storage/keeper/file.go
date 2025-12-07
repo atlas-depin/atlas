@@ -5,6 +5,8 @@ import (
 	"context"
 
 	"nebulix/x/storage/types"
+
+	"cosmossdk.io/collections"
 )
 
 // StoreFile stores a new file with a provider
@@ -31,6 +33,14 @@ func (k Keeper) GetFile(ctx context.Context, fileId string) (types.File, error) 
 	return k.FileStore.Get(ctx, fileId)
 }
 
+func (k Keeper) GetAllFiles(ctx context.Context) ([]collections.KeyValue[string, types.File], error) {
+	iter, err := k.FileStore.Iterate(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return iter.KeyValues()
+}
+
 // \\ DeleteFile marks a file as deleted
 func (k Keeper) DeleteFile(ctx context.Context, fileId string, owner string) error {
 	file, err := k.FileStore.Get(ctx, fileId)
@@ -55,7 +65,6 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 	for ; iter.Valid(); iter.Next() {
 		kv, err := iter.KeyValue()
 		if err != nil {
-			// [TBD]: continue?
 			return err
 		}
 
@@ -65,4 +74,19 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 	}
 
 	return nil
+}
+
+func (k Keeper) GetFileCount(ctx context.Context) (uint64, error) {
+	iter, err := k.FileStore.Iterate(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer iter.Close()
+
+	keys, err := iter.Keys()
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(len(keys)), nil
 }

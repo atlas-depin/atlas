@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -47,9 +48,9 @@ type Keeper struct {
 	FileStagingStore collections.Map[string, types.StagedFile]
 	FileStore        *collections.IndexedMap[string, types.File, fileIndexes]
 
-	BinStore       collections.Map[string, types.Bin]       // file_id -> File
-	ProviderStore  collections.Map[string, types.Provider]  // address -> Provider
-	ChallengeStore collections.Map[string, types.Challenge] // challenge_id -> Challenge
+	BinStore       collections.Map[string, types.Bin]      // file_id -> File
+	ProviderStore  collections.Map[string, types.Provider] // address -> Provider
+	ChallengeStore collections.Map[collections.Pair[string, string], types.StorageChallenge]
 
 	// Indicies
 	FilesByProvider collections.KeySet[string] // provider_address|file_id -> {}
@@ -122,6 +123,12 @@ func NewKeeper(
 			codec.CollValue[types.Provider](cdc),
 		),
 
+		ChallengeStore: collections.NewMap(
+			sb, collections.NewPrefix(1), "challenges",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			codec.CollValue[types.StorageChallenge](cdc),
+		),
+
 		// FilesByProvider: collections.NewKeySet(
 		// 	sb, collections.NewPrefix(3), "files_by_provider",
 		// 	collections.PairKeyCodec(collections.StringKey, collections.StringKey),
@@ -140,4 +147,10 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+func (k Keeper) GetPreviousBlockHash(ctx context.Context) []byte {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	header := sdkCtx.BlockHeader()
+	return header.LastBlockId.Hash
 }
