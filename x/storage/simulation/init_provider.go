@@ -12,7 +12,7 @@ import (
 	"nebulix/x/storage/types"
 )
 
-func SimulateMsgInitProvider(
+func SimulateMsgRegisterProvider(
 	ak types.AuthKeeper,
 	bk types.BankKeeper,
 	k keeper.Keeper,
@@ -21,12 +21,12 @@ func SimulateMsgInitProvider(
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
-		msg := &types.MsgInitProvider{
+		msg := &types.MsgRegisterProvider{
 			Creator: simAccount.Address.String(),
 		}
 
-		// TODO: Handle the InitProvider simulation
+		// TODO: Handle the RegisterProvider simulation
 
-		return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(msg), "InitProvider simulation not implemented"), nil, nil
+		return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(msg), "RegisterProvider simulation not implemented"), nil, nil
 	}
 }

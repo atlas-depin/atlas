@@ -44,7 +44,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	suite.Require().Equal(creator, storedFile.Owner)
 	suite.Require().Equal(fileSize, storedFile.FileSize)
 	suite.Require().Equal(int64(3), storedFile.Replicas)
-	suite.Require().Equal(msg.Providers, storedFile.Providers)
+	suite.Require().Equal([]string{}, storedFile.Providers)
 	suite.Require().Equal(subscriptionId, storedFile.Subscription)
 	suite.Require().Equal(ctx.BlockHeight(), storedFile.Start)
 
@@ -81,7 +81,6 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 		FileSize:     fileSize,
 		Subscription: subscriptionId,
 		Replicas:     replicas,
-		Providers:    []string{"p1", "p2", "p3", "p4", "p5"},
 	}
 
 	response, err := msgServer.PostFile(ctx, msg)

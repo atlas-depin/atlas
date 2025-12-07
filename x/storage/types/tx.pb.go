@@ -124,26 +124,25 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
-// MsgInitProvider defines the MsgInitProvider message.
-type MsgInitProvider struct {
-	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Address    string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	Hostname   string `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	TotalSpace uint64 `protobuf:"varint,4,opt,name=total_space,json=totalSpace,proto3" json:"total_space,omitempty"`
+// MsgRegisterProvider defines the MsgRegisterProvider message.
+type MsgRegisterProvider struct {
+	Creator  string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Hostname string `protobuf:"bytes,2,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Capacity int64  `protobuf:"varint,3,opt,name=capacity,proto3" json:"capacity,omitempty"`
 }
 
-func (m *MsgInitProvider) Reset()         { *m = MsgInitProvider{} }
-func (m *MsgInitProvider) String() string { return proto.CompactTextString(m) }
-func (*MsgInitProvider) ProtoMessage()    {}
-func (*MsgInitProvider) Descriptor() ([]byte, []int) {
+func (m *MsgRegisterProvider) Reset()         { *m = MsgRegisterProvider{} }
+func (m *MsgRegisterProvider) String() string { return proto.CompactTextString(m) }
+func (*MsgRegisterProvider) ProtoMessage()    {}
+func (*MsgRegisterProvider) Descriptor() ([]byte, []int) {
 	return fileDescriptor_98f04901bd7343c8, []int{2}
 }
-func (m *MsgInitProvider) XXX_Unmarshal(b []byte) error {
+func (m *MsgRegisterProvider) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgInitProvider) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgRegisterProvider) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgInitProvider.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgRegisterProvider.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -153,62 +152,55 @@ func (m *MsgInitProvider) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
-func (m *MsgInitProvider) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgInitProvider.Merge(m, src)
+func (m *MsgRegisterProvider) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRegisterProvider.Merge(m, src)
 }
-func (m *MsgInitProvider) XXX_Size() int {
+func (m *MsgRegisterProvider) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgInitProvider) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgInitProvider.DiscardUnknown(m)
+func (m *MsgRegisterProvider) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRegisterProvider.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgInitProvider proto.InternalMessageInfo
+var xxx_messageInfo_MsgRegisterProvider proto.InternalMessageInfo
 
-func (m *MsgInitProvider) GetCreator() string {
+func (m *MsgRegisterProvider) GetCreator() string {
 	if m != nil {
 		return m.Creator
 	}
 	return ""
 }
 
-func (m *MsgInitProvider) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *MsgInitProvider) GetHostname() string {
+func (m *MsgRegisterProvider) GetHostname() string {
 	if m != nil {
 		return m.Hostname
 	}
 	return ""
 }
 
-func (m *MsgInitProvider) GetTotalSpace() uint64 {
+func (m *MsgRegisterProvider) GetCapacity() int64 {
 	if m != nil {
-		return m.TotalSpace
+		return m.Capacity
 	}
 	return 0
 }
 
-// MsgInitProviderResponse defines the MsgInitProviderResponse message.
-type MsgInitProviderResponse struct {
+// MsgRegisterProviderResponse defines the MsgRegisterProviderResponse message.
+type MsgRegisterProviderResponse struct {
 }
 
-func (m *MsgInitProviderResponse) Reset()         { *m = MsgInitProviderResponse{} }
-func (m *MsgInitProviderResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgInitProviderResponse) ProtoMessage()    {}
-func (*MsgInitProviderResponse) Descriptor() ([]byte, []int) {
+func (m *MsgRegisterProviderResponse) Reset()         { *m = MsgRegisterProviderResponse{} }
+func (m *MsgRegisterProviderResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgRegisterProviderResponse) ProtoMessage()    {}
+func (*MsgRegisterProviderResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_98f04901bd7343c8, []int{3}
 }
-func (m *MsgInitProviderResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgRegisterProviderResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgInitProviderResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgRegisterProviderResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgInitProviderResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgRegisterProviderResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -218,17 +210,17 @@ func (m *MsgInitProviderResponse) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return b[:n], nil
 	}
 }
-func (m *MsgInitProviderResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgInitProviderResponse.Merge(m, src)
+func (m *MsgRegisterProviderResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRegisterProviderResponse.Merge(m, src)
 }
-func (m *MsgInitProviderResponse) XXX_Size() int {
+func (m *MsgRegisterProviderResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgInitProviderResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgInitProviderResponse.DiscardUnknown(m)
+func (m *MsgRegisterProviderResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRegisterProviderResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgInitProviderResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgRegisterProviderResponse proto.InternalMessageInfo
 
 // MsgBuyStorage & MsgBuyStorageResponse
 type MsgBuyStorage struct {
@@ -361,12 +353,12 @@ func (m *MsgBuyStorageResponse) GetSubscriptionId() string {
 
 // MsgPostFile defines the MsgPostFile message.
 type MsgPostFile struct {
-	Creator      string   `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Merkle       []byte   `protobuf:"bytes,2,opt,name=merkle,proto3" json:"merkle,omitempty"`
-	FileSize     int64    `protobuf:"varint,3,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
-	Providers    []string `protobuf:"bytes,4,rep,name=providers,proto3" json:"providers,omitempty"`
-	Replicas     int64    `protobuf:"varint,5,opt,name=replicas,proto3" json:"replicas,omitempty"`
-	Subscription string   `protobuf:"bytes,6,opt,name=subscription,proto3" json:"subscription,omitempty"`
+	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Merkle       []byte `protobuf:"bytes,2,opt,name=merkle,proto3" json:"merkle,omitempty"`
+	Ddi          int64  `protobuf:"varint,3,opt,name=ddi,proto3" json:"ddi,omitempty"`
+	FileSize     int64  `protobuf:"varint,4,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
+	Replicas     int64  `protobuf:"varint,5,opt,name=replicas,proto3" json:"replicas,omitempty"`
+	Subscription string `protobuf:"bytes,6,opt,name=subscription,proto3" json:"subscription,omitempty"`
 }
 
 func (m *MsgPostFile) Reset()         { *m = MsgPostFile{} }
@@ -416,18 +408,18 @@ func (m *MsgPostFile) GetMerkle() []byte {
 	return nil
 }
 
+func (m *MsgPostFile) GetDdi() int64 {
+	if m != nil {
+		return m.Ddi
+	}
+	return 0
+}
+
 func (m *MsgPostFile) GetFileSize() int64 {
 	if m != nil {
 		return m.FileSize
 	}
 	return 0
-}
-
-func (m *MsgPostFile) GetProviders() []string {
-	if m != nil {
-		return m.Providers
-	}
-	return nil
 }
 
 func (m *MsgPostFile) GetReplicas() int64 {
@@ -492,8 +484,8 @@ func (m *MsgPostFileResponse) GetStartBlock() int64 {
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "nebulix.storage.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "nebulix.storage.v1.MsgUpdateParamsResponse")
-	proto.RegisterType((*MsgInitProvider)(nil), "nebulix.storage.v1.MsgInitProvider")
-	proto.RegisterType((*MsgInitProviderResponse)(nil), "nebulix.storage.v1.MsgInitProviderResponse")
+	proto.RegisterType((*MsgRegisterProvider)(nil), "nebulix.storage.v1.MsgRegisterProvider")
+	proto.RegisterType((*MsgRegisterProviderResponse)(nil), "nebulix.storage.v1.MsgRegisterProviderResponse")
 	proto.RegisterType((*MsgBuyStorage)(nil), "nebulix.storage.v1.MsgBuyStorage")
 	proto.RegisterType((*MsgBuyStorageResponse)(nil), "nebulix.storage.v1.MsgBuyStorageResponse")
 	proto.RegisterType((*MsgPostFile)(nil), "nebulix.storage.v1.MsgPostFile")
@@ -503,51 +495,50 @@ func init() {
 func init() { proto.RegisterFile("nebulix/storage/v1/tx.proto", fileDescriptor_98f04901bd7343c8) }
 
 var fileDescriptor_98f04901bd7343c8 = []byte{
-	// 692 bytes of a gzipped FileDescriptorProto
+	// 680 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0xcf, 0x4f, 0x13, 0x41,
-	0x14, 0xee, 0x5a, 0x28, 0xdd, 0xd7, 0xaa, 0x71, 0x44, 0x59, 0x16, 0xd3, 0x96, 0x9a, 0x68, 0xc5,
-	0xd8, 0x06, 0x24, 0x1c, 0x48, 0x8c, 0xb1, 0x07, 0x13, 0x0e, 0x4d, 0xc8, 0x56, 0x2f, 0x5c, 0xca,
-	0xb4, 0x3b, 0x2c, 0x13, 0x76, 0x77, 0x36, 0x33, 0xd3, 0x86, 0x72, 0x32, 0x1c, 0x3d, 0xf9, 0x67,
-	0x18, 0x4f, 0x1c, 0x3c, 0x7b, 0xe6, 0x48, 0x3c, 0x79, 0x32, 0xa6, 0x1c, 0x38, 0xfa, 0x2f, 0x98,
-	0xfd, 0xd9, 0x1f, 0x50, 0x30, 0x5c, 0x9a, 0x7e, 0xdf, 0xfb, 0xde, 0xcc, 0xfb, 0xbe, 0xf6, 0x0d,
-	0x2c, 0xb9, 0xa4, 0xdd, 0xb5, 0xe9, 0x61, 0x4d, 0x48, 0xc6, 0xb1, 0x45, 0x6a, 0xbd, 0xd5, 0x9a,
-	0x3c, 0xac, 0x7a, 0x9c, 0x49, 0x86, 0x50, 0x54, 0xac, 0x46, 0xc5, 0x6a, 0x6f, 0x55, 0x7f, 0x80,
-	0x1d, 0xea, 0xb2, 0x5a, 0xf0, 0x19, 0xca, 0xf4, 0x85, 0x0e, 0x13, 0x0e, 0x13, 0x35, 0x47, 0x58,
-	0x7e, 0xbb, 0x23, 0xac, 0xa8, 0xb0, 0x18, 0x16, 0x5a, 0x01, 0xaa, 0x85, 0x20, 0x2a, 0xcd, 0x5b,
-	0xcc, 0x62, 0x21, 0xef, 0x7f, 0x8b, 0xd8, 0xe2, 0x15, 0xd3, 0x78, 0x98, 0x63, 0x27, 0x6a, 0x2b,
-	0xff, 0x50, 0xe0, 0x7e, 0x43, 0x58, 0x1f, 0x3d, 0x13, 0x4b, 0xb2, 0x1d, 0x54, 0xd0, 0x06, 0xa8,
-	0xb8, 0x2b, 0xf7, 0x19, 0xa7, 0xb2, 0xaf, 0x29, 0x25, 0xa5, 0xa2, 0xd6, 0xb5, 0x9f, 0xdf, 0x5f,
-	0xcd, 0x47, 0xf7, 0xbd, 0x33, 0x4d, 0x4e, 0x84, 0x68, 0x4a, 0x4e, 0x5d, 0xcb, 0x18, 0x4a, 0xd1,
-	0x1b, 0xc8, 0x84, 0x67, 0x6b, 0x77, 0x4a, 0x4a, 0x25, 0xb7, 0xa6, 0x57, 0x2f, 0xdb, 0xad, 0x86,
-	0x77, 0xd4, 0xd5, 0xd3, 0xdf, 0xc5, 0xd4, 0xd7, 0x8b, 0x93, 0x15, 0xc5, 0x88, 0x9a, 0x36, 0xd7,
-	0x8f, 0x2f, 0x4e, 0x56, 0x86, 0xc7, 0x7d, 0xbe, 0x38, 0x59, 0x59, 0x8e, 0xc7, 0x1f, 0x1a, 0x98,
-	0x18, 0xb6, 0xbc, 0x08, 0x0b, 0x13, 0x94, 0x41, 0x84, 0xc7, 0x5c, 0x41, 0xca, 0xdf, 0x42, 0x6f,
-	0x5b, 0x2e, 0x95, 0xdb, 0x9c, 0xf5, 0xa8, 0x49, 0x38, 0x5a, 0x83, 0xb9, 0x0e, 0x27, 0x58, 0x32,
-	0x7e, 0xa3, 0xb3, 0x58, 0x88, 0x34, 0x98, 0xc3, 0x61, 0x25, 0x30, 0xa6, 0x1a, 0x31, 0x44, 0x3a,
-	0x64, 0xf7, 0x99, 0x90, 0x2e, 0x76, 0x88, 0x96, 0x0e, 0x4a, 0x09, 0x46, 0x45, 0xc8, 0x49, 0x26,
-	0xb1, 0xdd, 0x12, 0x1e, 0xee, 0x10, 0x6d, 0xa6, 0xa4, 0x54, 0x66, 0x0c, 0x08, 0xa8, 0xa6, 0xcf,
-	0x6c, 0xe6, 0x7d, 0xbf, 0xf1, 0x25, 0x91, 0x8f, 0xd1, 0x59, 0x13, 0x1f, 0x7f, 0x15, 0xb8, 0xdb,
-	0x10, 0x56, 0xbd, 0xdb, 0x6f, 0x86, 0x21, 0xdc, 0xca, 0xc5, 0x3a, 0x64, 0x39, 0xe9, 0x10, 0xda,
-	0x23, 0x3c, 0xb4, 0x71, 0x4d, 0x53, 0xa2, 0xf4, 0x1d, 0x9a, 0x5d, 0x8e, 0x25, 0x65, 0x6e, 0xe0,
-	0x30, 0x6d, 0x24, 0x18, 0xcd, 0xc3, 0x6c, 0xbb, 0x2f, 0x89, 0x08, 0xbc, 0xa5, 0x8d, 0x10, 0xf8,
-	0x1d, 0x9c, 0x78, 0x36, 0xed, 0x60, 0xa1, 0xcd, 0x86, 0x1d, 0x31, 0xf6, 0x93, 0x34, 0xc9, 0x1e,
-	0xee, 0xda, 0x52, 0xcb, 0x94, 0x94, 0x4a, 0xd6, 0x88, 0xe1, 0x44, 0x18, 0x6f, 0xe1, 0xd1, 0x98,
-	0xe1, 0x38, 0x0a, 0xf4, 0x0c, 0xee, 0x35, 0xbb, 0x6d, 0xd1, 0xe1, 0xd4, 0xf3, 0x47, 0xd8, 0x32,
-	0x43, 0xff, 0xc6, 0x04, 0x5b, 0x1e, 0x28, 0x90, 0x6b, 0x08, 0x6b, 0x9b, 0x09, 0xf9, 0x9e, 0xda,
-	0xb7, 0x0b, 0xec, 0x31, 0x64, 0x1c, 0xc2, 0x0f, 0x6c, 0x12, 0xc4, 0x95, 0x37, 0x22, 0x84, 0x96,
-	0x40, 0xdd, 0xa3, 0x36, 0x69, 0x09, 0x7a, 0x44, 0xe2, 0x4c, 0x7c, 0xa2, 0x49, 0x8f, 0x08, 0x7a,
-	0x02, 0xaa, 0x17, 0xfd, 0x7e, 0x7e, 0x2e, 0xe9, 0x8a, 0x6a, 0x0c, 0x89, 0x6b, 0xb3, 0x29, 0x43,
-	0x5e, 0x8c, 0x98, 0x08, 0x02, 0x52, 0x8d, 0x31, 0x6e, 0x22, 0xa5, 0x0d, 0x78, 0x38, 0xe2, 0x31,
-	0xc9, 0xa8, 0x08, 0x39, 0x21, 0x31, 0x97, 0xad, 0xb6, 0xcd, 0x3a, 0x07, 0x81, 0xdf, 0xb4, 0x01,
-	0x01, 0x55, 0xf7, 0x99, 0xb5, 0xe3, 0x34, 0xa4, 0x1b, 0xc2, 0x42, 0xbb, 0x90, 0x1f, 0xdb, 0xfb,
-	0xa7, 0x57, 0xed, 0xeb, 0xc4, 0x72, 0xe9, 0x2f, 0xff, 0x43, 0x94, 0x8c, 0xb2, 0x0b, 0xf9, 0xb1,
-	0xed, 0x9b, 0x76, 0xc3, 0xa8, 0x68, 0xea, 0x0d, 0x57, 0xed, 0x06, 0xda, 0x01, 0x18, 0xd9, 0x8b,
-	0xe5, 0x29, 0xad, 0x43, 0x89, 0xfe, 0xe2, 0x46, 0x49, 0x72, 0xf6, 0x07, 0xc8, 0x26, 0x7f, 0xa0,
-	0xe2, 0x94, 0xb6, 0x58, 0xa0, 0x3f, 0xbf, 0x41, 0x10, 0x9f, 0xaa, 0xcf, 0x7e, 0xf2, 0x5f, 0xbd,
-	0xfa, 0xea, 0xe9, 0xa0, 0xa0, 0x9c, 0x0d, 0x0a, 0xca, 0x9f, 0x41, 0x41, 0xf9, 0x72, 0x5e, 0x48,
-	0x9d, 0x9d, 0x17, 0x52, 0xbf, 0xce, 0x0b, 0xa9, 0x9d, 0x85, 0xcb, 0x8f, 0x9e, 0xec, 0x7b, 0x44,
-	0xb4, 0x33, 0xc1, 0x93, 0xfd, 0xfa, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x88, 0x4c, 0xda, 0xd3,
-	0x63, 0x06, 0x00, 0x00,
+	0x14, 0xee, 0x58, 0x29, 0xed, 0xa3, 0x2a, 0xae, 0x28, 0xcb, 0x12, 0xdb, 0x52, 0x13, 0xa9, 0x18,
+	0xbb, 0x01, 0x09, 0x07, 0x12, 0x63, 0xec, 0xc1, 0xc4, 0x43, 0x13, 0xb2, 0xd5, 0x0b, 0x17, 0x9c,
+	0xee, 0x0e, 0xcb, 0x84, 0xdd, 0xce, 0x66, 0x66, 0xb6, 0xa1, 0x9c, 0x8c, 0x47, 0x0f, 0xea, 0x9f,
+	0xe1, 0x91, 0x83, 0x67, 0xcf, 0x1c, 0x89, 0x07, 0xe3, 0xc9, 0x18, 0x38, 0x70, 0xf4, 0x5f, 0x30,
+	0xfb, 0xb3, 0xb0, 0xfc, 0x28, 0xe1, 0xd2, 0xec, 0x7b, 0xef, 0x7b, 0x6f, 0xbe, 0xef, 0xeb, 0xbc,
+	0x81, 0xd9, 0x1e, 0xe9, 0xfa, 0x0e, 0xdd, 0xd1, 0x85, 0x64, 0x1c, 0xdb, 0x44, 0xef, 0x2f, 0xea,
+	0x72, 0xa7, 0xe9, 0x71, 0x26, 0x99, 0xa2, 0xc4, 0xc5, 0x66, 0x5c, 0x6c, 0xf6, 0x17, 0xb5, 0xbb,
+	0xd8, 0xa5, 0x3d, 0xa6, 0x87, 0xbf, 0x11, 0x4c, 0x9b, 0x36, 0x99, 0x70, 0x99, 0xd0, 0x5d, 0x61,
+	0x07, 0xed, 0xae, 0xb0, 0xe3, 0xc2, 0x4c, 0x54, 0xd8, 0x08, 0x23, 0x3d, 0x0a, 0xe2, 0xd2, 0x94,
+	0xcd, 0x6c, 0x16, 0xe5, 0x83, 0xaf, 0x38, 0x5b, 0x3d, 0x87, 0x8d, 0x87, 0x39, 0x76, 0xe3, 0xb6,
+	0xfa, 0x0f, 0x04, 0x77, 0xda, 0xc2, 0x7e, 0xe7, 0x59, 0x58, 0x92, 0xb5, 0xb0, 0xa2, 0xac, 0x40,
+	0x09, 0xfb, 0x72, 0x8b, 0x71, 0x2a, 0x07, 0x2a, 0xaa, 0xa1, 0x46, 0xa9, 0xa5, 0xfe, 0xfc, 0xfe,
+	0x6c, 0x2a, 0x3e, 0xef, 0x95, 0x65, 0x71, 0x22, 0x44, 0x47, 0x72, 0xda, 0xb3, 0x8d, 0x21, 0x54,
+	0x79, 0x01, 0x85, 0x68, 0xb6, 0x7a, 0xa3, 0x86, 0x1a, 0x13, 0x4b, 0x5a, 0xf3, 0xac, 0xdc, 0x66,
+	0x74, 0x46, 0xab, 0xb4, 0xff, 0xa7, 0x9a, 0xfb, 0x76, 0xbc, 0xb7, 0x80, 0x8c, 0xb8, 0x69, 0x75,
+	0xf9, 0xe3, 0xf1, 0xde, 0xc2, 0x70, 0xdc, 0xa7, 0xe3, 0xbd, 0x85, 0xb9, 0x84, 0xfe, 0x50, 0x40,
+	0x86, 0x6c, 0x7d, 0x06, 0xa6, 0x33, 0x29, 0x83, 0x08, 0x8f, 0xf5, 0x04, 0xa9, 0x7f, 0x41, 0x70,
+	0xaf, 0x2d, 0x6c, 0x83, 0xd8, 0x54, 0x48, 0xc2, 0xd7, 0x38, 0xeb, 0x53, 0x8b, 0x70, 0x65, 0x09,
+	0xc6, 0x4d, 0x4e, 0xb0, 0x64, 0x7c, 0xa4, 0xba, 0x04, 0xa8, 0x68, 0x50, 0xdc, 0x62, 0x42, 0xf6,
+	0xb0, 0x4b, 0x42, 0x75, 0x25, 0x23, 0x8d, 0x83, 0x9a, 0x89, 0x3d, 0x6c, 0x06, 0x76, 0xe5, 0x6b,
+	0xa8, 0x91, 0x37, 0xd2, 0x78, 0xb5, 0x1c, 0x88, 0x4a, 0xa6, 0xd4, 0x1f, 0xc2, 0xec, 0x39, 0x84,
+	0x52, 0xc2, 0xff, 0x10, 0xdc, 0x6a, 0x0b, 0xbb, 0xe5, 0x0f, 0x3a, 0x91, 0xda, 0x6b, 0x51, 0x5d,
+	0x86, 0x22, 0x27, 0x26, 0xa1, 0x7d, 0xc2, 0x23, 0xaa, 0x97, 0x34, 0xa5, 0xc8, 0x40, 0x84, 0xe5,
+	0x73, 0x2c, 0x29, 0xeb, 0x25, 0x22, 0x92, 0x58, 0x99, 0x82, 0xb1, 0xee, 0x40, 0x12, 0xa1, 0xde,
+	0x0c, 0x0b, 0x51, 0x10, 0x74, 0x70, 0xe2, 0x39, 0xd4, 0xc4, 0x42, 0x1d, 0x8b, 0x3a, 0x92, 0x58,
+	0x51, 0x61, 0xdc, 0x22, 0x9b, 0xd8, 0x77, 0xa4, 0x5a, 0xa8, 0xa1, 0x46, 0xd1, 0x48, 0xc2, 0x8c,
+	0x21, 0x2f, 0xe1, 0xfe, 0x29, 0xc1, 0x89, 0x15, 0xca, 0x63, 0xb8, 0xdd, 0xf1, 0xbb, 0xc2, 0xe4,
+	0xd4, 0x0b, 0x28, 0xbc, 0xb1, 0x22, 0xfd, 0x46, 0x26, 0x5b, 0xff, 0x85, 0x60, 0xa2, 0x2d, 0xec,
+	0x35, 0x26, 0xe4, 0x6b, 0xea, 0x5c, 0xcf, 0xb0, 0x07, 0x50, 0x70, 0x09, 0xdf, 0x76, 0xa2, 0x7f,
+	0xb6, 0x6c, 0xc4, 0x91, 0x32, 0x09, 0x79, 0xcb, 0xa2, 0xb1, 0x1b, 0xc1, 0xa7, 0x32, 0x0b, 0xa5,
+	0x4d, 0xea, 0x90, 0x0d, 0x41, 0x77, 0x49, 0x6c, 0x46, 0x31, 0x48, 0x74, 0xe8, 0x2e, 0xb9, 0xd4,
+	0x8f, 0x3a, 0x94, 0xc5, 0x09, 0xe2, 0xa1, 0x29, 0x25, 0xe3, 0x54, 0x2e, 0xe3, 0xcc, 0x4a, 0x78,
+	0x77, 0x13, 0x5d, 0xa9, 0x2f, 0x55, 0x98, 0x10, 0x12, 0x73, 0xb9, 0xd1, 0x75, 0x98, 0xb9, 0x1d,
+	0x6a, 0xcc, 0x1b, 0x10, 0xa6, 0x5a, 0x41, 0x66, 0xe9, 0x73, 0x1e, 0xf2, 0x6d, 0x61, 0x2b, 0xef,
+	0xa1, 0x7c, 0x6a, 0xa9, 0x1f, 0x9d, 0xb7, 0x8c, 0x99, 0xcd, 0xd1, 0x9e, 0x5e, 0x01, 0x94, 0x52,
+	0x71, 0x60, 0xf2, 0xcc, 0x6a, 0xcd, 0x5f, 0x30, 0x20, 0x0b, 0xd4, 0xf4, 0x2b, 0x02, 0xd3, 0xd3,
+	0xd6, 0x01, 0x4e, 0xec, 0xc5, 0xdc, 0x05, 0xed, 0x43, 0x88, 0xf6, 0x64, 0x24, 0x24, 0x9d, 0xfd,
+	0x16, 0x8a, 0xe9, 0x05, 0xaa, 0x5e, 0xd0, 0x96, 0x00, 0xb4, 0xf9, 0x11, 0x80, 0x64, 0xaa, 0x36,
+	0xf6, 0x21, 0x78, 0xde, 0x5a, 0x8b, 0xfb, 0x87, 0x15, 0x74, 0x70, 0x58, 0x41, 0x7f, 0x0f, 0x2b,
+	0xe8, 0xeb, 0x51, 0x25, 0x77, 0x70, 0x54, 0xc9, 0xfd, 0x3e, 0xaa, 0xe4, 0xd6, 0xa7, 0xcf, 0xbe,
+	0x6e, 0x72, 0xe0, 0x11, 0xd1, 0x2d, 0x84, 0x6f, 0xf3, 0xf3, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff,
+	0xa1, 0x71, 0x1f, 0x39, 0x4c, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -565,7 +556,7 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
-	InitProvider(ctx context.Context, in *MsgInitProvider, opts ...grpc.CallOption) (*MsgInitProviderResponse, error)
+	RegisterProvider(ctx context.Context, in *MsgRegisterProvider, opts ...grpc.CallOption) (*MsgRegisterProviderResponse, error)
 	BuyStorage(ctx context.Context, in *MsgBuyStorage, opts ...grpc.CallOption) (*MsgBuyStorageResponse, error)
 	PostFile(ctx context.Context, in *MsgPostFile, opts ...grpc.CallOption) (*MsgPostFileResponse, error)
 }
@@ -587,9 +578,9 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
-func (c *msgClient) InitProvider(ctx context.Context, in *MsgInitProvider, opts ...grpc.CallOption) (*MsgInitProviderResponse, error) {
-	out := new(MsgInitProviderResponse)
-	err := c.cc.Invoke(ctx, "/nebulix.storage.v1.Msg/InitProvider", in, out, opts...)
+func (c *msgClient) RegisterProvider(ctx context.Context, in *MsgRegisterProvider, opts ...grpc.CallOption) (*MsgRegisterProviderResponse, error) {
+	out := new(MsgRegisterProviderResponse)
+	err := c.cc.Invoke(ctx, "/nebulix.storage.v1.Msg/RegisterProvider", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -619,7 +610,7 @@ type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
-	InitProvider(context.Context, *MsgInitProvider) (*MsgInitProviderResponse, error)
+	RegisterProvider(context.Context, *MsgRegisterProvider) (*MsgRegisterProviderResponse, error)
 	BuyStorage(context.Context, *MsgBuyStorage) (*MsgBuyStorageResponse, error)
 	PostFile(context.Context, *MsgPostFile) (*MsgPostFileResponse, error)
 }
@@ -631,8 +622,8 @@ type UnimplementedMsgServer struct {
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
 }
-func (*UnimplementedMsgServer) InitProvider(ctx context.Context, req *MsgInitProvider) (*MsgInitProviderResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method InitProvider not implemented")
+func (*UnimplementedMsgServer) RegisterProvider(ctx context.Context, req *MsgRegisterProvider) (*MsgRegisterProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterProvider not implemented")
 }
 func (*UnimplementedMsgServer) BuyStorage(ctx context.Context, req *MsgBuyStorage) (*MsgBuyStorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BuyStorage not implemented")
@@ -663,20 +654,20 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_InitProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgInitProvider)
+func _Msg_RegisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRegisterProvider)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).InitProvider(ctx, in)
+		return srv.(MsgServer).RegisterProvider(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/nebulix.storage.v1.Msg/InitProvider",
+		FullMethod: "/nebulix.storage.v1.Msg/RegisterProvider",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).InitProvider(ctx, req.(*MsgInitProvider))
+		return srv.(MsgServer).RegisterProvider(ctx, req.(*MsgRegisterProvider))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -727,8 +718,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_UpdateParams_Handler,
 		},
 		{
-			MethodName: "InitProvider",
-			Handler:    _Msg_InitProvider_Handler,
+			MethodName: "RegisterProvider",
+			Handler:    _Msg_RegisterProvider_Handler,
 		},
 		{
 			MethodName: "BuyStorage",
@@ -806,7 +797,7 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgInitProvider) Marshal() (dAtA []byte, err error) {
+func (m *MsgRegisterProvider) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -816,32 +807,25 @@ func (m *MsgInitProvider) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgInitProvider) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgRegisterProvider) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgInitProvider) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgRegisterProvider) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.TotalSpace != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.TotalSpace))
+	if m.Capacity != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Capacity))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x18
 	}
 	if len(m.Hostname) > 0 {
 		i -= len(m.Hostname)
 		copy(dAtA[i:], m.Hostname)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Hostname)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Address)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -855,7 +839,7 @@ func (m *MsgInitProvider) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgInitProviderResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgRegisterProviderResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -865,12 +849,12 @@ func (m *MsgInitProviderResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgInitProviderResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgRegisterProviderResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgInitProviderResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgRegisterProviderResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1002,17 +986,13 @@ func (m *MsgPostFile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x28
 	}
-	if len(m.Providers) > 0 {
-		for iNdEx := len(m.Providers) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Providers[iNdEx])
-			copy(dAtA[i:], m.Providers[iNdEx])
-			i = encodeVarintTx(dAtA, i, uint64(len(m.Providers[iNdEx])))
-			i--
-			dAtA[i] = 0x22
-		}
-	}
 	if m.FileSize != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.FileSize))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Ddi != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Ddi))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -1096,7 +1076,7 @@ func (m *MsgUpdateParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgInitProvider) Size() (n int) {
+func (m *MsgRegisterProvider) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1106,21 +1086,17 @@ func (m *MsgInitProvider) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
 	l = len(m.Hostname)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.TotalSpace != 0 {
-		n += 1 + sovTx(uint64(m.TotalSpace))
+	if m.Capacity != 0 {
+		n += 1 + sovTx(uint64(m.Capacity))
 	}
 	return n
 }
 
-func (m *MsgInitProviderResponse) Size() (n int) {
+func (m *MsgRegisterProviderResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1185,14 +1161,11 @@ func (m *MsgPostFile) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
+	if m.Ddi != 0 {
+		n += 1 + sovTx(uint64(m.Ddi))
+	}
 	if m.FileSize != 0 {
 		n += 1 + sovTx(uint64(m.FileSize))
-	}
-	if len(m.Providers) > 0 {
-		for _, s := range m.Providers {
-			l = len(s)
-			n += 1 + l + sovTx(uint64(l))
-		}
 	}
 	if m.Replicas != 0 {
 		n += 1 + sovTx(uint64(m.Replicas))
@@ -1387,7 +1360,7 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
+func (m *MsgRegisterProvider) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1410,10 +1383,10 @@ func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgInitProvider: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgRegisterProvider: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgInitProvider: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgRegisterProvider: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1450,38 +1423,6 @@ func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Hostname", wireType)
 			}
 			var stringLen uint64
@@ -1512,11 +1453,11 @@ func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
 			}
 			m.Hostname = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TotalSpace", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Capacity", wireType)
 			}
-			m.TotalSpace = 0
+			m.Capacity = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1526,7 +1467,7 @@ func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TotalSpace |= uint64(b&0x7F) << shift
+				m.Capacity |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1552,7 +1493,7 @@ func (m *MsgInitProvider) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgInitProviderResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgRegisterProviderResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1575,10 +1516,10 @@ func (m *MsgInitProviderResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgInitProviderResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgRegisterProviderResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgInitProviderResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgRegisterProviderResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -1972,6 +1913,25 @@ func (m *MsgPostFile) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ddi", wireType)
+			}
+			m.Ddi = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Ddi |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field FileSize", wireType)
 			}
 			m.FileSize = 0
@@ -1989,38 +1949,6 @@ func (m *MsgPostFile) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Providers", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Providers = append(m.Providers, string(dAtA[iNdEx:postIndex]))
-			iNdEx = postIndex
 		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Replicas", wireType)

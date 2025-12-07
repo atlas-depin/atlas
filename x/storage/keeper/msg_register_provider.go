@@ -6,10 +6,14 @@ import (
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgInitProvider) (*types.MsgInitProviderResponse, error) {
+func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegisterProvider) (*types.MsgRegisterProviderResponse, error) {
+	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
+		return nil, errorsmod.Wrap(err, "invalid creator address")
+	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Check if provider already exists
@@ -43,18 +47,19 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgInitPro
 
 	/// --- Register the provider
 	provider := types.Provider{
-		Address:     msg.Creator,
-		Hostname:    msg.Hostname,
-		Capacity:    msg.Capacity,
-		CreatedAt:   ctx.BlockHeight(),
-		CreditDelta: 0,
+		Address:        msg.Creator,
+		Hostname:       msg.Hostname,
+		SpaceAvailable: msg.Capacity,
+		SpaceUsed:      0,
+		CreatedAt:      ctx.BlockHeight(),
+		CreditDelta:    0,
 	}
 
 	k.SetProvider(ctx, provider)
 
 	// [TOOD]: event emission
 
-	return &types.MsgInitProviderResponse{}, nil
+	return &types.MsgRegisterProviderResponse{}, nil
 }
 
 // func (k msgServer) ShutdownProvider(goCtx context.Context, msg *types.MsgShutdownProvider) (*types.MsgShutdownProviderResponse, error) {

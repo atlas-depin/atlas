@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"time"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -34,7 +35,9 @@ type Keeper struct {
 	Params collections.Item[types.Params]
 
 	// Collections
-	StorageCreditPool        collections.Item[math.Int]
+	StorageCreditPool collections.Item[math.Int]
+	LastRewardsTime   collections.Item[time.Time]
+
 	SubscriptionStore        collections.Map[collections.Pair[string, string], types.StorageSubscription]
 	DefaultSubscriptionIndex collections.Map[string, string]
 	//// [TBD]: I added this to enable having multiple subscriptions created for the same account in the same block, but idk if its the best way.

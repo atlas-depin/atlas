@@ -34,7 +34,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		Owner:     msg.Creator,
 		Start:     ctx.BlockHeight(),
 		FileSize:  msg.FileSize,
-		Providers: msg.Providers,
+		Providers: []string{},
 		Replicas:  msg.Replicas,
 	}
 	// [TODO]: fix protoc
