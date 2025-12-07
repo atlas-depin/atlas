@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"strconv"
@@ -10,7 +11,6 @@ import (
 
 	"cosmossdk.io/errors"
 
-	"github.com/cespare/xxhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -28,29 +28,34 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		msg.Replicas = 3
 	}
 
-	/// --- Index the file
+	/// --- Compile file information
 	file := types.File{
-		Merkle:    hex.EncodeToString(msg.Merkle),
-		Owner:     msg.Creator,
-		Start:     ctx.BlockHeight(),
-		FileSize:  msg.FileSize,
-		Providers: []string{},
-		Replicas:  msg.Replicas,
+		Merkle:   hex.EncodeToString(msg.Merkle),
+		Owner:    msg.Creator,
+		Start:    ctx.BlockHeight(),
+		FileSize: msg.FileSize,
+		Replicas: msg.Replicas,
 	}
-	// [TODO]: fix protoc
-	fidString := file.Merkle + file.Owner + strconv.FormatInt(ctx.BlockHeight(), 10)
-	fid := xxhash.Sum64([]byte(fidString))
+	fidString := file.Merkle + file.Owner + strconv.FormatInt(msg.Ddi, 10) + strconv.FormatInt(msg.FileSize, 10)
+	fid := fmt.Sprintf("%x", sha256.Sum256([]byte(fidString)))
 
-	// update subscription usage stats
+	/// --- Ensure file is staged & get providers
+	stagedFile, err := k.GetStagedFile(ctx, fid)
+	if err != nil {
+		return nil, err
+	}
+	file.Providers = stagedFile.Providers[:file.Replicas]
+	k.RemoveStagedFile(ctx, fid) // idc if there's an error, it'll get cleaned up after expiry anyways
+
+	/// --- Update subscription & commit file
 	subscriptionId, err := k.UpdateStorageSubscriptionUsage(ctx, msg.Creator, msg.Subscription, msg.FileSize, msg.Replicas)
 	if err != nil {
 		return nil, errors.Wrapf(sdkerrors.ErrInvalidRequest, "%s", err.Error())
 	} else {
 		file.Subscription = subscriptionId
 	}
-	// commit file to kvstore
 
-	k.SetNewFile(ctx, fmt.Sprintf("%x", fid), file)
+	k.SetNewFile(ctx, fid, file)
 
 	/// --- Emit events
 	ctx.EventManager().EmitEvent(

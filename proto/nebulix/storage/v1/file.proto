@@ -13,3 +13,8 @@ message File {
   int64 start = 6;
   int64 replicas = 7;
 }
+
+message StagedFile {
+    repeated string providers = 1;
+    int64 start = 2;
+}
