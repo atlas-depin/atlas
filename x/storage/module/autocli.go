@@ -70,6 +70,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a post-file tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "merkle"}, {ProtoField: "file_size"}, {ProtoField: "providers"}, {ProtoField: "replicas"}},
 				},
+				{
+					RpcMethod:      "StageFile",
+					Use:            "stage-file [provider] [fid]",
+					Short:          "Send a stage-file tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "provider"}, {ProtoField: "fid"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

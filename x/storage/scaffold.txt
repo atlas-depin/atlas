@@ -1,0 +1,11 @@
+ignite scaffold message stage-file provider:string fid:string --module storage
+
+
+
+Generates Things In:
+autocli.go
+simulation.go
+codec.go
+tx.proto
+tx.pb.go
+
