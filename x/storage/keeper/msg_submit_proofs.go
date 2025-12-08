@@ -5,7 +5,10 @@ import (
 )
 
 type Proof struct {
-	FileId string
+	ChallengeId string
+	HashList    []byte
+	Chunk       int64
+	Data        []byte
 }
 
 type MsgPostProofs struct {
@@ -30,7 +33,7 @@ func (k msgServer) SubmitProofs(ctx context.Context, msg *MsgPostProofs) (*MsgPo
 	var failed []string = []string{}
 
 	for _, proof := range msg.Proofs {
-		err := k.AttemptProof(ctx, msg.Provider, proof)
+		err := k.AttemptChallenge(ctx, msg.Provider, proof)
 		if err != nil {
 			failed = append(failed, proof.FileId)
 		} else {

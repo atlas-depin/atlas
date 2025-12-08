@@ -2,11 +2,14 @@ package keeper
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/zeebo/blake3"
 )
 
 // [ENABLE] probabilistic auditing
@@ -153,6 +156,63 @@ func CreateChallenge(
 		Seed:          seed,
 		Completed:     false,
 	}, nil
+}
+
+func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput Proof) error {
+	challenge, err := k.GetChallenge(ctx, proofInput.ChallengeId)
+	// [TODO]: allow no challenge
+	if err != nil {
+		return nil
+	}
+
+	file, err := k.GetFile(ctx, challenge.FileId)
+	if err != nil {
+		// [TODO]: remove challenge
+		return nil
+	}
+
+	if containsProver(file, provider) {
+		err := Prove(ctx, proofInput)
+	} else if len(file.Providers) == int(file.Replicas) {
+		// [TODO]: not your file
+		return nil
+	} else {
+		// [TODO]: add provider
+	}
+}
+
+func containsProver(file types.File, prover string) bool {
+	for _, provider := range file.Providers {
+		if provider == prover {
+			return true
+		}
+	}
+	return false
+}
+
+func (k Keeper) Prove(ctx context.Context, root []byte, input Proof) bool {
+	hasher = blake3.New()
+
+	_, err := io.WriteString(hasher, fmt.Sprintf("%d%x", input.Chunk, input.Data))
+	if err != nil {
+		return false
+	}
+	hashName := hasher.Sum(nil)
+
+	var proof merkletree.Proof // unmarshal proof
+	err = json.Unmarshal(input.HashList, &proof)
+	if err != nil {
+		return false
+	}
+
+	treeHash = treeblake3.New256()
+
+	verified, err := merkletree.VerifyProofUsing(hashName, false, &proof, [][]byte{root}, treeHash)
+	if err != nil {
+		return false
+	}
+
+	return verified
 }
 
 // // GenerateChallenges iterates over all files and probabilistically generates a challenge.
