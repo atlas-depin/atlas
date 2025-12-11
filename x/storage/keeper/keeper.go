@@ -104,13 +104,13 @@ func NewKeeper(
 		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(3), "subscription_seq"),
 
 		FileStagingStore: collections.NewMap(
-			sb, collections.NewPrefix(3), "files_staged",
+			sb, collections.NewPrefix(4), "files_staged",
 			collections.StringKey,
 			codec.CollValue[types.StagedFile](cdc),
 		),
 		FileStore: collections.NewIndexedMap(
 			sb,
-			collections.NewPrefix(4),
+			collections.NewPrefix(5),
 			"files",
 			collections.StringKey,
 			codec.CollValue[types.File](cdc),
@@ -118,13 +118,13 @@ func NewKeeper(
 		),
 
 		ProviderStore: collections.NewMap(
-			sb, collections.NewPrefix(5), "providers",
+			sb, collections.NewPrefix(6), "providers",
 			collections.StringKey,
 			codec.CollValue[types.Provider](cdc),
 		),
 
 		ChallengeStore: collections.NewMap(
-			sb, collections.NewPrefix(1), "challenges",
+			sb, collections.NewPrefix(7), "challenges",
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageChallenge](cdc),
 		),

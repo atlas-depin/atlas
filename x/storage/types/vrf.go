@@ -8,8 +8,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+var GetVerifiableRandomSeed = getVerifiableRandomSeed
+
 // GetVerifiableRandomSeed creates seed from block hash
-func GetVerifiableRandomSeed(ctx context.Context) ([]byte, error) {
+func getVerifiableRandomSeed(ctx context.Context) ([]byte, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Use previous block's hash for randomness
