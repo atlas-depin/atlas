@@ -4,8 +4,8 @@ package nebulix.storage.v1;
 option go_package = "nebulix/x/storage/types";
 
 message MerkleProof {
-  bytes chunk = 1;           // The 1KB chunk data
-  uint64 index = 2;          // Position in file (0-based)
+  bytes chunk = 1; // The 1KB chunk data
+  uint64 index = 2; // Position in file (0-based)
   repeated bytes siblings = 3; // Sibling hashes for Merkle path
 }
 

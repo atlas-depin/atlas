@@ -18,11 +18,13 @@ service Msg {
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
   rpc RegisterProvider(MsgRegisterProvider) returns (MsgRegisterProviderResponse);
-  rpc BuyStorage(MsgBuyStorage) returns (MsgBuyStorageResponse);
   rpc PostFile(MsgPostFile) returns (MsgPostFileResponse);
 
   // StageFile defines the StageFile RPC.
   rpc StageFile(MsgStageFile) returns (MsgStageFileResponse);
+
+  // BuyStorage defines the BuyStorage RPC.
+  rpc BuyStorage(MsgBuyStorage) returns (MsgBuyStorageResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -57,21 +59,6 @@ message MsgRegisterProvider {
 // MsgRegisterProviderResponse defines the MsgRegisterProviderResponse message.
 message MsgRegisterProviderResponse {}
 
-// MsgBuyStorage & MsgBuyStorageResponse
-message MsgBuyStorage {
-  option (cosmos.msg.v1.signer) = "creator";
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string receiver = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  int64 duration = 3;
-  int64 bytes = 4;
-  int64 replicas = 5;
-  bool default = 6;
-}
-
-message MsgBuyStorageResponse {
-  string SubscriptionId = 1;
-}
-
 // MsgPostFile defines the MsgPostFile message.
 message MsgPostFile {
   option (cosmos.msg.v1.signer) = "creator";
@@ -100,3 +87,18 @@ message MsgStageFile {
 
 // MsgStageFileResponse defines the MsgStageFileResponse message.
 message MsgStageFileResponse {}
+
+// MsgBuyStorage defines the MsgBuyStorage message.
+message MsgBuyStorage {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string receiver = 2;
+  int64 duration = 3;
+  int64 bytes = 4;
+  bool is_default = 5;
+}
+
+// MsgBuyStorageResponse defines the MsgBuyStorageResponse message.
+message MsgBuyStorageResponse {
+  string SubscriptionId = 1;
+}

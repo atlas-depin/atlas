@@ -46,6 +46,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a stage-file tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "provider"}, {ProtoField: "fid"}, {ProtoField: "file_creator"}, {ProtoField: "file_size"}},
 				},
+				{
+					RpcMethod:      "BuyStorage",
+					Use:            "buy-storage [receiver] [duration] [bytes] [is-default]",
+					Short:          "Send a buy-storage tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "receiver"}, {ProtoField: "duration"}, {ProtoField: "bytes"}, {ProtoField: "is_default"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

@@ -94,11 +94,11 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
-		Creator:  creator,
-		Receiver: "",
-		Duration: 30,
-		Bytes:    1_000_000_000_000,
-		Default:  true,
+		Creator:   creator,
+		Receiver:  "",
+		Duration:  30,
+		Bytes:     1_000_000_000_000,
+		IsDefault: true,
 	}
 
 	response, err := msgServer.BuyStorage(ctx, msg)

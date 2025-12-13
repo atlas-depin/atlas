@@ -17,8 +17,8 @@ message File {
 }
 
 message StagedFile {
-    repeated string providers = 1;
-    string creator = 2;
-    int64 file_size = 3;
-    int64 start = 4;
+  repeated string providers = 1;
+  string creator = 2;
+  int64 file_size = 3;
+  int64 start = 4;
 }

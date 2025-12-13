@@ -1,10 +1,11 @@
 ignite scaffold message stage-file provider:string fid:string --module storage
-ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 default:bool
+ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 is-default:bool --module storage
 
 
 Generates Things In:
 autocli.go
 simulation.go
+simulation/<msg>.go
 codec.go
 tx.proto
 tx.pb.go

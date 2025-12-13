@@ -75,6 +75,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgStageFile,
 		storagesimulation.SimulateMsgStageFile(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
+	const (
+		opWeightMsgBuyStorage          = "op_weight_msg_storage"
+		defaultWeightMsgBuyStorage int = 100
+	)
+
+	var weightMsgBuyStorage int
+	simState.AppParams.GetOrGenerate(opWeightMsgBuyStorage, &weightMsgBuyStorage, nil,
+		func(_ *rand.Rand) {
+			weightMsgBuyStorage = defaultWeightMsgBuyStorage
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgBuyStorage,
+		storagesimulation.SimulateMsgBuyStorage(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
 
 	return operations
 }

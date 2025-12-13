@@ -103,7 +103,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "failed to commit new storage subscription")
 	}
 
-	if msg.Default {
+	if msg.IsDefault {
 		k.SetDefaultStorageSubscriptionId(ctx, msg.Receiver, subscriptionId)
 	}
 
