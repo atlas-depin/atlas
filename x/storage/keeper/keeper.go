@@ -110,8 +110,7 @@ func NewKeeper(
 		),
 		FileStore: collections.NewIndexedMap(
 			sb,
-			collections.NewPrefix(4),
-			"files",
+			collections.NewPrefix(4), "files",
 			collections.StringKey,
 			codec.CollValue[types.File](cdc),
 			NewFileIndexes(sb),

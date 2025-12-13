@@ -20,10 +20,14 @@ func (k msgServer) StageFile(ctx context.Context, msg *types.MsgStageFile) (*typ
 	if err == sdkerrors.ErrNotFound {
 		stagedFile = types.StagedFile{
 			Providers: []string{msg.Provider},
+			FileSize:  msg.FileSize,
+			Creator:   msg.FileCreator,
 			Start:     sdkCtx.BlockHeight(),
 		}
 	} else if err != nil {
 		return nil, err
+	} else if msg.FileSize != stagedFile.FileSize || msg.FileCreator != stagedFile.Creator {
+		return nil, sdkerrors.ErrInvalidRequest
 	} else {
 		stagedFile.Providers = append(stagedFile.Providers, msg.Provider)
 	}

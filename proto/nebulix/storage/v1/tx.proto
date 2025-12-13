@@ -92,8 +92,10 @@ message MsgPostFileResponse {
 message MsgStageFile {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string provider = 2;
-  string fid = 3;
+  string fid = 2;
+  string file_creator = 3;
+  int64 file_size = 4;
+  string provider = 5;
 }
 
 // MsgStageFileResponse defines the MsgStageFileResponse message.

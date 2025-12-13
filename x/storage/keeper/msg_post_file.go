@@ -44,6 +44,9 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 	if err != nil {
 		return nil, err
 	}
+	if msg.Creator != stagedFile.Creator || file.FileSize != stagedFile.FileSize {
+		return nil, sdkerrors.ErrInvalidRequest
+	}
 	file.Providers = stagedFile.Providers[:file.Replicas]
 	k.RemoveStagedFile(ctx, fid) // idc if there's an error, it'll get cleaned up after expiry anyways
 
