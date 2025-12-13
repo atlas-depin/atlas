@@ -15,7 +15,7 @@ type AuthKeeper interface {
 	GetAccount(context.Context, sdk.AccAddress) sdk.AccountI // only used for simulation
 	HasAccount(context.Context, sdk.AccAddress) bool
 	SetAccount(context.Context, sdk.AccountI)
-	NewAccountWithAddress(sdk.Context, sdk.AccAddress) sdk.AccountI
+	NewAccountWithAddress(context.Context, sdk.AccAddress) sdk.AccountI
 	// Methods imported from account should be defined here
 }
 

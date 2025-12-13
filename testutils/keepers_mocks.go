@@ -80,7 +80,7 @@ func (mr *MockAuthKeeperMockRecorder) HasAccount(arg0, arg1 interface{}) *gomock
 }
 
 // NewAccountWithAddress mocks base method.
-func (m *MockAuthKeeper) NewAccountWithAddress(arg0 types.Context, arg1 types.AccAddress) types.AccountI {
+func (m *MockAuthKeeper) NewAccountWithAddress(arg0 context.Context, arg1 types.AccAddress) types.AccountI {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewAccountWithAddress", arg0, arg1)
 	ret0, _ := ret[0].(types.AccountI)
