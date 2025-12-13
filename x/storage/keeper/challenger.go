@@ -7,18 +7,36 @@ import (
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/wealdtech/go-merkletree/v2"
+	treeblake3 "github.com/wealdtech/go-merkletree/v2/blake3"
+	"github.com/zeebo/blake3"
 )
+
+var json = jsoniter.ConfigFastest
 
 // [ENABLE] probabilistic auditing
 // const ChallengeRate = 10000
 
-func (k Keeper) SetChallenge(ctx sdk.Context, challenge types.StorageChallenge) error {
+func (k Keeper) SetChallenge(ctx context.Context, challenge types.StorageChallenge) error {
 	// Save challenge
 	key := collections.Join(challenge.Provider, challenge.ChallengeId)
 	if err := k.ChallengeStore.Set(ctx, key, challenge); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (k Keeper) GetChallenge(ctx context.Context, provider string, challengeId string) (types.StorageChallenge, error) {
+	// Save challenge
+	key := collections.Join(provider, challengeId)
+	return k.ChallengeStore.Get(ctx, key)
+}
+
+func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeId string) error {
+	// Save challenge
+	key := collections.Join(provider, challengeId)
+	return k.ChallengeStore.Remove(ctx, key)
 }
 
 func (k Keeper) ChallengeFiles(ctx context.Context) error {
@@ -127,6 +145,8 @@ func (k Keeper) GenerateFileChallenges(
 				providerAddr, err)
 		}
 
+		k.SetChallenge(ctx, challenge)
+
 		challenges = append(challenges, challenge)
 	}
 
@@ -153,6 +173,69 @@ func CreateChallenge(
 		Seed:          seed,
 		Completed:     false,
 	}, nil
+}
+
+func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {
+	challenge, err := k.GetChallenge(ctx, provider, proofInput.ChallengeId)
+	// [TODO]: allow no challenge
+	if err != nil {
+		return nil
+	}
+
+	file, err := k.GetFile(ctx, challenge.FileId)
+	if err != nil {
+		// [TODO]: remove challenge
+		return nil
+	}
+
+	if containsProver(file, provider) {
+		success := k.Prove(ctx, challenge.ChunkIndex, []byte(file.Merkle), proofInput)
+		if success {
+			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+		}
+		return nil
+	} else if len(file.Providers) == int(file.Replicas) {
+		// [TODO]: not your file
+		return nil
+	} else {
+		return nil
+	}
+}
+
+func containsProver(file types.File, prover string) bool {
+	for _, provider := range file.Providers {
+		if provider == prover {
+			return true
+		}
+	}
+	return false
+}
+
+func (k Keeper) Prove(ctx context.Context, index uint64, root []byte, input types.Proof) bool {
+	hasher := blake3.New()
+	hasher.Write(input.Data)
+	hashName := hasher.Sum(nil)
+
+	var proof merkletree.Proof // unmarshal proof
+	proof.Hashes = input.Hashes
+	proof.Index = uint64(input.ChunkIndex)
+	// err := json.Unmarshal(input.HashList, &proof)
+	// if err != nil {
+	// 	return false
+	// }
+
+	if index != proof.Index {
+		return false
+	}
+
+	treeHash := treeblake3.New256()
+
+	verified, err := merkletree.VerifyProofUsing(hashName, false, &proof, [][]byte{root}, treeHash)
+	if err != nil {
+		return false
+	}
+
+	return verified
 }
 
 // // GenerateChallenges iterates over all files and probabilistically generates a challenge.

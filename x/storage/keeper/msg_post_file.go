@@ -58,7 +58,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		file.Subscription = subscriptionId
 	}
 
-	k.SetNewFile(ctx, fid, file)
+	k.SetNewFile(ctx, file)
 
 	/// --- Emit events
 	ctx.EventManager().EmitEvent(

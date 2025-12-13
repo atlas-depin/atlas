@@ -10,9 +10,9 @@ import (
 )
 
 // StoreFile stores a new file with a provider
-func (k Keeper) SetNewFile(ctx context.Context, fileId string, file types.File) error {
+func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	// Check if file already exists
-	exists, err := k.FileStore.Has(ctx, fileId)
+	exists, err := k.FileStore.Has(ctx, file.FileId)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (k Keeper) SetNewFile(ctx context.Context, fileId string, file types.File) 
 	}
 
 	// Save file
-	if err := k.FileStore.Set(ctx, fileId, file); err != nil {
+	if err := k.FileStore.Set(ctx, file.FileId, file); err != nil {
 		return err
 	}
 

@@ -9,6 +9,8 @@ replace (
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	// replace broken vanity url
 	nhooyr.io/websocket => github.com/coder/websocket v1.8.7
+	// merkletree blake3 support
+	github.com/wealdtech/go-merkletree/v2 => github.com/TheMarstonConnell/go-merkletree/v2 v2.0.0-20250829184252-ad65f46fbd22
 )
 
 require (

@@ -2,14 +2,11 @@ package keeper
 
 import (
 	"context"
+	"nebulix/x/storage/types"
 )
 
-type Proof struct {
-	FileId string
-}
-
 type MsgPostProofs struct {
-	Proofs   []Proof
+	Proofs   []types.Proof
 	Provider string
 }
 
@@ -30,11 +27,11 @@ func (k msgServer) SubmitProofs(ctx context.Context, msg *MsgPostProofs) (*MsgPo
 	var failed []string = []string{}
 
 	for _, proof := range msg.Proofs {
-		err := k.AttemptProof(ctx, msg.Provider, proof)
+		err := k.AttemptChallenge(ctx, msg.Provider, proof)
 		if err != nil {
-			failed = append(failed, proof.FileId)
+			failed = append(failed, proof.ChallengeId)
 		} else {
-			passed = append(passed, proof.FileId)
+			passed = append(passed, proof.ChallengeId)
 		}
 	}
 

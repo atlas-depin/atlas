@@ -15,14 +15,14 @@ type fileIndexes struct {
 
 func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 	return fileIndexes{
-		ByOwner: indexes.NewUnique[string, string, types.File](
+		ByOwner: indexes.NewMulti[string, string, types.File](
 			sb, collections.NewPrefix(40), "by_owner",
 			collections.StringKey, collections.StringKey,
 			func(pk string, f types.File) (string, error) {
 				return f.Owner, nil
 			},
 		),
-		BySubscription: indexes.NewUnique[string, string, types.File](
+		BySubscription: indexes.NewMulti[string, string, types.File](
 			sb, collections.NewPrefix(41), "by_subscription",
 			collections.StringKey, collections.StringKey,
 			func(pk string, f types.File) (string, error) {
