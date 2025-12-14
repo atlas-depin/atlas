@@ -17,9 +17,10 @@ const (
 	// See: https://github.com/cosmos/cosmos-sdk/blob/v0.52.0-beta.2/x/gov/types/keys.go#L9
 	GovModuleName = "gov"
 
-	ProviderDepositCollectorName = "provider_deposit_collector"
+	ProviderDepositAccountName = "provider_deposit"
 )
 
 // ParamsKey is the prefix to retrieve all Params
 var ParamsKey = collections.NewPrefix("p_storage")
 var ModuleAddress = authtypes.NewModuleAddress(ModuleName)
+var ProviderDepositAddress = authtypes.NewModuleAddress(ProviderDepositAccountName)

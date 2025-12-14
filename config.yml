@@ -3,6 +3,7 @@ validation: sovereign
 default_denom: unblx
 accounts: 
 - name: alice
+  mnemonic: "key monitor patrol electric buyer actor license stool script critic impulse next asset minute addict carpet pretty desert sponsor place resemble bike pause mirror"
   coins:
   - 20000token
   - 20000000000unblx

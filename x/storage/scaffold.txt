@@ -4,6 +4,8 @@ ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 i
 ignite scaffold query get-subscription-info subscriberAddress:string subscriptionId:string --module storage
 ignite scaffold query provider address:string --response provider:string --module storage
 
+ignite scaffold query providers --module storage
+
 
 Generates Things In:
 autocli.go

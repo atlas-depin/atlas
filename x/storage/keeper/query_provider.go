@@ -14,7 +14,9 @@ func (q queryServer) Provider(ctx context.Context, req *types.QueryProviderReque
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	// TODO: Process the query
+	provider, err := q.k.GetProvider(ctx, req.Address)
 
-	return &types.QueryProviderResponse{}, nil
+	return &types.QueryProviderResponse{
+		Provider: &provider,
+	}, err
 }

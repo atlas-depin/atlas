@@ -40,7 +40,7 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 	}
 
 	// [TODO]: make sure this provider collector module account is created at genesis
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ProviderDepositCollectorName, coins)
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ProviderDepositAccountName, coins)
 	if err != nil {
 		return nil, errors.Wrapf(err, "%s does not have %s", account, coin.String())
 	}

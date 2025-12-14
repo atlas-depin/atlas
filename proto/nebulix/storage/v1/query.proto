@@ -28,6 +28,11 @@ service Query {
   rpc Provider(QueryProviderRequest) returns (QueryProviderResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/provider/{address}";
   }
+
+  // Providers Queries a list of Providers items.
+  rpc Providers(QueryProvidersRequest) returns (QueryProvidersResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/providers";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -61,4 +66,12 @@ message QueryProviderRequest {
 // QueryProviderResponse defines the QueryProviderResponse message.
 message QueryProviderResponse {
   Provider provider = 1;
+}
+
+// QueryProvidersRequest defines the QueryProvidersRequest message.
+message QueryProvidersRequest {}
+
+// QueryProvidersResponse defines the QueryProvidersResponse message.
+message QueryProvidersResponse {
+  repeated Provider providers = 1;
 }
