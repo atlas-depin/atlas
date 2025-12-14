@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"nebulix/x/storage/types"
 	"time"
@@ -22,13 +23,13 @@ func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subsc
 	return subscription.Id, k.SubscriptionStore.Set(ctx, key, subscription)
 }
 
-func (k Keeper) SetStorageSubscription(ctx sdk.Context, address string, subscription types.StorageSubscription) error {
+func (k Keeper) SetStorageSubscription(ctx context.Context, address string, subscription types.StorageSubscription) error {
 	key := collections.Join(address, subscription.Id)
 	// [TODO]: add things that ensure the
 	return k.SubscriptionStore.Set(ctx, key, subscription)
 }
 
-func (k Keeper) GetStorageSubscription(ctx sdk.Context, address string, subscriptionId string) (types.StorageSubscription, error) {
+func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subscriptionId string) (types.StorageSubscription, error) {
 	if subscriptionId == "" {
 		id, err := k.GetDefaultStorageSubscriptionId(ctx, address)
 		if err != nil {
@@ -42,21 +43,22 @@ func (k Keeper) GetStorageSubscription(ctx sdk.Context, address string, subscrip
 	return k.SubscriptionStore.Get(ctx, key)
 }
 
-func (k Keeper) GetDefaultStorageSubscriptionId(ctx sdk.Context, address string) (string, error) {
+func (k Keeper) GetDefaultStorageSubscriptionId(ctx context.Context, address string) (string, error) {
 	return k.DefaultSubscriptionIndex.Get(ctx, address)
 }
 
-func (k Keeper) SetDefaultStorageSubscriptionId(ctx sdk.Context, address string, subscriptionId string) error {
+func (k Keeper) SetDefaultStorageSubscriptionId(ctx context.Context, address string, subscriptionId string) error {
 	return k.DefaultSubscriptionIndex.Set(ctx, address, subscriptionId)
 }
 
 // helpers
-func (k Keeper) UpdateStorageSubscriptionUsage(ctx sdk.Context, address string, subscriptionId string, bytes int64, replicas int64) (string, error) {
+func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address string, subscriptionId string, bytes int64, replicas int64) (string, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	subscription, err := k.GetStorageSubscription(ctx, address, subscriptionId)
 	if err != nil {
 		return "", err
 	}
-	if subscription.End.Before(ctx.BlockTime()) {
+	if subscription.End.Before(sdkCtx.BlockTime()) {
 		// [TBD]: can I handle storage account expiry here? appstate remains unchanged on error so, idk how
 		// [TODO]: better error handling
 		return "", sdkerrors.ErrUnauthorized
@@ -75,7 +77,7 @@ func (k Keeper) UpdateStorageSubscriptionUsage(ctx sdk.Context, address string, 
 	if err != nil {
 		return "", err
 	}
-	credits := math.NewInt(bytes * replicas).Mul(math.NewInt(int64(subscription.End.Sub(ctx.BlockTime()) / time.Second)))
+	credits := math.NewInt(bytes * replicas).Mul(math.NewInt(int64(subscription.End.Sub(sdkCtx.BlockTime()) / time.Second)))
 
 	subscription.Credits = subscription.Credits.Sub(credits)
 	k.StorageCreditPool.Set(ctx, currentCreditPool.Add(credits))

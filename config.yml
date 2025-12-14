@@ -1,15 +1,15 @@
 version: 1
 validation: sovereign
-default_denom: stake
+default_denom: unblx
 accounts: 
 - name: alice
   coins:
   - 20000token
-  - 200000000stake
+  - 20000000000unblx
 - name: bob
   coins:
   - 10000token
-  - 100000000stake
+  - 100000000unblx
 client:
   openapi:
     path: docs/static/openapi.json
@@ -17,11 +17,11 @@ faucet:
   name: bob
   coins:
   - 5token
-  - 100000stake
+  - 100000unblx
 validators:
 - name: alice
-  bonded: 100000000stake
+  bonded: 100000000unblx
 - name: validator1
-  bonded: 200000000stake
+  bonded: 200000000unblx
 - name: validator2
-  bonded: 100000000stake
+  bonded: 100000000unblx

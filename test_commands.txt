@@ -1,0 +1,2 @@
+./nebulixd tx storage buy-storage nblx1gxuhzz4kf8r5g3ddevkprqk6mplth700cqxt7w 720 1000000000 false --from alice --broadcast-mode block
+./nebulixd q storage get-subscription-info nblx1gxuhzz4kf8r5g3ddevkprqk6mplth700cqxt7w sub_0

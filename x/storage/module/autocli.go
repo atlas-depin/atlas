@@ -17,6 +17,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod:      "GetSubscriptionInfo",
+					Use:            "get-subscription-info [subscriber-address] [subscription-id]",
+					Short:          "Query get-subscription-info",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subscriber_address"}, {ProtoField: "subscription_id"}},
+				},
+
+				{
+					RpcMethod:      "Provider",
+					Use:            "provider [address]",
+					Short:          "Query provider",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "address"}},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},

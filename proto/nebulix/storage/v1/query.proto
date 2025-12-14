@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package nebulix.storage.v1;
 
 import "amino/amino.proto";
@@ -6,6 +7,8 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "nebulix/storage/v1/params.proto";
+import "nebulix/storage/v1/provider.proto";
+import "nebulix/storage/v1/subscription.proto";
 
 option go_package = "nebulix/x/storage/types";
 
@@ -14,6 +17,16 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/params";
+  }
+
+  // GetSubscriptionInfo Queries a list of GetSubscriptionInfo items.
+  rpc GetSubscriptionInfo(QueryGetSubscriptionInfoRequest) returns (QueryGetSubscriptionInfoResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/get_subscription_info/{subscriber_address}/{subscription_id}";
+  }
+
+  // Provider Queries a list of Provider items.
+  rpc Provider(QueryProviderRequest) returns (QueryProviderResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/provider/{address}";
   }
 }
 
@@ -27,4 +40,25 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryGetSubscriptionInfoRequest defines the QueryGetSubscriptionInfoRequest message.
+message QueryGetSubscriptionInfoRequest {
+  string subscriber_address = 1;
+  string subscription_id = 2;
+}
+
+// QueryGetSubscriptionInfoResponse defines the QueryGetSubscriptionInfoResponse message.
+message QueryGetSubscriptionInfoResponse {
+  StorageSubscription subscription = 1;
+}
+
+// QueryProviderRequest defines the QueryProviderRequest message.
+message QueryProviderRequest {
+  string address = 1;
+}
+
+// QueryProviderResponse defines the QueryProviderResponse message.
+message QueryProviderResponse {
+  Provider provider = 1;
 }

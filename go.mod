@@ -7,10 +7,10 @@ replace (
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-	// replace broken vanity url
-	nhooyr.io/websocket => github.com/coder/websocket v1.8.7
 	// merkletree blake3 support
 	github.com/wealdtech/go-merkletree/v2 => github.com/TheMarstonConnell/go-merkletree/v2 v2.0.0-20250829184252-ad65f46fbd22
+	// replace broken vanity url
+	nhooyr.io/websocket => github.com/coder/websocket v1.8.7
 )
 
 require (
@@ -40,6 +40,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/json-iterator/go v1.1.12
 	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
@@ -50,7 +51,11 @@ require (
 	google.golang.org/protobuf v1.36.10
 )
 
-require github.com/iden3/go-iden3-crypto v0.0.16 // indirect
+require (
+	github.com/iden3/go-iden3-crypto v0.0.16 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
+)
 
 require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
