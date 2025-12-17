@@ -15,7 +15,7 @@ TODO: summary of features, jot-notes
 6. Rewards Distribution & Slashing
 
 ## 1. Storage Representation
-Storage is represented in units of `1 byte-second`. In simple terms, one unit of storage is equivalent to storing one byte of data for one second. A unit of storage is represented on-chain by a "**storage credit**". This approach directly links storage consumption (bytes) with duration (seconds), allowing for fair and granular billing, excellent traceability of storage consumption, efficient rewards distribution and/or slashing, and the ability to pool credits into one source of distribution rather than iterating through individual credit gauges associated with each and every payment.
+Storage is represented in units of `1 byte-second`. One unit of storage is equivalent to storing one byte of data for one second. A unit of storage is represented on-chain by a "storage credit". This approach directly links storage consumption (bytes) with duration (seconds), allowing for fair and granular billing, excellent traceability of storage consumption, effective rewards distribution with slashing, and the ability to pool credits into one source of distribution rather than iterating through individual credit gauges associated with each and every payment.
 
 
 ## 2. Storage Provider Orchestration
@@ -58,7 +58,7 @@ Upon expiry, all remaining storage credits are sent to a "dump". Storage credits
 Currently, subscriptions are based on a fixed duration, while storage credits exist to support effective rewards distribution, file replica management, and subscription expansion. In a future development, a new type of subscription that does not have an expiry could be added. In this case, as long as the user has storage credits remaining, they may use them on-demand. These storage credits would be billed at a premium rate since they offer immense flexibility and have no contributions to the POL. The premium would be routed to POL.
 
 ## 4. File Management
-Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<merkle_hash>/<start_block>`. The start block of the file is necessary in case the user chooses to upload several copies of the same file; however, this structure still prevents a user from uploading the same file twice in the same block.
+Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<merkle_hash>/<deduplication_index>`. The de-duplication index is necessary in case a user chooses to upload several copies of the same file. The recommended deduplication index is the upload block height; however, it can be any other `int64` value in case a user needs to upload the same file several times in one block. Although this is highly improbably, Atlas Protocol is built to support all situations.
 
 ### File Object
 ```proto
@@ -72,6 +72,24 @@ message File {
   int64 replicas = 7;
 }
 ```
+### File Uploads
+A client uploads a file directly to a storage provider of choice, potentially randomized on the client's end. Both the client and provider create a merkle tree using 1KB chunks of the file. The merkle tree isn't just a file identifier, but also used by the proofs mechanism (see Section #). The provider broadcasts a `StageFile` transaction to stage the file and then returns a success response to the upload request.
+
+A staged file on-chain tracks the file owner, size, merkle root, and the providers who have recieved the file. The StagedFiles kvstore key is the fid. If a staged file already exists on another provider, any new provider is added to the list of providers. The start block is also recorded by the chain to manage staged file expiry. An `EndBlock` expiry check occurs every 100 blocks. 
+
+```proto
+message StagedFile {
+  string owner;
+  string merkle;
+  int64 file_size;
+  int64 start;
+  repeated Provider providers;
+}
+```
+
+When the client broadcasts a `PostFile` transaction, and the blockchain seeks a staged file with the same file owner, merkle root, and file size. The file is then committed on-chain with the first N providers where N is the number of replicas specified by the transaction.
+
+
 
 ### CR~~U~~D - Create, READ, ~~UPDATE~~, DELETE
 When a file is created on-chain, it is commited to the kvstore. The `spaceUsed` of the corresponding storage subscription is also incremented by the file size. Storage credits are not withdrawn from the subscription until a storage provider attests to having the file.
@@ -84,11 +102,16 @@ When a file is deleted on-chain, the remaining storage credits until its expiry 
 
 
 ## 5. DePIN Security Strategy
+Atlas Protocol challenges all files within a proof window. To reduce chain congestion, a proof window consists of several proof rounds of N blocks. At the start of a proof window, an index of files to prove is populated with all files. When a file is proven, it gets removed from this index. 80% of the files to prove within a proof round are selected at random from the index, while the other 20% is selected at random from all files. This distribution of sources mitigates the feasibility of "store-on-demand" attacks, while also maintaining an efficient mechanism to ensure all files are proven within a certain proof window. "store-on-demand" attacks are still possible; however, the risks strongly outweight the rewards due to the provider rewards slashing mechanism.
+
+
+1D blocks / (total_files / 500 files/block) == intervals
 
 ### Proof-of-Persistence
+The merkle tree leaves are cryptographic hashes of every 1KB chunk of the file, with the last chunk being <= 1KB. Blake3 is the hashing algorithm of choice due to its rapid hash rate of approximately 1GB/s for 1KB segments. The merkle tree is then constructed using the XXH3 hashing algorithm. While it is not a cryptographic hash, a pre-image attack is extremely unlikely because the leaves are cryptographic hashes. XXH3 has a hash-rate up to approximately 31.5 GB/s, which makes the intense process of merkle node creation 30x faster (relative to Blake3 merkle trees).
 
 ### Future Works: KZG Commitment Algorithm
-TODO
+This could be fun.
 
 
 ## 6. Rewards Distribution & Slashing
