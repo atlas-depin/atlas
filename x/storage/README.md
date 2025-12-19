@@ -58,7 +58,7 @@ Upon expiry, all remaining storage credits are sent to a "dump". Storage credits
 Currently, subscriptions are based on a fixed duration, while storage credits exist to support effective rewards distribution, file replica management, and subscription expansion. In a future development, a new type of subscription that does not have an expiry could be added. In this case, as long as the user has storage credits remaining, they may use them on-demand. These storage credits would be billed at a premium rate since they offer immense flexibility and have no contributions to the POL. The premium would be routed to POL.
 
 ## 4. File Management
-Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<merkle_hash>/<deduplication_index>`. The de-duplication index is necessary in case a user chooses to upload several copies of the same file. The recommended deduplication index is the upload block height; however, it can be any other `int64` value in case a user needs to upload the same file several times in one block. Although this is highly improbably, Atlas Protocol is built to support all situations.
+Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<file_id>`. The file id (fid) is a sha256 hash of the following: `<merkle root>:<creator_address>:<de-duplication index>`. The de-duplication index  is necessary in case a user chooses to upload several copies of the same file. It is calculated by Atlas Protocol and is equal to the `total file count + blockchain height`.
 
 ### File Object
 ```proto
@@ -73,32 +73,18 @@ message File {
 }
 ```
 ### File Uploads
-A client uploads a file directly to a storage provider of choice, potentially randomized on the client's end. Both the client and provider create a merkle tree using 1KB chunks of the file. The merkle tree isn't just a file identifier, but also used by the proofs mechanism (see Section #). The provider broadcasts a `StageFile` transaction to stage the file and then returns a success response to the upload request.
+Before uploading a file, the client builds a merkle tree of the file divided into 1KB chunks (see Section 6 for more detail). A `PostFile` request is then broadcasted by the client, submitting the file's relevant metadata and merkle root, as well as the subscription the client wants to use (or none for default). The status of the file at this point is STAGED.
 
-A staged file on-chain tracks the file owner, size, merkle root, and the providers who have recieved the file. The StagedFiles kvstore key is the fid. If a staged file already exists on another provider, any new provider is added to the list of providers. The start block is also recorded by the chain to manage staged file expiry. An `EndBlock` expiry check occurs every 100 blocks. 
+Once the `PostFile` request is successful, the client uploads a file directly to a storage provider of choice, potentially randomized on their end. The provider repeats the merkle tree process using 1KB chunks of the file. The merkle tree isn't just part of file identification, but also used by the provider for proofs (see Section 6). The provider submits a proof for the first chunk of the file to attest that it has received the file and is capable of providing it. Upon a successful proof, the file status becomes ACTIVE. It is also added to the collection of stray files, enabling other storage providers to pick up the file.
 
-```proto
-message StagedFile {
-  string owner;
-  string merkle;
-  int64 file_size;
-  int64 start;
-  repeated Provider providers;
-}
-```
+### CR~~U~~D - CREATE, READ, ~~UPDATE~~, DELETE
+When a file is created on-chain, it is commited to the appstore. The tracked space used of the corresponding storage subscription is incremented by the file size. The storage credits are computed and withdrawn from the subscription.
 
-When the client broadcasts a `PostFile` transaction, and the blockchain seeks a staged file with the same file owner, merkle root, and file size. The file is then committed on-chain with the first N providers where N is the number of replicas specified by the transaction.
+A file's information can be queried using the creator address, merkle root hash, and de-dupe index. If no de-dupe index is provided, the query will fetch the first file uploaded of the provided merkle hash and address.
 
+Files cannot be "updated" on-chain, because that changes the merkle root of the file which is equivalent to deleting the file and re-creating it.
 
-
-### CR~~U~~D - Create, READ, ~~UPDATE~~, DELETE
-When a file is created on-chain, it is commited to the kvstore. The `spaceUsed` of the corresponding storage subscription is also incremented by the file size. Storage credits are not withdrawn from the subscription until a storage provider attests to having the file.
-
-A file's on-chain index entry can be queried. If no start block is provided, the query will fetch the first file uploaded of the specified merkle hash and address.
-
-Files cannot be "updated" on-chain, because that changes the merkle hash of the file which is equivalent to deleting the file and re-creating it (which can be done).
-
-When a file is deleted on-chain, the remaining storage credits until its expiry is computed and routed back to the subscription that posted the file.
+When a file is deleted on-chain, the remaining storage credits until its expiry is computed and routed back to the subscription that posted the file. The space used by the storage subscription and stored by the providers is decremented by the file size.
 
 
 ## 5. DePIN Security Strategy
@@ -116,6 +102,18 @@ This could be fun.
 
 ## 6. Rewards Distribution & Slashing
 TODO
+
+
+## Storage Provider AA Mechanism
+- detects incoming request for two unique files from two different creators from the same IP
+- log this using kv map, IP: {file, creator, round}, that is reset every proof window
+- if prev. file was challenged in X round for provider Y, and current file is being challenged in the current round for provider Y
+- report provider for suspicious behavior, report severity (2)
+- if range request, provider report severity to maximum (3)
+- if nothing suspicious, add IP to whitelist for checks
+
+- if 50% of providers log sev. == sev.3, ban
+- if 75% of providers log sev. >= sev.2, ban
 
 
 ## TODO
