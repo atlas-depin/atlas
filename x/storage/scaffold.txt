@@ -1,5 +1,6 @@
 ignite scaffold message stage-file provider:string fid:string --module storage
 ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 is-default:bool --module storage
+ignite scaffold message prove-file challengeId:string fileId:string data:bytes hashes:array.bytes chunk:uint64 --module storage
 
 ignite scaffold query get-subscription-info subscriberAddress:string subscriptionId:string --module storage
 ignite scaffold query provider address:string --response provider:string --module storage

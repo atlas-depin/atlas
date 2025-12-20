@@ -13,10 +13,8 @@ import (
 	"nebulix/x/storage/types"
 )
 
-var _ depinject.OnePerModuleType = AppModule{}
-
 // IsOnePerModuleType implements the depinject.OnePerModuleType interface.
-func (AppModule) IsOnePerModuleType() {}
+func (am AppModule) IsOnePerModuleType() {}
 
 func init() {
 	appconfig.Register(

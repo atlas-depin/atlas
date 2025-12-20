@@ -9,6 +9,10 @@ import (
 	"cosmossdk.io/collections"
 )
 
+func (k Keeper) SetFile(ctx context.Context, file types.File) error {
+	return k.FileStore.Set(ctx, file.FileId, file)
+}
+
 // StoreFile stores a new file with a provider
 func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	// Check if file already exists

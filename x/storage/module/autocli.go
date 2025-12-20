@@ -31,6 +31,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "address"}},
 				},
 
+				{
+					RpcMethod:      "Providers",
+					Use:            "providers ",
+					Short:          "Query providers",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -65,6 +72,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:            "buy-storage [receiver] [duration] [bytes] [is-default]",
 					Short:          "Send a buy-storage tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "receiver"}, {ProtoField: "duration"}, {ProtoField: "bytes"}, {ProtoField: "is_default"}},
+				},
+				{
+					RpcMethod:      "ProveFile",
+					Use:            "prove-file [challenge-id] [file-id] [data] [hashes] [chunk]",
+					Short:          "Send a prove-file tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "challenge_id"}, {ProtoField: "file_id"}, {ProtoField: "data"}, {ProtoField: "hashes"}, {ProtoField: "chunk"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

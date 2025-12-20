@@ -26,13 +26,15 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type File struct {
 	FileId               string   `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
 	Merkle               string   `protobuf:"bytes,2,opt,name=merkle,proto3" json:"merkle,omitempty"`
-	Owner                string   `protobuf:"bytes,3,opt,name=owner,proto3" json:"owner,omitempty"`
+	Creator              string   `protobuf:"bytes,3,opt,name=creator,proto3" json:"creator,omitempty"`
 	Subscription         string   `protobuf:"bytes,4,opt,name=subscription,proto3" json:"subscription,omitempty"`
-	Providers            []string `protobuf:"bytes,5,rep,name=providers,proto3" json:"providers,omitempty"`
+	Status               string   `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	FileSize             int64    `protobuf:"varint,6,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
-	Start                int64    `protobuf:"varint,7,opt,name=start,proto3" json:"start,omitempty"`
-	Replicas             int64    `protobuf:"varint,8,opt,name=replicas,proto3" json:"replicas,omitempty"`
-	LastChallengedHeight int64    `protobuf:"varint,9,opt,name=last_challenged_height,json=lastChallengedHeight,proto3" json:"last_challenged_height,omitempty"`
+	Replicas             int64    `protobuf:"varint,7,opt,name=replicas,proto3" json:"replicas,omitempty"`
+	Providers            []string `protobuf:"bytes,8,rep,name=providers,proto3" json:"providers,omitempty"`
+	Start                int64    `protobuf:"varint,9,opt,name=start,proto3" json:"start,omitempty"`
+	DedupeIndex          int64    `protobuf:"varint,10,opt,name=dedupe_index,json=dedupeIndex,proto3" json:"dedupe_index,omitempty"`
+	LastChallengedHeight int64    `protobuf:"varint,11,opt,name=last_challenged_height,json=lastChallengedHeight,proto3" json:"last_challenged_height,omitempty"`
 }
 
 func (m *File) Reset()         { *m = File{} }
@@ -82,9 +84,9 @@ func (m *File) GetMerkle() string {
 	return ""
 }
 
-func (m *File) GetOwner() string {
+func (m *File) GetCreator() string {
 	if m != nil {
-		return m.Owner
+		return m.Creator
 	}
 	return ""
 }
@@ -96,11 +98,11 @@ func (m *File) GetSubscription() string {
 	return ""
 }
 
-func (m *File) GetProviders() []string {
+func (m *File) GetStatus() string {
 	if m != nil {
-		return m.Providers
+		return m.Status
 	}
-	return nil
+	return ""
 }
 
 func (m *File) GetFileSize() int64 {
@@ -110,6 +112,20 @@ func (m *File) GetFileSize() int64 {
 	return 0
 }
 
+func (m *File) GetReplicas() int64 {
+	if m != nil {
+		return m.Replicas
+	}
+	return 0
+}
+
+func (m *File) GetProviders() []string {
+	if m != nil {
+		return m.Providers
+	}
+	return nil
+}
+
 func (m *File) GetStart() int64 {
 	if m != nil {
 		return m.Start
@@ -117,9 +133,9 @@ func (m *File) GetStart() int64 {
 	return 0
 }
 
-func (m *File) GetReplicas() int64 {
+func (m *File) GetDedupeIndex() int64 {
 	if m != nil {
-		return m.Replicas
+		return m.DedupeIndex
 	}
 	return 0
 }
@@ -207,28 +223,30 @@ func init() {
 func init() { proto.RegisterFile("nebulix/storage/v1/file.proto", fileDescriptor_fa470856b6e8fa61) }
 
 var fileDescriptor_fa470856b6e8fa61 = []byte{
-	// 329 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0xcb, 0x4e, 0x02, 0x31,
-	0x14, 0x86, 0x29, 0x03, 0x03, 0x73, 0xe2, 0xaa, 0x21, 0xd0, 0x78, 0x99, 0x10, 0x56, 0xac, 0x20,
-	0x44, 0x9f, 0x40, 0x13, 0xa3, 0x5b, 0xd8, 0xb9, 0x21, 0x65, 0xe6, 0x38, 0x34, 0xd6, 0xe9, 0xa4,
-	0x2d, 0xa0, 0x3c, 0x85, 0x0b, 0x1f, 0xca, 0x25, 0x4b, 0x97, 0x06, 0x5e, 0xc4, 0x4c, 0x07, 0xc4,
-	0x31, 0x71, 0xf9, 0xfd, 0xdf, 0x69, 0x7a, 0x2e, 0x70, 0x91, 0xe2, 0x6c, 0x21, 0xc5, 0xcb, 0xd0,
-	0x58, 0xa5, 0x79, 0x82, 0xc3, 0xe5, 0x68, 0xf8, 0x28, 0x24, 0x0e, 0x32, 0xad, 0xac, 0xa2, 0x74,
-	0xaf, 0x07, 0x7b, 0x3d, 0x58, 0x8e, 0x7a, 0xef, 0x55, 0xa8, 0xdd, 0x0a, 0x89, 0xb4, 0x03, 0x8d,
-	0xbc, 0x74, 0x2a, 0x62, 0x46, 0xba, 0xa4, 0x1f, 0x8c, 0xfd, 0x1c, 0xef, 0x63, 0xda, 0x06, 0xff,
-	0x19, 0xf5, 0x93, 0x44, 0x56, 0x2d, 0xf2, 0x82, 0x68, 0x0b, 0xea, 0x6a, 0x95, 0xa2, 0x66, 0x9e,
-	0x8b, 0x0b, 0xa0, 0x3d, 0x38, 0x31, 0x8b, 0x99, 0x89, 0xb4, 0xc8, 0xac, 0x50, 0x29, 0xab, 0x39,
-	0x59, 0xca, 0xe8, 0x39, 0x04, 0x99, 0x56, 0x4b, 0x11, 0xa3, 0x36, 0xac, 0xde, 0xf5, 0xfa, 0xc1,
-	0xf8, 0x18, 0xd0, 0x33, 0x08, 0x5c, 0x23, 0x46, 0xac, 0x91, 0xf9, 0x5d, 0xd2, 0xf7, 0xc6, 0xcd,
-	0x3c, 0x98, 0x88, 0xb5, 0xfb, 0xd4, 0x58, 0xae, 0x2d, 0x6b, 0x38, 0x51, 0x00, 0x3d, 0x85, 0xa6,
-	0xc6, 0x4c, 0x8a, 0x88, 0x1b, 0xd6, 0x2c, 0x5e, 0x1c, 0x98, 0x5e, 0x41, 0x5b, 0x72, 0x63, 0xa7,
-	0xd1, 0x9c, 0x4b, 0x89, 0x69, 0x82, 0xf1, 0x74, 0x8e, 0x22, 0x99, 0x5b, 0x16, 0xb8, 0xca, 0x56,
-	0x6e, 0x6f, 0x7e, 0xe4, 0x9d, 0x73, 0xbd, 0x15, 0xc0, 0xc4, 0xf2, 0x04, 0x63, 0xb7, 0x9b, 0x52,
-	0xc3, 0xe4, 0x6f, 0xc3, 0x0c, 0x1a, 0x91, 0x46, 0x6e, 0x95, 0xde, 0x6f, 0xe8, 0x80, 0xe5, 0x51,
-	0xbc, 0xff, 0x46, 0xa9, 0xfd, 0x1a, 0xe5, 0x7a, 0xf4, 0xb1, 0x0d, 0xc9, 0x66, 0x1b, 0x92, 0xaf,
-	0x6d, 0x48, 0xde, 0x76, 0x61, 0x65, 0xb3, 0x0b, 0x2b, 0x9f, 0xbb, 0xb0, 0xf2, 0xd0, 0x39, 0x1c,
-	0xf7, 0x78, 0x5e, 0xfb, 0x9a, 0xa1, 0x99, 0xf9, 0xee, 0xba, 0x97, 0xdf, 0x01, 0x00, 0x00, 0xff,
-	0xff, 0xee, 0x0b, 0xf5, 0x15, 0xfe, 0x01, 0x00, 0x00,
+	// 361 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x92, 0xcd, 0x8e, 0xda, 0x30,
+	0x14, 0x85, 0x09, 0x81, 0x40, 0x2e, 0xac, 0x2c, 0x04, 0x56, 0x7f, 0x22, 0xca, 0x8a, 0x15, 0x08,
+	0xb5, 0x4f, 0xd0, 0x4a, 0x55, 0xd9, 0xc2, 0xae, 0x9b, 0xc8, 0xc4, 0xb7, 0xc1, 0xaa, 0x27, 0x89,
+	0x6c, 0x87, 0x61, 0x78, 0x8a, 0x79, 0xac, 0x59, 0x22, 0xcd, 0x66, 0x96, 0x23, 0x78, 0x91, 0x51,
+	0x1c, 0xfe, 0xc2, 0xf2, 0x9c, 0xcf, 0xbe, 0xba, 0xf7, 0xe8, 0xc0, 0xd7, 0x04, 0x57, 0xb9, 0x14,
+	0xdb, 0xa9, 0x36, 0xa9, 0x62, 0x31, 0x4e, 0x37, 0xb3, 0xe9, 0x3f, 0x21, 0x71, 0x92, 0xa9, 0xd4,
+	0xa4, 0x84, 0x9c, 0xf0, 0xe4, 0x84, 0x27, 0x9b, 0xd9, 0xe8, 0xb5, 0x0e, 0x8d, 0xdf, 0x42, 0x22,
+	0x19, 0x40, 0xab, 0x78, 0x1a, 0x0a, 0x4e, 0x9d, 0xa1, 0x33, 0xf6, 0x17, 0x5e, 0x21, 0xe7, 0x9c,
+	0xf4, 0xc1, 0x7b, 0x40, 0xf5, 0x5f, 0x22, 0xad, 0x97, 0x7e, 0xa9, 0x08, 0x85, 0x56, 0xa4, 0x90,
+	0x99, 0x54, 0x51, 0xd7, 0x82, 0xb3, 0x24, 0x23, 0xe8, 0xea, 0x7c, 0xa5, 0x23, 0x25, 0x32, 0x23,
+	0xd2, 0x84, 0x36, 0x2c, 0xae, 0x78, 0xc5, 0x54, 0x6d, 0x98, 0xc9, 0x35, 0x6d, 0x96, 0x53, 0x4b,
+	0x45, 0x3e, 0x83, 0x6f, 0xd7, 0xd0, 0x62, 0x87, 0xd4, 0x1b, 0x3a, 0x63, 0x77, 0xd1, 0x2e, 0x8c,
+	0xa5, 0xd8, 0x21, 0xf9, 0x04, 0x6d, 0x85, 0x99, 0x14, 0x11, 0xd3, 0xb4, 0x55, 0xb2, 0xb3, 0x26,
+	0x5f, 0xc0, 0xcf, 0x54, 0xba, 0x11, 0x1c, 0x95, 0xa6, 0xed, 0xa1, 0x3b, 0xf6, 0x17, 0x57, 0x83,
+	0xf4, 0xa0, 0xa9, 0x0d, 0x53, 0x86, 0xfa, 0xf6, 0x5b, 0x29, 0xc8, 0x37, 0xe8, 0x72, 0xe4, 0x79,
+	0x86, 0xa1, 0x48, 0x38, 0x6e, 0x29, 0x58, 0xd8, 0x29, 0xbd, 0x79, 0x61, 0x91, 0x1f, 0xd0, 0x97,
+	0x4c, 0x9b, 0x30, 0x5a, 0x33, 0x29, 0x31, 0x89, 0x91, 0x87, 0x6b, 0x14, 0xf1, 0xda, 0xd0, 0x8e,
+	0x7d, 0xdc, 0x2b, 0xe8, 0xaf, 0x0b, 0xfc, 0x63, 0xd9, 0xe8, 0x11, 0x60, 0x69, 0x58, 0x8c, 0xdc,
+	0x46, 0x5b, 0x59, 0xcd, 0xb9, 0x5f, 0xed, 0x26, 0xc7, 0x7a, 0x35, 0xc7, 0x4a, 0x16, 0xee, 0x5d,
+	0x16, 0x97, 0x8b, 0x1a, 0x37, 0x17, 0xfd, 0x9c, 0xbd, 0x1c, 0x02, 0x67, 0x7f, 0x08, 0x9c, 0xf7,
+	0x43, 0xe0, 0x3c, 0x1f, 0x83, 0xda, 0xfe, 0x18, 0xd4, 0xde, 0x8e, 0x41, 0xed, 0xef, 0xe0, 0xdc,
+	0x8d, 0x6b, 0x3b, 0xcc, 0x53, 0x86, 0x7a, 0xe5, 0xd9, 0x72, 0x7c, 0xff, 0x08, 0x00, 0x00, 0xff,
+	0xff, 0x3a, 0x19, 0x14, 0x2c, 0x3d, 0x02, 0x00, 0x00,
 }
 
 func (m *File) Marshal() (dAtA []byte, err error) {
@@ -254,15 +272,29 @@ func (m *File) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.LastChallengedHeight != 0 {
 		i = encodeVarintFile(dAtA, i, uint64(m.LastChallengedHeight))
 		i--
-		dAtA[i] = 0x48
+		dAtA[i] = 0x58
 	}
-	if m.Replicas != 0 {
-		i = encodeVarintFile(dAtA, i, uint64(m.Replicas))
+	if m.DedupeIndex != 0 {
+		i = encodeVarintFile(dAtA, i, uint64(m.DedupeIndex))
 		i--
-		dAtA[i] = 0x40
+		dAtA[i] = 0x50
 	}
 	if m.Start != 0 {
 		i = encodeVarintFile(dAtA, i, uint64(m.Start))
+		i--
+		dAtA[i] = 0x48
+	}
+	if len(m.Providers) > 0 {
+		for iNdEx := len(m.Providers) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Providers[iNdEx])
+			copy(dAtA[i:], m.Providers[iNdEx])
+			i = encodeVarintFile(dAtA, i, uint64(len(m.Providers[iNdEx])))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if m.Replicas != 0 {
+		i = encodeVarintFile(dAtA, i, uint64(m.Replicas))
 		i--
 		dAtA[i] = 0x38
 	}
@@ -271,14 +303,12 @@ func (m *File) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x30
 	}
-	if len(m.Providers) > 0 {
-		for iNdEx := len(m.Providers) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Providers[iNdEx])
-			copy(dAtA[i:], m.Providers[iNdEx])
-			i = encodeVarintFile(dAtA, i, uint64(len(m.Providers[iNdEx])))
-			i--
-			dAtA[i] = 0x2a
-		}
+	if len(m.Status) > 0 {
+		i -= len(m.Status)
+		copy(dAtA[i:], m.Status)
+		i = encodeVarintFile(dAtA, i, uint64(len(m.Status)))
+		i--
+		dAtA[i] = 0x2a
 	}
 	if len(m.Subscription) > 0 {
 		i -= len(m.Subscription)
@@ -287,10 +317,10 @@ func (m *File) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x22
 	}
-	if len(m.Owner) > 0 {
-		i -= len(m.Owner)
-		copy(dAtA[i:], m.Owner)
-		i = encodeVarintFile(dAtA, i, uint64(len(m.Owner)))
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintFile(dAtA, i, uint64(len(m.Creator)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -385,7 +415,7 @@ func (m *File) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovFile(uint64(l))
 	}
-	l = len(m.Owner)
+	l = len(m.Creator)
 	if l > 0 {
 		n += 1 + l + sovFile(uint64(l))
 	}
@@ -393,20 +423,27 @@ func (m *File) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovFile(uint64(l))
 	}
+	l = len(m.Status)
+	if l > 0 {
+		n += 1 + l + sovFile(uint64(l))
+	}
+	if m.FileSize != 0 {
+		n += 1 + sovFile(uint64(m.FileSize))
+	}
+	if m.Replicas != 0 {
+		n += 1 + sovFile(uint64(m.Replicas))
+	}
 	if len(m.Providers) > 0 {
 		for _, s := range m.Providers {
 			l = len(s)
 			n += 1 + l + sovFile(uint64(l))
 		}
 	}
-	if m.FileSize != 0 {
-		n += 1 + sovFile(uint64(m.FileSize))
-	}
 	if m.Start != 0 {
 		n += 1 + sovFile(uint64(m.Start))
 	}
-	if m.Replicas != 0 {
-		n += 1 + sovFile(uint64(m.Replicas))
+	if m.DedupeIndex != 0 {
+		n += 1 + sovFile(uint64(m.DedupeIndex))
 	}
 	if m.LastChallengedHeight != 0 {
 		n += 1 + sovFile(uint64(m.LastChallengedHeight))
@@ -540,7 +577,7 @@ func (m *File) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -568,7 +605,7 @@ func (m *File) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Owner = string(dAtA[iNdEx:postIndex])
+			m.Creator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
@@ -604,6 +641,76 @@ func (m *File) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowFile
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthFile
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthFile
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Status = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FileSize", wireType)
+			}
+			m.FileSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowFile
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FileSize |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Replicas", wireType)
+			}
+			m.Replicas = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowFile
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Replicas |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 8:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Providers", wireType)
 			}
 			var stringLen uint64
@@ -634,26 +741,7 @@ func (m *File) Unmarshal(dAtA []byte) error {
 			}
 			m.Providers = append(m.Providers, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
-		case 6:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field FileSize", wireType)
-			}
-			m.FileSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowFile
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.FileSize |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 7:
+		case 9:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Start", wireType)
 			}
@@ -672,11 +760,11 @@ func (m *File) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 8:
+		case 10:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Replicas", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DedupeIndex", wireType)
 			}
-			m.Replicas = 0
+			m.DedupeIndex = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowFile
@@ -686,12 +774,12 @@ func (m *File) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Replicas |= int64(b&0x7F) << shift
+				m.DedupeIndex |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 9:
+		case 11:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastChallengedHeight", wireType)
 			}

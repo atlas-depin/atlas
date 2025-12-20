@@ -47,6 +47,7 @@ type Keeper struct {
 	////
 	FileStagingStore collections.Map[string, types.StagedFile]
 	FileStore        *collections.IndexedMap[string, types.File, fileIndexes]
+	FileCount        collections.Item[int64]
 
 	BinStore       collections.Map[string, types.Bin]      // file_id -> File
 	ProviderStore  collections.Map[string, types.Provider] // address -> Provider
@@ -116,14 +117,16 @@ func NewKeeper(
 			NewFileIndexes(sb),
 		),
 
+		FileCount: collections.NewItem(sb, collections.NewPrefix(6), "file_count", collections.Int64Value),
+
 		ProviderStore: collections.NewMap(
-			sb, collections.NewPrefix(6), "providers",
+			sb, collections.NewPrefix(7), "providers",
 			collections.StringKey,
 			codec.CollValue[types.Provider](cdc),
 		),
 
 		ChallengeStore: collections.NewMap(
-			sb, collections.NewPrefix(7), "challenges",
+			sb, collections.NewPrefix(8), "challenges",
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageChallenge](cdc),
 		),

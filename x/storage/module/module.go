@@ -12,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"google.golang.org/grpc"
 
 	"nebulix/x/storage/keeper"
 	"nebulix/x/storage/types"
@@ -22,10 +21,11 @@ var (
 	_ module.AppModuleBasic = (*AppModule)(nil)
 	_ module.AppModule      = (*AppModule)(nil)
 	_ module.HasGenesis     = (*AppModule)(nil)
+	_ module.HasServices    = (*AppModule)(nil)
 
-	_ appmodule.AppModule       = (*AppModule)(nil)
-	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
-	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
+	_ appmodule.AppModule = (*AppModule)(nil)
+	// _ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	// _ appmodule.HasEndBlocker   = (*AppModule)(nil)
 )
 
 // AppModule implements the AppModule interface that defines the inter-dependent methods that modules need to implement
@@ -74,11 +74,9 @@ func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 }
 
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
-func (am AppModule) RegisterServices(registrar grpc.ServiceRegistrar) error {
-	types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(registrar, keeper.NewQueryServerImpl(am.keeper))
-
-	return nil
+func (am AppModule) RegisterServices(cfg module.Configurator) {
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
 }
 
 // DefaultGenesis returns a default GenesisState for the module, marshalled to json.RawMessage.

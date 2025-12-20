@@ -19,7 +19,7 @@ func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 			sb, collections.NewPrefix(40), "by_owner",
 			collections.StringKey, collections.StringKey,
 			func(pk string, f types.File) (string, error) {
-				return f.Owner, nil
+				return f.Creator, nil
 			},
 		),
 		BySubscription: indexes.NewMulti[string, string, types.File](
@@ -43,7 +43,7 @@ type fileAddressIndex struct{}
 
 func (fa fileAddressIndex) UnorderedKeys() bool { return false }
 func (fa fileAddressIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
-	return file.Owner, nil
+	return file.Creator, nil
 }
 func (fa fileAddressIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
 	return pk, nil

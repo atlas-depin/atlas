@@ -41,7 +41,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	// Verify file was stored
 	storedFile, err := suite.keeper.GetFile(ctx, fmt.Sprintf("%x", fid))
 	suite.Require().NoError(err)
-	suite.Require().Equal(creator, storedFile.Owner)
+	suite.Require().Equal(creator, storedFile.Creator)
 	suite.Require().Equal(fileSize, storedFile.FileSize)
 	suite.Require().Equal(int64(3), storedFile.Replicas)
 	suite.Require().Equal([]string{}, storedFile.Providers)

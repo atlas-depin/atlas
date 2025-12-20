@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"strconv"
 
 	"nebulix/x/storage/types"
 
@@ -22,35 +21,33 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		return nil, errors.Wrap(err, "invalid authority address")
 	}
 
-	if msg.Replicas < -1 || msg.Replicas == 1 {
-		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "must have 2 or more replicas")
-	} else if msg.Replicas == 0 {
+	if msg.Replicas == 0 {
 		msg.Replicas = 3
+	} else if msg.Replicas < 2 {
+		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "must have 2 or more replicas")
 	}
 
-	/// --- Compile file information
-	file := types.File{
-		Merkle:   hex.EncodeToString(msg.Merkle),
-		Owner:    msg.Creator,
-		Start:    ctx.BlockHeight(),
-		FileSize: msg.FileSize,
-		Replicas: msg.Replicas,
-	}
-	fidString := file.Merkle + file.Owner + strconv.FormatInt(msg.Ddi, 10) + strconv.FormatInt(msg.FileSize, 10)
-	fid := fmt.Sprintf("%x", sha256.Sum256([]byte(fidString)))
-
-	/// --- Ensure file is staged & get providers
-	stagedFile, err := k.GetStagedFile(ctx, fid)
+	/// --- Build file index element & metadata
+	fileIndex, err := k.FileCount.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if msg.Creator != stagedFile.Creator || file.FileSize != stagedFile.FileSize {
-		return nil, sdkerrors.ErrInvalidRequest
-	}
-	file.Providers = stagedFile.Providers[:file.Replicas]
-	k.RemoveStagedFile(ctx, fid) // idc if there's an error, it'll get cleaned up after expiry anyways
+	fileIndex++
+	fileDeDupeIndex := fileIndex + ctx.BlockHeight()
 
-	/// --- Update subscription & commit file
+	fid := sha256.Sum256(append(append(msg.Merkle, []byte(msg.Creator)...), byte(fileDeDupeIndex)))
+	file := types.File{
+		FileId:      fmt.Sprintf("%x", fid),
+		Merkle:      hex.EncodeToString(msg.Merkle),
+		Creator:     msg.Creator,
+		Status:      "STAGED",
+		Start:       ctx.BlockHeight(),
+		FileSize:    msg.FileSize,
+		Replicas:    msg.Replicas,
+		DedupeIndex: fileDeDupeIndex,
+	}
+
+	/// --- Update subscription
 	subscriptionId, err := k.UpdateStorageSubscriptionUsage(ctx, msg.Creator, msg.Subscription, msg.FileSize, msg.Replicas)
 	if err != nil {
 		return nil, errors.Wrapf(sdkerrors.ErrInvalidRequest, "%s", err.Error())
@@ -58,7 +55,13 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		file.Subscription = subscriptionId
 	}
 
-	k.SetNewFile(ctx, file)
+	/// --- Commit file
+	if err = k.FileCount.Set(ctx, fileIndex); err != nil {
+		return nil, err
+	}
+	if err = k.SetNewFile(ctx, file); err != nil {
+		return nil, err
+	}
 
 	/// --- Emit events
 	ctx.EventManager().EmitEvent(

@@ -189,7 +189,7 @@ func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInpu
 	}
 
 	if containsProver(file, provider) {
-		success := k.Prove(ctx, challenge.ChunkIndex, []byte(file.Merkle), proofInput)
+		success := k.Prove(ctx, []byte(file.Merkle), challenge.ChunkIndex, proofInput)
 		if success {
 			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
 		}
@@ -211,7 +211,7 @@ func containsProver(file types.File, prover string) bool {
 	return false
 }
 
-func (k Keeper) Prove(ctx context.Context, index uint64, root []byte, input types.Proof) bool {
+func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input types.Proof) bool {
 	hasher := blake3.New()
 	hasher.Write(input.Data)
 	hashName := hasher.Sum(nil)

@@ -22,7 +22,7 @@ func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int6
 	file := types.File{
 		FileId:    fileId,
 		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
-		Owner:     owner,
+		Creator:   owner,
 		Start:     suite.ctx.BlockHeight(),
 		FileSize:  fileSize,
 		Providers: providers,
@@ -296,7 +296,7 @@ func (suite *KeeperTestSuite) TestProve_Success() {
 	}
 
 	// Test Prove function
-	success := suite.keeper.Prove(suite.ctx, uint64(chunkIndex), root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, uint64(chunkIndex), proofInput)
 	suite.Require().True(success, "valid proof should verify")
 }
 
@@ -316,7 +316,7 @@ func (suite *KeeperTestSuite) TestProve_WrongData() {
 		ChunkIndex:  proof.Index,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 0, root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, 0, proofInput)
 	suite.Require().False(success, "wrong data should fail even with correct proof")
 }
 
@@ -336,7 +336,7 @@ func (suite *KeeperTestSuite) TestProve_WrongChunkIndex() {
 		ChunkIndex:  2,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 2, root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, 2, proofInput)
 	suite.Require().False(success, "wrong chunk index should fail")
 }
 
@@ -354,7 +354,7 @@ func (suite *KeeperTestSuite) TestProve_NilData() {
 		ChunkIndex:  proof.Index,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 0, root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, 0, proofInput)
 	suite.Require().False(success, "nil data should fail")
 }
 
@@ -372,7 +372,7 @@ func (suite *KeeperTestSuite) TestProve_EmptyProofHashes() {
 		ChunkIndex:  proof.Index,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 0, root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, 0, proofInput)
 	suite.Require().False(success, "empty proof hashes should fail")
 }
 
@@ -411,7 +411,7 @@ func (suite *KeeperTestSuite) TestProve_WrongMerkleRoot() {
 		ChunkIndex:  proof.Index,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 0, tree2.Root(), proofInput)
+	success := suite.keeper.Prove(suite.ctx, tree2.Root(), 0, proofInput)
 	suite.Require().False(success, "proof for different tree should fail")
 }
 
@@ -440,7 +440,7 @@ func (suite *KeeperTestSuite) TestProve_ProofTampering() {
 		ChunkIndex:  tamperedProof.Index,
 	}
 
-	success := suite.keeper.Prove(suite.ctx, 0, root, proofInput)
+	success := suite.keeper.Prove(suite.ctx, root, 0, proofInput)
 	suite.Require().False(success, "tampered proof should fail")
 }
 
@@ -517,7 +517,7 @@ func (suite *KeeperTestSuite) TestProve_Performance_100kProofs() {
 			ChunkIndex:  uint64(i),
 		}
 
-		success := suite.keeper.Prove(suite.ctx, uint64(i), root, proofInput)
+		success := suite.keeper.Prove(suite.ctx, root, uint64(i), proofInput)
 		if success {
 			successCount++
 		} else {
