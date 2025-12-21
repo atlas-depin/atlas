@@ -37,18 +37,19 @@ func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 // GetFile retrieves a file by ID
 func (k Keeper) GetFile(ctx context.Context, fileId string) (types.File, error) {
 	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
+	// [TODO]: if key is "", there is an error
 	if err != nil {
 		return types.File{}, err
 	}
 	return k.FileStore.Get(ctx, key)
 }
 
-func (k Keeper) GetAllFiles(ctx context.Context) ([]collections.KeyValue[collections.Triple[string, string, string], types.File], error) {
+func (k Keeper) GetFiles(ctx context.Context) ([]types.File, error) {
 	iter, err := k.FileStore.Iterate(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	return iter.KeyValues()
+	return iter.Values()
 }
 
 // \\ DeleteFile marks a file as deleted

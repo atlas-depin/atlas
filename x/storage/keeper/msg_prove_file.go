@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/hex"
 
 	"nebulix/x/storage/types"
 
@@ -31,7 +32,8 @@ func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*typ
 		if int64(len(file.Providers)) >= file.Replicas {
 			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "this file has sufficient providers")
 		}
-		if k.Prove(ctx, []byte(file.Merkle), msg.Chunk, proofInput) {
+		root, _ := hex.DecodeString(file.Merkle)
+		if k.Prove(ctx, root, msg.Chunk, proofInput) {
 			file.Providers = append(file.Providers, msg.Creator)
 			file.Status = "ACTIVE"
 			// [TODO]: eliminate stray from stays index if sufficient providers reached

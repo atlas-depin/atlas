@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
 
@@ -189,7 +190,8 @@ func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInpu
 	}
 
 	if containsProver(file, provider) {
-		success := k.Prove(ctx, []byte(file.Merkle), challenge.ChunkIndex, proofInput)
+		root, _ := hex.DecodeString(file.Merkle)
+		success := k.Prove(ctx, root, challenge.ChunkIndex, proofInput)
 		if success {
 			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
 		}

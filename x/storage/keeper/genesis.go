@@ -15,6 +15,10 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		panic(err)
 	}
 
+	if err := k.FileCount.Set(ctx, 0); err != nil {
+		panic(err)
+	}
+
 	return k.Params.Set(ctx, genState.Params)
 }
 

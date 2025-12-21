@@ -45,6 +45,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "fid"}},
 				},
 
+				{
+					RpcMethod:      "Files",
+					Use:            "files ",
+					Short:          "Query files",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -64,9 +71,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				// },
 				{
 					RpcMethod:      "PostFile",
-					Use:            "post-file [merkle] [index] [file-size] [replicas] [subscription]",
+					Use:            "post-file [merkle] [file-size] [replicas] [subscription]",
 					Short:          "Send a post-file tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "merkle"}, {ProtoField: "ddi"}, {ProtoField: "file_size"}, {ProtoField: "replicas"}, {ProtoField: "subscription"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "merkle"}, {ProtoField: "file_size"}, {ProtoField: "replicas"}, {ProtoField: "subscription"}},
 				},
 				{
 					RpcMethod:      "BuyStorage",
