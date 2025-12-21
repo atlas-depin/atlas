@@ -20,9 +20,6 @@ service Msg {
   rpc RegisterProvider(MsgRegisterProvider) returns (MsgRegisterProviderResponse);
   rpc PostFile(MsgPostFile) returns (MsgPostFileResponse);
 
-  // StageFile defines the StageFile RPC.
-  rpc StageFile(MsgStageFile) returns (MsgStageFileResponse);
-
   // BuyStorage defines the BuyStorage RPC.
   rpc BuyStorage(MsgBuyStorage) returns (MsgBuyStorageResponse);
 
@@ -77,19 +74,6 @@ message MsgPostFile {
 message MsgPostFileResponse {
   int64 start_block = 1;
 }
-
-// MsgStageFile defines the MsgStageFile message.
-message MsgStageFile {
-  option (cosmos.msg.v1.signer) = "creator";
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string fid = 2;
-  string file_creator = 3;
-  int64 file_size = 4;
-  string provider = 5;
-}
-
-// MsgStageFileResponse defines the MsgStageFileResponse message.
-message MsgStageFileResponse {}
 
 // MsgBuyStorage defines the MsgBuyStorage message.
 message MsgBuyStorage {

@@ -9,53 +9,34 @@ import (
 )
 
 type fileIndexes struct {
-	ByOwner        collections.Index[string, types.File]
-	BySubscription collections.Index[string, types.File]
+	ByFileId *indexes.Unique[string, collections.Triple[string, string, string], types.File]
 }
 
 func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 	return fileIndexes{
-		ByOwner: indexes.NewMulti[string, string, types.File](
-			sb, collections.NewPrefix(40), "by_owner",
-			collections.StringKey, collections.StringKey,
-			func(pk string, f types.File) (string, error) {
-				return f.Creator, nil
-			},
-		),
-		BySubscription: indexes.NewMulti[string, string, types.File](
-			sb, collections.NewPrefix(41), "by_subscription",
-			collections.StringKey, collections.StringKey,
-			func(pk string, f types.File) (string, error) {
-				return f.Subscription, nil
+		ByFileId: indexes.NewUnique[string, collections.Triple[string, string, string], types.File](
+			sb, collections.NewPrefix(40), "by_fid",
+			collections.StringKey, collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
+			func(pk collections.Triple[string, string, string], f types.File) (string, error) {
+				return f.FileId, nil
 			},
 		),
 	}
 }
 
-func (fi fileIndexes) IndexesList() []collections.Index[string, types.File] {
-	return []collections.Index[string, types.File]{
-		fi.ByOwner,
-		fi.BySubscription,
+func (fi fileIndexes) IndexesList() []collections.Index[collections.Triple[string, string, string], types.File] {
+	return []collections.Index[collections.Triple[string, string, string], types.File]{
+		fi.ByFileId,
 	}
 }
 
-type fileAddressIndex struct{}
+type fileIdIndex struct{}
 
-func (fa fileAddressIndex) UnorderedKeys() bool { return false }
-func (fa fileAddressIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
-	return file.Creator, nil
+func (fa fileIdIndex) UnorderedKeys() bool { return false }
+func (fa fileIdIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
+	return file.FileId, nil
 }
-func (fa fileAddressIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
-	return pk, nil
-}
-
-type fileSubscriptionIndex struct{}
-
-func (fs fileSubscriptionIndex) UnorderedKeys() bool { return false }
-func (fs fileSubscriptionIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
-	return file.Subscription, nil
-}
-func (fs fileSubscriptionIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
+func (fa fileIdIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
 	return pk, nil
 }
 

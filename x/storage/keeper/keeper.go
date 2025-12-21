@@ -45,9 +45,8 @@ type Keeper struct {
 	// Can't use block height or timestamp because then you would have a conflict of subscription IDs.
 	SubscriptionSequence collections.Sequence
 	////
-	FileStagingStore collections.Map[string, types.StagedFile]
-	FileStore        *collections.IndexedMap[string, types.File, fileIndexes]
-	FileCount        collections.Item[int64]
+	FileStore *collections.IndexedMap[collections.Triple[string, string, string], types.File, fileIndexes]
+	FileCount collections.Item[int64]
 
 	BinStore       collections.Map[string, types.Bin]      // file_id -> File
 	ProviderStore  collections.Map[string, types.Provider] // address -> Provider
@@ -104,15 +103,10 @@ func NewKeeper(
 		),
 		SubscriptionSequence: collections.NewSequence(sb, collections.NewPrefix(3), "subscription_seq"),
 
-		FileStagingStore: collections.NewMap(
-			sb, collections.NewPrefix(4), "files_staged",
-			collections.StringKey,
-			codec.CollValue[types.StagedFile](cdc),
-		),
 		FileStore: collections.NewIndexedMap(
 			sb,
-			collections.NewPrefix(5), "files",
-			collections.StringKey,
+			collections.NewPrefix(4), "files",
+			collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
 			codec.CollValue[types.File](cdc),
 			NewFileIndexes(sb),
 		),

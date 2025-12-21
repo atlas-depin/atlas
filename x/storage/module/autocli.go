@@ -62,12 +62,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "merkle"}, {ProtoField: "ddi"}, {ProtoField: "file_size"}, {ProtoField: "replicas"}, {ProtoField: "subscription"}},
 				},
 				{
-					RpcMethod:      "StageFile",
-					Use:            "stage-file [provider] [fid] [file-creator] [file-size]",
-					Short:          "Send a stage-file tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "provider"}, {ProtoField: "fid"}, {ProtoField: "file_creator"}, {ProtoField: "file_size"}},
-				},
-				{
 					RpcMethod:      "BuyStorage",
 					Use:            "buy-storage [receiver] [duration] [bytes] [is-default]",
 					Short:          "Send a buy-storage tx",

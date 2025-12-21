@@ -9,9 +9,6 @@ import (
 
 func (k Keeper) EndBlocker(ctx sdk.Context) error {
 	// Execute every 300 blocks
-	if ctx.BlockHeight() > 0 && ctx.BlockHeight()%50 == 0 {
-		k.CleanupStagedFiles(ctx)
-	}
 
 	if ctx.BlockHeight() > 0 && ctx.BlockHeight()%300 == 0 {
 		ctx.Logger().Info("Processing provider rewards", "height", ctx.BlockHeight())

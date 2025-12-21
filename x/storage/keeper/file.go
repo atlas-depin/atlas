@@ -10,13 +10,15 @@ import (
 )
 
 func (k Keeper) SetFile(ctx context.Context, file types.File) error {
-	return k.FileStore.Set(ctx, file.FileId, file)
+	key := collections.Join3(file.Creator, file.Subscription, file.FileId)
+	return k.FileStore.Set(ctx, key, file)
 }
 
 // StoreFile stores a new file with a provider
 func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	// Check if file already exists
-	exists, err := k.FileStore.Has(ctx, file.FileId)
+	key := collections.Join3(file.Creator, file.Subscription, file.FileId)
+	exists, err := k.FileStore.Has(ctx, key)
 	if err != nil {
 		return err
 	}
@@ -25,19 +27,23 @@ func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	}
 
 	// Save file
-	if err := k.FileStore.Set(ctx, file.FileId, file); err != nil {
+	if err := k.FileStore.Set(ctx, key, file); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// \\ GetFile retrieves a file by ID
+// GetFile retrieves a file by ID
 func (k Keeper) GetFile(ctx context.Context, fileId string) (types.File, error) {
-	return k.FileStore.Get(ctx, fileId)
+	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
+	if err != nil {
+		return types.File{}, err
+	}
+	return k.FileStore.Get(ctx, key)
 }
 
-func (k Keeper) GetAllFiles(ctx context.Context) ([]collections.KeyValue[string, types.File], error) {
+func (k Keeper) GetAllFiles(ctx context.Context) ([]collections.KeyValue[collections.Triple[string, string, string], types.File], error) {
 	iter, err := k.FileStore.Iterate(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -46,17 +52,20 @@ func (k Keeper) GetAllFiles(ctx context.Context) ([]collections.KeyValue[string,
 }
 
 // \\ DeleteFile marks a file as deleted
-func (k Keeper) DeleteFile(ctx context.Context, fileId string, owner string) error {
-	file, err := k.FileStore.Get(ctx, fileId)
+func (k Keeper) DeleteFile(ctx context.Context, fileId string) error {
+	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
+	if err != nil {
+		return err
+	}
+	_, err = k.FileStore.Get(ctx, key)
 	if err != nil {
 		return err
 	}
 
-	// TODO: Verify ownership?
-
 	// Soft delete
 	// file.IsDeleted = true
-	return k.FileStore.Set(ctx, fileId, file)
+	//k.FileStore.Set(ctx, fileId, file)
+	return nil
 }
 
 func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (stop bool)) error {
