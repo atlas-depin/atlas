@@ -38,6 +38,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
 				},
 
+				{
+					RpcMethod:      "File",
+					Use:            "file [fid]",
+					Short:          "Query file",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "fid"}},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},

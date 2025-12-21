@@ -9,6 +9,7 @@ import "google/api/annotations.proto";
 import "nebulix/storage/v1/params.proto";
 import "nebulix/storage/v1/provider.proto";
 import "nebulix/storage/v1/subscription.proto";
+import "nebulix/storage/v1/file.proto";
 
 option go_package = "nebulix/x/storage/types";
 
@@ -32,6 +33,11 @@ service Query {
   // Providers Queries a list of Providers items.
   rpc Providers(QueryProvidersRequest) returns (QueryProvidersResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/providers";
+  }
+
+  // File Queries a list of File items.
+  rpc File(QueryFileRequest) returns (QueryFileResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/file/{fid}";
   }
 }
 
@@ -74,4 +80,14 @@ message QueryProvidersRequest {}
 // QueryProvidersResponse defines the QueryProvidersResponse message.
 message QueryProvidersResponse {
   repeated Provider providers = 1;
+}
+
+// QueryFileRequest defines the QueryFileRequest message.
+message QueryFileRequest {
+  string fid = 1;
+}
+
+// QueryFileResponse defines the QueryFileResponse message.
+message QueryFileResponse {
+  File file = 1;
 }

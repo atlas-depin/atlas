@@ -6,7 +6,7 @@ ignite scaffold query get-subscription-info subscriberAddress:string subscriptio
 ignite scaffold query provider address:string --response provider:string --module storage
 
 ignite scaffold query providers --module storage
-ignite scaffold query file  --module storage
+ignite scaffold query file fid:string --response file:custom --module storage
 
 
 Generates Things In:
