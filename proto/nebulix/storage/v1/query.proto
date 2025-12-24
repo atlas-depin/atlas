@@ -19,12 +19,7 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/params";
   }
-
-  // GetSubscriptionInfo Queries a list of GetSubscriptionInfo items.
-  rpc GetSubscriptionInfo(QueryGetSubscriptionInfoRequest) returns (QueryGetSubscriptionInfoResponse) {
-    option (google.api.http).get = "/nebulix/storage/v1/get_subscription_info/{subscriber_address}/{subscription_id}";
-  }
-
+  
   // Provider Queries a list of Provider items.
   rpc Provider(QueryProviderRequest) returns (QueryProviderResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/provider/{address}";
@@ -44,6 +39,16 @@ service Query {
   rpc Files(QueryFilesRequest) returns (QueryFilesResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/files";
   }
+
+  // Subscription Queries a list of Subscription items.
+  rpc Subscription(QuerySubscriptionRequest) returns (QuerySubscriptionResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/subscription";
+  }
+
+  // Subscriptions Queries a list of Subscriptions items.
+  rpc Subscriptions(QuerySubscriptionsRequest) returns (QuerySubscriptionsResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/subscriptions";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -56,17 +61,6 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
-}
-
-// QueryGetSubscriptionInfoRequest defines the QueryGetSubscriptionInfoRequest message.
-message QueryGetSubscriptionInfoRequest {
-  string subscriber_address = 1;
-  string subscription_id = 2;
-}
-
-// QueryGetSubscriptionInfoResponse defines the QueryGetSubscriptionInfoResponse message.
-message QueryGetSubscriptionInfoResponse {
-  StorageSubscription subscription = 1;
 }
 
 // QueryProviderRequest defines the QueryProviderRequest message.
@@ -99,11 +93,36 @@ message QueryFileResponse {
 
 // QueryFilesRequest defines the QueryFilesRequest message.
 message QueryFilesRequest {
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+  string creator = 1;
+  string subscription = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
 }
 
 // QueryFilesResponse defines the QueryFilesResponse message.
 message QueryFilesResponse {
   repeated File files = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QuerySubscriptionRequest defines the QuerySubscriptionRequest message.
+message QuerySubscriptionRequest {
+  string subscriber_address = 1;
+  string subscription_id = 2;
+}
+
+// QuerySubscriptionResponse defines the QuerySubscriptionResponse message.
+message QuerySubscriptionResponse {
+  StorageSubscription subscription = 1;
+}
+
+// QuerySubscriptionsRequest defines the QuerySubscriptionsRequest message.
+message QuerySubscriptionsRequest {
+  string subscriber_address = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QuerySubscriptionsResponse defines the QuerySubscriptionsResponse message.
+message QuerySubscriptionsResponse {
+  repeated StorageSubscription subscriptions = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

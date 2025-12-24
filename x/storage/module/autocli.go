@@ -17,12 +17,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
-				{
-					RpcMethod:      "GetSubscriptionInfo",
-					Use:            "get-subscription-info [subscriber-address] [subscription-id]",
-					Short:          "Query get-subscription-info",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subscriber_address"}, {ProtoField: "subscription_id"}},
-				},
 
 				{
 					RpcMethod:      "Provider",
@@ -49,6 +43,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod:      "Files",
 					Use:            "files ",
 					Short:          "Query files",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
+				{
+					RpcMethod:      "Subscription",
+					Use:            "subscription ",
+					Short:          "Query subscription",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
+				{
+					RpcMethod:      "Subscriptions",
+					Use:            "subscriptions ",
+					Short:          "Query subscriptions",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
 				},
 

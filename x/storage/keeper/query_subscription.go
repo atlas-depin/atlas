@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) GetSubscriptionInfo(ctx context.Context, req *types.QueryGetSubscriptionInfoRequest) (*types.QueryGetSubscriptionInfoResponse, error) {
+func (q queryServer) Subscription(ctx context.Context, req *types.QuerySubscriptionRequest) (*types.QuerySubscriptionResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -19,5 +19,5 @@ func (q queryServer) GetSubscriptionInfo(ctx context.Context, req *types.QueryGe
 		return nil, err
 	}
 
-	return &types.QueryGetSubscriptionInfoResponse{Subscription: &subscription}, nil
+	return &types.QuerySubscriptionResponse{Subscription: &subscription}, nil
 }
