@@ -16,6 +16,14 @@ func (q queryServer) Subscriptions(ctx context.Context, req *types.QuerySubscrip
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
+	var queryOpts []func(opt *query.CollectionsPaginateOptions[collections.Pair[string, string]])
+	if req.SubscriberAddress != "" {
+		if _, err := q.k.addressCodec.StringToBytes(req.SubscriberAddress); err != nil {
+			return nil, status.Error(codes.InvalidArgument, "bad subscriber address")
+		}
+		queryOpts = append(queryOpts, query.WithCollectionPaginationPairPrefix[string, string](req.SubscriberAddress))
+	}
+
 	subscriptions, pageRes, err := query.CollectionPaginate(
 		ctx,
 		q.k.SubscriptionStore,
@@ -23,6 +31,7 @@ func (q queryServer) Subscriptions(ctx context.Context, req *types.QuerySubscrip
 		func(key collections.Pair[string, string], value types.StorageSubscription) (*types.StorageSubscription, error) {
 			return &value, nil
 		},
+		queryOpts...,
 	)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "paginate: %v", err)
