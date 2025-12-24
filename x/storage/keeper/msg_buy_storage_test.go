@@ -23,7 +23,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 
 	// Calculate cost and mock payment using helper
 	cost := math.NewInt(12000000)
-	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
@@ -61,7 +61,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_NewAccount() {
 
 	// Calculate and mock payment
 	cost := math.NewInt(12000000)
-	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
@@ -91,7 +91,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
 
 	// Calculate cost and mock payment using helper
 	cost := math.NewInt(12000000)
-	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:   creator,
@@ -124,7 +124,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 
 	// Calculate and mock payment for large storage
 	cost := suite.keeper.GetStorageCost(suite.ctx, 100000, 730) // 100TB for 2 years
-	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName)
+	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
@@ -184,7 +184,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
 
 	// Mock failed payment
 	cost := suite.keeper.GetStorageCost(suite.ctx, 10, 365)
-	suite.helpers.Bank.MockFailedPayment(suite.bankKeeper, creatorAddr, "unblx", cost, types.ModuleName, "insufficient funds")
+	suite.helpers.Bank.MockFailedPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName, "insufficient funds")
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,

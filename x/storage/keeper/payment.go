@@ -7,7 +7,7 @@ import (
 
 // NOTE: I know I can pull this from the bankkeeper but this is just way more efficient and we should never be changing this anyways....
 const (
-	unblxUnit int64 = 1_000_000
+	uatlUnit int64 = 1_000_000
 )
 
 func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int {
@@ -18,13 +18,13 @@ func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int 
 
 	// [TODO]: oracle for price fetching
 	totalCostDec := math.LegacyNewDecFromBigInt(totalCost.BigInt()).Quo(math.LegacyNewDec(1000000))
-	nblxPrice, _ := math.LegacyNewDecFromStr("1")
+	atlPrice, _ := math.LegacyNewDecFromStr("1")
 	// ^ temporary price for testing
 
-	nblxCost := totalCostDec.Quo(nblxPrice)
+	atlCost := totalCostDec.Quo(atlPrice)
 
-	unblxUnit := math.LegacyNewDec(1_000_000)
-	unblxCost := nblxCost.Mul(unblxUnit)
+	uatlUnit := math.LegacyNewDec(1_000_000)
+	uatlCost := atlCost.Mul(uatlUnit)
 
-	return unblxCost.Ceil().TruncateInt()
+	return uatlCost.Ceil().TruncateInt()
 }

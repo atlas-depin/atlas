@@ -21,7 +21,7 @@ const (
 )
 
 func validateBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
-	if denom != "unblx" {
+	if denom != "uatl" {
 		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than ujkl")
 		return
 	}
@@ -60,14 +60,14 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// [TBD]: do I need to return duration?
-	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, "unblx")
+	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, "uatl")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate buy request")
 	}
 
 	/// --- compute storage cost --- ///
 	storageCost := k.GetStorageCost(ctx, gbs, msg.Duration)
-	toPay := sdk.NewCoin("unblx", storageCost)
+	toPay := sdk.NewCoin("uatl", storageCost)
 
 	/// --- create new storage subscription --- ///
 	// create recipient account if it doesn't exist

@@ -19,7 +19,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	t_delta := math.NewInt(int64(t1.Sub(t0).Seconds()))
 
 	/// --- get current storage tokens and storage credits kept by the module
-	storageTokensInPool := k.bankKeeper.GetBalance(ctx, types.ModuleAddress, "unblx")
+	storageTokensInPool := k.bankKeeper.GetBalance(ctx, types.ModuleAddress, "uatl")
 	storageCreditsInPool, err := k.StorageCreditPool.Get(ctx)
 	if err != nil {
 		return err

@@ -31,7 +31,7 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 		return nil, err
 	}
 
-	coin := sdk.NewInt64Coin("unblx", params.ProviderDeposit)
+	coin := sdk.NewInt64Coin("uatl", params.ProviderDeposit)
 	coins := sdk.NewCoins(coin)
 
 	account, err := sdk.AccAddressFromBech32(msg.Creator)
