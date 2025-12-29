@@ -1,6 +1,8 @@
 package app
 
 import (
+	_ "nebulix/x/filetree/module"
+	filetreemoduletypes "nebulix/x/filetree/types"
 	_ "nebulix/x/nebulix/module"
 	nebulixmoduletypes "nebulix/x/nebulix/types"
 	_ "nebulix/x/storage/module"
@@ -131,7 +133,8 @@ var (
 						// chain modules
 						nebulixmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/beginBlockers
+						filetreemoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
 						govtypes.ModuleName,
@@ -141,7 +144,8 @@ var (
 						// chain modules
 						nebulixmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/endBlockers
+						filetreemoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
 					OverrideStoreKeys: []*runtimev1alpha1.StoreKeyConfig{
@@ -179,7 +183,8 @@ var (
 						// chain modules
 						nebulixmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/initGenesis
+						filetreemoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
 			},
@@ -283,7 +288,11 @@ var (
 				Name:   storagemoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&storagemoduletypes.Module{}),
 			},
-			// this line is used by starport scaffolding # stargate/app/moduleConfig
+			{
+				Name:   filetreemoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&filetreemoduletypes.Module{}),
+			},
+// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
 	})
 )

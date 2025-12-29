@@ -1,0 +1,19 @@
+syntax = "proto3";
+package nebulix.filetree.module.v1;
+
+import "cosmos/app/v1alpha1/module.proto";
+
+option go_package = "nebulix/x/filetree/types";
+
+// Module is the config object for the module.
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import: "nebulix/x/filetree"
+  };
+
+  // authority defines the custom module authority.
+  // If not set, defaults to the governance module.
+  string authority = 1;
+
+  
+}

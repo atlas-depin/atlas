@@ -1,0 +1,17 @@
+syntax = "proto3";
+package nebulix.filetree.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "nebulix/filetree/v1/params.proto";
+
+option go_package = "nebulix/x/filetree/types";
+
+// GenesisState defines the filetree module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

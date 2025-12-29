@@ -46,6 +46,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"nebulix/docs"
+	filetreemodulekeeper "nebulix/x/filetree/keeper"
 	nebulixmodulekeeper "nebulix/x/nebulix/keeper"
 	storagemodulekeeper "nebulix/x/storage/keeper"
 )
@@ -100,9 +101,10 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	// simulation manager
-	sm            *module.SimulationManager
-	NebulixKeeper nebulixmodulekeeper.Keeper
-	StorageKeeper storagemodulekeeper.Keeper
+	sm             *module.SimulationManager
+	NebulixKeeper  nebulixmodulekeeper.Keeper
+	StorageKeeper  storagemodulekeeper.Keeper
+	FiletreeKeeper filetreemodulekeeper.Keeper
 }
 
 func init() {
@@ -177,6 +179,7 @@ func New(
 		&app.ParamsKeeper,
 		&app.NebulixKeeper,
 		&app.StorageKeeper,
+		&app.FiletreeKeeper,
 	); err != nil {
 		panic(err)
 	}
