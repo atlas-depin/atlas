@@ -15,7 +15,8 @@ func (q queryServer) FileTreeNode(ctx context.Context, req *types.QueryFileTreeN
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	node, err := q.k.GetNode(ctx, strings.TrimSuffix(req.Path, "/"))
+	path := strings.TrimSuffix(req.Path, "/")
+	node, err := q.k.GetNode(ctx, path)
 
 	return &types.QueryFileTreeNodeResponse{Node: &node}, err
 }
