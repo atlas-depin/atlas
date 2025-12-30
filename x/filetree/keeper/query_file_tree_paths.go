@@ -17,15 +17,28 @@ func (q queryServer) FileTreePaths(ctx context.Context, req *types.QueryFileTree
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	paths, pageRes, err := query.CollectionPaginate(
+	var paths []string
+	basepath := strings.TrimSuffix(req.Basepath, "/") + "/"
+
+	_, pageRes, err := query.CollectionPaginate(
 		ctx,
 		q.k.FileTree,
 		req.Pagination,
-		func(key collections.Pair[string, string], _ types.FileTreeNode) (string, error) {
-			return key.K1(), nil
+		func(key collections.Triple[string, string, string], _ types.FileTreeNode) (string, error) {
+			if key.K2() == basepath {
+				paths = append(paths, key.K3())
+			}
+			return "", nil
 		},
-		query.WithCollectionPaginationPairPrefix[string, string](strings.TrimSuffix(req.Basepath, "/")+"/"),
+		WithCollectionPaginationTriplePrefix[string, string, string](req.Owner, basepath),
 	)
 
 	return &types.QueryFileTreePathsResponse{Paths: paths, Pagination: pageRes}, err
+}
+
+func WithCollectionPaginationTriplePrefix[K1, K2, K3 any](k1 K1, k2 K2) func(o *query.CollectionsPaginateOptions[collections.Triple[K1, K2, K3]]) {
+	return func(o *query.CollectionsPaginateOptions[collections.Triple[K1, K2, K3]]) {
+		prefix := collections.TripleSuperPrefix[K1, K2, K3](k1, k2)
+		o.Prefix = &prefix
+	}
 }

@@ -9,48 +9,34 @@ import (
 	"cosmossdk.io/collections"
 )
 
-func (k Keeper) SetNode(ctx context.Context, path string, file types.FileTreeNode) error {
-	key := collections.Join(filepath.Dir(path), filepath.Base(path))
+func (k Keeper) SetNode(ctx context.Context, owner string, path string, file types.FileTreeNode) error {
+	key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
 	return k.FileTree.Set(ctx, key, file)
 }
 
-func (k Keeper) GetNode(ctx context.Context, path string) (types.FileTreeNode, error) {
-	key := collections.Join(filepath.Dir(path), filepath.Base(path))
+func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.FileTreeNode, error) {
+	key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
 	return k.FileTree.Get(ctx, key)
 }
 
-func (k Keeper) DeleteNode(ctx context.Context, path string) error {
-	var keys []collections.Pair[string, string]
-
-	dir := filepath.Dir(path) + "/"
-
-	// Prefix range: iterate all nodes whose parent directory starts with 'basepath'
-	rng := new(collections.Range[collections.Pair[string, string]]).Prefix(
-		collections.Join(dir, ""),
+func (k Keeper) DeleteNode(ctx context.Context, owner string, path string) error {
+	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
+		collections.Join3(owner, path, ""),
 	)
 
-	err := k.IterateNodes(ctx, rng, func(key collections.Pair[string, string], _ types.FileTreeNode) bool {
-		keys = append(keys, key)
-		return false
-	})
-	if err != nil {
-		return err
-	}
-
-	// Delete all collected keys
-	for _, key := range keys {
+	// this is "safe"
+	return k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], _ types.FileTreeNode) (bool, error) {
 		if err := k.FileTree.Remove(ctx, key); err != nil {
-			return err
+			return true, err
 		}
-	}
-
-	return nil
+		return false, nil
+	})
 }
 
 func (k Keeper) IterateNodes(
 	ctx context.Context,
-	rng collections.Ranger[collections.Pair[string, string]],
-	fn func(key collections.Pair[string, string], value types.FileTreeNode) (stop bool),
+	rng collections.Ranger[collections.Triple[string, string, string]],
+	fn func(key collections.Triple[string, string, string], value types.FileTreeNode) (stop bool, err error),
 ) error {
 	iter, err := k.FileTree.Iterate(ctx, rng)
 	if err != nil {
@@ -64,7 +50,11 @@ func (k Keeper) IterateNodes(
 			return err
 		}
 
-		if fn(kv.Key, kv.Value) {
+		end, err := fn(kv.Key, kv.Value)
+		if err != nil {
+			return err
+		}
+		if end {
 			break
 		}
 	}

@@ -44,7 +44,8 @@ message QueryParamsResponse {
 
 // QueryFileTreeNodeRequest defines the QueryFileTreeNodeRequest message.
 message QueryFileTreeNodeRequest {
-  string path = 1;
+  string owner = 1;
+  string path = 2;
 }
 
 // QueryFileTreeNodeResponse defines the QueryFileTreeNodeResponse message.
@@ -54,8 +55,9 @@ message QueryFileTreeNodeResponse {
 
 // QueryFileTreePathsRequest defines the QueryFileTreePathsRequest message.
 message QueryFileTreePathsRequest {
-  string basepath = 1;
-  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+  string owner = 1;
+  string basepath = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
 }
 
 // QueryFileTreePathsResponse defines the QueryFileTreePathsResponse message.

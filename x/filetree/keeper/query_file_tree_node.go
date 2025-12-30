@@ -16,7 +16,7 @@ func (q queryServer) FileTreeNode(ctx context.Context, req *types.QueryFileTreeN
 	}
 
 	path := strings.TrimSuffix(req.Path, "/")
-	node, err := q.k.GetNode(ctx, path)
+	node, err := q.k.GetNode(ctx, req.Owner, path)
 
 	return &types.QueryFileTreeNodeResponse{Node: &node}, err
 }
