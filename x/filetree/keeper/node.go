@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"path/filepath"
 
 	"nebulix/x/filetree/types"
 
@@ -9,18 +10,26 @@ import (
 )
 
 func (k Keeper) SetNode(ctx context.Context, path string, file types.FileTreeNode) error {
-	return k.FileTree.Set(ctx, path, file)
+	key := collections.Join(filepath.Dir(path), filepath.Base(path))
+	return k.FileTree.Set(ctx, key, file)
 }
 
 func (k Keeper) GetNode(ctx context.Context, path string) (types.FileTreeNode, error) {
-	return k.FileTree.Get(ctx, path)
+	key := collections.Join(filepath.Dir(path), filepath.Base(path))
+	return k.FileTree.Get(ctx, key)
 }
 
 func (k Keeper) DeleteNode(ctx context.Context, path string) error {
-	keys := []string{path}
+	var keys []collections.Pair[string, string]
 
-	rng := new(collections.Range[string]).Prefix(path + "/")
-	err := k.IterateNodes(ctx, rng, func(key string, _ types.FileTreeNode) bool {
+	dir := filepath.Dir(path) + "/"
+
+	// Prefix range: iterate all nodes whose parent directory starts with 'basepath'
+	rng := new(collections.Range[collections.Pair[string, string]]).Prefix(
+		collections.Join(dir, ""),
+	)
+
+	err := k.IterateNodes(ctx, rng, func(key collections.Pair[string, string], _ types.FileTreeNode) bool {
 		keys = append(keys, key)
 		return false
 	})
@@ -28,6 +37,7 @@ func (k Keeper) DeleteNode(ctx context.Context, path string) error {
 		return err
 	}
 
+	// Delete all collected keys
 	for _, key := range keys {
 		if err := k.FileTree.Remove(ctx, key); err != nil {
 			return err
@@ -37,7 +47,11 @@ func (k Keeper) DeleteNode(ctx context.Context, path string) error {
 	return nil
 }
 
-func (k Keeper) IterateNodes(ctx context.Context, rng collections.Ranger[string], fn func(key string, value types.FileTreeNode) (stop bool)) error {
+func (k Keeper) IterateNodes(
+	ctx context.Context,
+	rng collections.Ranger[collections.Pair[string, string]],
+	fn func(key collections.Pair[string, string], value types.FileTreeNode) (stop bool),
+) error {
 	iter, err := k.FileTree.Iterate(ctx, rng)
 	if err != nil {
 		return err

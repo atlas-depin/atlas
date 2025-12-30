@@ -2,18 +2,20 @@ package keeper
 
 import (
 	"context"
+	"strings"
 
-    "nebulix/x/filetree/types"
+	"nebulix/x/filetree/types"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) FileTreeNode(ctx context.Context,  req *types.QueryFileTreeNodeRequest) (*types.QueryFileTreeNodeResponse, error) {
+func (q queryServer) FileTreeNode(ctx context.Context, req *types.QueryFileTreeNodeRequest) (*types.QueryFileTreeNodeResponse, error) {
 	if req == nil {
-        return nil, status.Error(codes.InvalidArgument, "invalid request")
-    }
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
 
-    // TODO: Process the query
+	node, err := q.k.GetNode(ctx, strings.TrimSuffix(req.Path, "/"))
 
-	return &types.QueryFileTreeNodeResponse{}, nil
+	return &types.QueryFileTreeNodeResponse{Node: &node}, err
 }
