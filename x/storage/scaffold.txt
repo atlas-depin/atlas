@@ -12,6 +12,9 @@ ignite scaffold query subscription --response subscription:string --module stora
 ignite scaffold query subscriptions --response subscriptions:array.string --module storage --paginated
 
 
+ignite scaffold query file-tree-node path:string --response node:string --module filetree
+ignite scaffold query file-tree-paths path:string --response nodes:string --module filetree --paginated
+
 Generates Things In:
 autocli.go
 simulation.go

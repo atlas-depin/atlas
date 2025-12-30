@@ -17,6 +17,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod: "FileTreeNode",
+					Use: "file-tree-node [path]",
+					Short: "Query file-tree-node",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
+				},
+
+				{
+					RpcMethod: "FileTreePaths",
+					Use: "file-tree-paths [basepath]",
+					Short: "Query file-tree-paths",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "basepath"}},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
