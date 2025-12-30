@@ -7,7 +7,6 @@ import (
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
-	 
 
 	"nebulix/x/filetree/types"
 )
@@ -22,9 +21,10 @@ type Keeper struct {
 
 	Schema collections.Schema
 	Params collections.Item[types.Params]
-    
-	
-    authKeeper types.AuthKeeper
+
+	FileTree collections.Map[string, types.FileTreeNode]
+
+	authKeeper types.AuthKeeper
 }
 
 func NewKeeper(
@@ -32,8 +32,8 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
-    
-    authKeeper types.AuthKeeper,
+
+	authKeeper types.AuthKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -46,9 +46,14 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
-		
+
 		authKeeper: authKeeper,
-		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Params:     collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+
+		FileTree: collections.NewMap(sb,
+			collections.NewPrefix(0), "files",
+			collections.StringKey,
+			codec.CollValue[types.FileTreeNode](cdc)),
 	}
 
 	schema, err := sb.Build()
