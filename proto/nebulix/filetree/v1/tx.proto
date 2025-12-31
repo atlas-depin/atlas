@@ -20,6 +20,9 @@ service Msg {
   
   // PostNode defines the PostNode RPC.
   rpc PostNode (MsgPostNode) returns (MsgPostNodeResponse);
+  
+  // DeleteNode defines the DeleteNode RPC.
+  rpc DeleteNode (MsgDeleteNode) returns (MsgDeleteNodeResponse);
 }
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
@@ -50,4 +53,14 @@ message MsgPostNode {
 
 // MsgPostNodeResponse defines the MsgPostNodeResponse message.
 message MsgPostNodeResponse {}
+
+// MsgDeleteNode defines the MsgDeleteNode message.
+message MsgDeleteNode {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string path    = 2;
+}
+
+// MsgDeleteNodeResponse defines the MsgDeleteNodeResponse message.
+message MsgDeleteNodeResponse {}
 

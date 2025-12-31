@@ -1,11 +1,10 @@
 package filetree
 
 import (
-	"math/rand"
-
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"math/rand"
 
 	filetreesimulation "nebulix/x/filetree/simulation"
 	"nebulix/x/filetree/types"
@@ -43,6 +42,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgPostNode,
 		filetreesimulation.SimulateMsgPostNode(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgDeleteNode          = "op_weight_msg_filetree"
+		defaultWeightMsgDeleteNode int = 100
+	)
+
+	var weightMsgDeleteNode int
+	simState.AppParams.GetOrGenerate(opWeightMsgDeleteNode, &weightMsgDeleteNode, nil,
+		func(_ *rand.Rand) {
+			weightMsgDeleteNode = defaultWeightMsgDeleteNode
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgDeleteNode,
+		filetreesimulation.SimulateMsgDeleteNode(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
 
 	return operations

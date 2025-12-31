@@ -48,7 +48,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a post-node tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
 				},
-				// this line is used by ignite scaffolding # autocli/tx
+				{
+			RpcMethod: "DeleteNode",
+			Use: "delete-node [path]",
+			Short: "Send a delete-node tx",
+			PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
+		},
+		// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
 	}

@@ -19,7 +19,8 @@ func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.F
 	return k.FileTree.Get(ctx, key)
 }
 
-func (k Keeper) DeleteNode(ctx context.Context, owner string, path string) error {
+// [NOTE]: to be stress-tested, may have to default to regular DeleteNode
+func (k Keeper) RemoveNode(ctx context.Context, owner string, path string) error {
 	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
 		collections.Join3(owner, path, ""),
 	)
