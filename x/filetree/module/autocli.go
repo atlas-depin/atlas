@@ -18,16 +18,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:     "Shows the parameters of the module",
 				},
 				{
-					RpcMethod: "FileTreeNode",
-					Use: "file-tree-node [path]",
-					Short: "Query file-tree-node",
+					RpcMethod:      "FileTreeNode",
+					Use:            "file-tree-node [path]",
+					Short:          "Query file-tree-node",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
 				},
 
 				{
-					RpcMethod: "FileTreePaths",
-					Use: "file-tree-paths [basepath]",
-					Short: "Query file-tree-paths",
+					RpcMethod:      "FileTreePaths",
+					Use:            "file-tree-paths [basepath]",
+					Short:          "Query file-tree-paths",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "basepath"}},
 				},
 
@@ -35,12 +35,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			},
 		},
 		Tx: &autocliv1.ServiceCommandDescriptor{
-			Service: types.Msg_serviceDesc.ServiceName,
+			Service:              types.Msg_serviceDesc.ServiceName,
 			EnhanceCustomCommand: true, // only required if you want to use the custom command
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "UpdateParams",
-					Skip:       true, // skipped because authority gated
+					Skip:      true, // skipped because authority gated
+				},
+				{
+					RpcMethod:      "PostNode",
+					Use:            "post-node [path]",
+					Short:          "Send a post-node tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

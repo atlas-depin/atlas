@@ -57,12 +57,10 @@ message QueryFileTreeNodeResponse {
 message QueryFileTreePathsRequest {
   string owner = 1;
   string basepath = 2;
-  cosmos.base.query.v1beta1.PageRequest pagination = 3;
 }
 
 // QueryFileTreePathsResponse defines the QueryFileTreePathsResponse message.
 message QueryFileTreePathsResponse {
   repeated string paths = 1;
-  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 

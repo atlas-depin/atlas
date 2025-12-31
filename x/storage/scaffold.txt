@@ -11,9 +11,13 @@ ignite scaffold query files --response files:string --module storage --paginated
 ignite scaffold query subscription --response subscription:string --module storage
 ignite scaffold query subscriptions --response subscriptions:array.string --module storage --paginated
 
+ignite scaffold message post-node path:string --module filetree
+ignite scaffold message delete-node path:string --module filetree
 
 ignite scaffold query file-tree-node path:string --response node:string --module filetree
-ignite scaffold query file-tree-paths path:string --response nodes:string --module filetree --paginated
+ignite scaffold query file-tree-paths path:string --response nodes:string --module filetree
+// [TODO] batch get nodes
+
 
 Generates Things In:
 autocli.go
