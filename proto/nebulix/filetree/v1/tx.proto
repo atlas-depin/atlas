@@ -13,29 +13,33 @@ option go_package = "nebulix/x/filetree/types";
 // Msg defines the Msg service.
 service Msg {
   option (cosmos.msg.v1.service) = true;
-  
+
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
-  rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
-  
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
   // PostNode defines the PostNode RPC.
-  rpc PostNode (MsgPostNode) returns (MsgPostNodeResponse);
-  
+  rpc PostNode(MsgPostNode) returns (MsgPostNodeResponse);
+
   // DeleteNode defines the DeleteNode RPC.
-  rpc DeleteNode (MsgDeleteNode) returns (MsgDeleteNodeResponse);
+  rpc DeleteNode(MsgDeleteNode) returns (MsgDeleteNodeResponse);
 }
+
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
-  option (cosmos.msg.v1.signer) =                          "authority";
-  option           (amino.name) = "nebulix/x/filetree/MsgUpdateParams";
-  
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "nebulix/x/filetree/MsgUpdateParams";
+
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 
   // params defines the module parameters to update.
-  
+
   // NOTE: All parameters must be supplied.
-  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
 }
 
 // MsgUpdateParamsResponse defines the response structure for executing a
@@ -45,10 +49,10 @@ message MsgUpdateParamsResponse {}
 // MsgPostNode defines the MsgPostNode message.
 message MsgPostNode {
   option (cosmos.msg.v1.signer) = "creator";
-  string creator   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string path      = 2;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string path = 2;
   string node_type = 3;
-  string contents  = 4;
+  string contents = 4;
 }
 
 // MsgPostNodeResponse defines the MsgPostNodeResponse message.
@@ -58,9 +62,8 @@ message MsgPostNodeResponse {}
 message MsgDeleteNode {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string path    = 2;
+  string path = 2;
 }
 
 // MsgDeleteNodeResponse defines the MsgDeleteNodeResponse message.
 message MsgDeleteNodeResponse {}
-

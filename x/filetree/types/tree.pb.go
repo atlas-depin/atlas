@@ -22,23 +22,23 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type FileTreeNode struct {
+type FileNode struct {
 	NodeType string `protobuf:"bytes,1,opt,name=node_type,json=nodeType,proto3" json:"node_type,omitempty"`
 	Contents string `protobuf:"bytes,2,opt,name=contents,proto3" json:"contents,omitempty"`
 }
 
-func (m *FileTreeNode) Reset()         { *m = FileTreeNode{} }
-func (m *FileTreeNode) String() string { return proto.CompactTextString(m) }
-func (*FileTreeNode) ProtoMessage()    {}
-func (*FileTreeNode) Descriptor() ([]byte, []int) {
+func (m *FileNode) Reset()         { *m = FileNode{} }
+func (m *FileNode) String() string { return proto.CompactTextString(m) }
+func (*FileNode) ProtoMessage()    {}
+func (*FileNode) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4a3dbd3d3185160b, []int{0}
 }
-func (m *FileTreeNode) XXX_Unmarshal(b []byte) error {
+func (m *FileNode) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *FileTreeNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *FileNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_FileTreeNode.Marshal(b, m, deterministic)
+		return xxx_messageInfo_FileNode.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -48,26 +48,26 @@ func (m *FileTreeNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 		return b[:n], nil
 	}
 }
-func (m *FileTreeNode) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_FileTreeNode.Merge(m, src)
+func (m *FileNode) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FileNode.Merge(m, src)
 }
-func (m *FileTreeNode) XXX_Size() int {
+func (m *FileNode) XXX_Size() int {
 	return m.Size()
 }
-func (m *FileTreeNode) XXX_DiscardUnknown() {
-	xxx_messageInfo_FileTreeNode.DiscardUnknown(m)
+func (m *FileNode) XXX_DiscardUnknown() {
+	xxx_messageInfo_FileNode.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_FileTreeNode proto.InternalMessageInfo
+var xxx_messageInfo_FileNode proto.InternalMessageInfo
 
-func (m *FileTreeNode) GetNodeType() string {
+func (m *FileNode) GetNodeType() string {
 	if m != nil {
 		return m.NodeType
 	}
 	return ""
 }
 
-func (m *FileTreeNode) GetContents() string {
+func (m *FileNode) GetContents() string {
 	if m != nil {
 		return m.Contents
 	}
@@ -75,27 +75,27 @@ func (m *FileTreeNode) GetContents() string {
 }
 
 func init() {
-	proto.RegisterType((*FileTreeNode)(nil), "nebulix.filetree.v1.FileTreeNode")
+	proto.RegisterType((*FileNode)(nil), "nebulix.filetree.v1.FileNode")
 }
 
 func init() { proto.RegisterFile("nebulix/filetree/v1/tree.proto", fileDescriptor_4a3dbd3d3185160b) }
 
 var fileDescriptor_4a3dbd3d3185160b = []byte{
-	// 166 bytes of a gzipped FileDescriptorProto
+	// 162 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0xcb, 0x4b, 0x4d, 0x2a,
 	0xcd, 0xc9, 0xac, 0xd0, 0x4f, 0xcb, 0xcc, 0x49, 0x2d, 0x29, 0x4a, 0x4d, 0xd5, 0x2f, 0x33, 0xd4,
 	0x07, 0xd1, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0xc2, 0x50, 0x79, 0x3d, 0x98, 0xbc, 0x5e,
-	0x99, 0xa1, 0x92, 0x3b, 0x17, 0x8f, 0x5b, 0x66, 0x4e, 0x6a, 0x48, 0x51, 0x6a, 0xaa, 0x5f, 0x7e,
-	0x4a, 0xaa, 0x90, 0x34, 0x17, 0x67, 0x5e, 0x7e, 0x4a, 0x6a, 0x7c, 0x49, 0x65, 0x41, 0xaa, 0x04,
-	0xa3, 0x02, 0xa3, 0x06, 0x67, 0x10, 0x07, 0x48, 0x20, 0xa4, 0xb2, 0x20, 0x55, 0x48, 0x8a, 0x8b,
-	0x23, 0x39, 0x3f, 0xaf, 0x24, 0x35, 0xaf, 0xa4, 0x58, 0x82, 0x09, 0x22, 0x07, 0xe3, 0x3b, 0x19,
-	0x9d, 0x78, 0x24, 0xc7, 0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x13, 0x1e, 0xcb,
-	0x31, 0x5c, 0x78, 0x2c, 0xc7, 0x70, 0xe3, 0xb1, 0x1c, 0x43, 0x94, 0x04, 0xcc, 0x5d, 0x48, 0x2e,
-	0x03, 0x19, 0x5f, 0x9c, 0xc4, 0x06, 0x76, 0x98, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x7f, 0xe2,
-	0x30, 0x3b, 0xba, 0x00, 0x00, 0x00,
+	0x99, 0xa1, 0x92, 0x33, 0x17, 0x87, 0x5b, 0x66, 0x4e, 0xaa, 0x5f, 0x7e, 0x4a, 0xaa, 0x90, 0x34,
+	0x17, 0x67, 0x5e, 0x7e, 0x4a, 0x6a, 0x7c, 0x49, 0x65, 0x41, 0xaa, 0x04, 0xa3, 0x02, 0xa3, 0x06,
+	0x67, 0x10, 0x07, 0x48, 0x20, 0xa4, 0xb2, 0x20, 0x55, 0x48, 0x8a, 0x8b, 0x23, 0x39, 0x3f, 0xaf,
+	0x24, 0x35, 0xaf, 0xa4, 0x58, 0x82, 0x09, 0x22, 0x07, 0xe3, 0x3b, 0x19, 0x9d, 0x78, 0x24, 0xc7,
+	0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x13, 0x1e, 0xcb, 0x31, 0x5c, 0x78, 0x2c,
+	0xc7, 0x70, 0xe3, 0xb1, 0x1c, 0x43, 0x94, 0x04, 0xcc, 0x4d, 0x48, 0xae, 0x02, 0x19, 0x5f, 0x9c,
+	0xc4, 0x06, 0x76, 0x94, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x8b, 0x13, 0x89, 0xac, 0xb6, 0x00,
+	0x00, 0x00,
 }
 
-func (m *FileTreeNode) Marshal() (dAtA []byte, err error) {
+func (m *FileNode) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -105,12 +105,12 @@ func (m *FileTreeNode) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *FileTreeNode) MarshalTo(dAtA []byte) (int, error) {
+func (m *FileNode) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *FileTreeNode) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *FileNode) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -143,7 +143,7 @@ func encodeVarintTree(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *FileTreeNode) Size() (n int) {
+func (m *FileNode) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -166,7 +166,7 @@ func sovTree(x uint64) (n int) {
 func sozTree(x uint64) (n int) {
 	return sovTree(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *FileTreeNode) Unmarshal(dAtA []byte) error {
+func (m *FileNode) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -189,10 +189,10 @@ func (m *FileTreeNode) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: FileTreeNode: wiretype end group for non-group")
+			return fmt.Errorf("proto: FileNode: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: FileTreeNode: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: FileNode: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

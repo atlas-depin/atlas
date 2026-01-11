@@ -19,7 +19,7 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/params";
   }
-  
+
   // Provider Queries a list of Provider items.
   rpc Provider(QueryProviderRequest) returns (QueryProviderResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/provider/{address}";

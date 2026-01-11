@@ -3,9 +3,9 @@ syntax = "proto3";
 package nebulix.filetree.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
 import "nebulix/filetree/v1/params.proto";
 import "nebulix/filetree/v1/tree.proto";
 
@@ -13,44 +13,48 @@ option go_package = "nebulix/x/filetree/types";
 
 // Query defines the gRPC querier service.
 service Query {
-  
   // Parameters queries the parameters of the module.
-  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/nebulix/filetree/v1/params";
-  
   }
-  
-  // FileTreeNode Queries a list of FileTreeNode items.
-  rpc FileTreeNode (QueryFileTreeNodeRequest) returns (QueryFileTreeNodeResponse) {
+
+  // FileNode Queries a list of FileNode items.
+  rpc FileNode(QueryFileNodeRequest) returns (QueryFileNodeResponse) {
     option (google.api.http).get = "/nebulix/filetree/v1/file_tree_node/{path}";
-  
   }
-  
+
   // FileTreePaths Queries a list of FileTreePaths items.
-  rpc FileTreePaths (QueryFileTreePathsRequest) returns (QueryFileTreePathsResponse) {
+  rpc FileTreePaths(QueryFileTreePathsRequest) returns (QueryFileTreePathsResponse) {
     option (google.api.http).get = "/nebulix/filetree/v1/file_tree_paths/{basepath}";
-  
+  }
+
+  // FileNodeChildren Queries a list of FileNodeChildren items.
+  rpc FileNodeChildren(QueryFileNodeChildrenRequest) returns (QueryFileNodeChildrenResponse) {
+    option (google.api.http).get = "/nebulix/filetree/v1/file_node_children/{owner}/{path}";
   }
 }
+
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-  
   // params holds all the parameters of this module.
-  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
 }
 
-// QueryFileTreeNodeRequest defines the QueryFileTreeNodeRequest message.
-message QueryFileTreeNodeRequest {
+// QueryFileNodeRequest defines the QueryFileNodeRequest message.
+message QueryFileNodeRequest {
   string owner = 1;
   string path = 2;
 }
 
-// QueryFileTreeNodeResponse defines the QueryFileTreeNodeResponse message.
-message QueryFileTreeNodeResponse {
-  FileTreeNode node = 1;
+// QueryFileNodeResponse defines the QueryFileNodeResponse message.
+message QueryFileNodeResponse {
+  FileNode node = 1;
 }
 
 // QueryFileTreePathsRequest defines the QueryFileTreePathsRequest message.
@@ -64,3 +68,13 @@ message QueryFileTreePathsResponse {
   repeated string paths = 1;
 }
 
+// QueryFileNodeChildrenRequest defines the QueryFileNodeChildrenRequest message.
+message QueryFileNodeChildrenRequest {
+  string owner = 1;
+  string path = 2;
+}
+
+// QueryFileNodeChildrenResponse defines the QueryFileNodeChildrenResponse message.
+message QueryFileNodeChildrenResponse {
+  repeated FileNode nodes = 1;
+}

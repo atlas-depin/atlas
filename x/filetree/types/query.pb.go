@@ -114,24 +114,24 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// QueryFileTreeNodeRequest defines the QueryFileTreeNodeRequest message.
-type QueryFileTreeNodeRequest struct {
+// QueryFileNodeRequest defines the QueryFileNodeRequest message.
+type QueryFileNodeRequest struct {
 	Owner string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
 	Path  string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
 }
 
-func (m *QueryFileTreeNodeRequest) Reset()         { *m = QueryFileTreeNodeRequest{} }
-func (m *QueryFileTreeNodeRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryFileTreeNodeRequest) ProtoMessage()    {}
-func (*QueryFileTreeNodeRequest) Descriptor() ([]byte, []int) {
+func (m *QueryFileNodeRequest) Reset()         { *m = QueryFileNodeRequest{} }
+func (m *QueryFileNodeRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryFileNodeRequest) ProtoMessage()    {}
+func (*QueryFileNodeRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9c044a2de08c3bb6, []int{2}
 }
-func (m *QueryFileTreeNodeRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryFileNodeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryFileTreeNodeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryFileNodeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryFileTreeNodeRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryFileNodeRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -141,49 +141,49 @@ func (m *QueryFileTreeNodeRequest) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *QueryFileTreeNodeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryFileTreeNodeRequest.Merge(m, src)
+func (m *QueryFileNodeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryFileNodeRequest.Merge(m, src)
 }
-func (m *QueryFileTreeNodeRequest) XXX_Size() int {
+func (m *QueryFileNodeRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryFileTreeNodeRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryFileTreeNodeRequest.DiscardUnknown(m)
+func (m *QueryFileNodeRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryFileNodeRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryFileTreeNodeRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryFileNodeRequest proto.InternalMessageInfo
 
-func (m *QueryFileTreeNodeRequest) GetOwner() string {
+func (m *QueryFileNodeRequest) GetOwner() string {
 	if m != nil {
 		return m.Owner
 	}
 	return ""
 }
 
-func (m *QueryFileTreeNodeRequest) GetPath() string {
+func (m *QueryFileNodeRequest) GetPath() string {
 	if m != nil {
 		return m.Path
 	}
 	return ""
 }
 
-// QueryFileTreeNodeResponse defines the QueryFileTreeNodeResponse message.
-type QueryFileTreeNodeResponse struct {
-	Node *FileTreeNode `protobuf:"bytes,1,opt,name=node,proto3" json:"node,omitempty"`
+// QueryFileNodeResponse defines the QueryFileNodeResponse message.
+type QueryFileNodeResponse struct {
+	Node *FileNode `protobuf:"bytes,1,opt,name=node,proto3" json:"node,omitempty"`
 }
 
-func (m *QueryFileTreeNodeResponse) Reset()         { *m = QueryFileTreeNodeResponse{} }
-func (m *QueryFileTreeNodeResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryFileTreeNodeResponse) ProtoMessage()    {}
-func (*QueryFileTreeNodeResponse) Descriptor() ([]byte, []int) {
+func (m *QueryFileNodeResponse) Reset()         { *m = QueryFileNodeResponse{} }
+func (m *QueryFileNodeResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryFileNodeResponse) ProtoMessage()    {}
+func (*QueryFileNodeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9c044a2de08c3bb6, []int{3}
 }
-func (m *QueryFileTreeNodeResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryFileNodeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryFileTreeNodeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryFileNodeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryFileTreeNodeResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryFileNodeResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -193,19 +193,19 @@ func (m *QueryFileTreeNodeResponse) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryFileTreeNodeResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryFileTreeNodeResponse.Merge(m, src)
+func (m *QueryFileNodeResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryFileNodeResponse.Merge(m, src)
 }
-func (m *QueryFileTreeNodeResponse) XXX_Size() int {
+func (m *QueryFileNodeResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryFileTreeNodeResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryFileTreeNodeResponse.DiscardUnknown(m)
+func (m *QueryFileNodeResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryFileNodeResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryFileTreeNodeResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryFileNodeResponse proto.InternalMessageInfo
 
-func (m *QueryFileTreeNodeResponse) GetNode() *FileTreeNode {
+func (m *QueryFileNodeResponse) GetNode() *FileNode {
 	if m != nil {
 		return m.Node
 	}
@@ -310,51 +310,156 @@ func (m *QueryFileTreePathsResponse) GetPaths() []string {
 	return nil
 }
 
+// QueryFileNodeChildrenRequest defines the QueryFileNodeChildrenRequest message.
+type QueryFileNodeChildrenRequest struct {
+	Owner string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	Path  string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+}
+
+func (m *QueryFileNodeChildrenRequest) Reset()         { *m = QueryFileNodeChildrenRequest{} }
+func (m *QueryFileNodeChildrenRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryFileNodeChildrenRequest) ProtoMessage()    {}
+func (*QueryFileNodeChildrenRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9c044a2de08c3bb6, []int{6}
+}
+func (m *QueryFileNodeChildrenRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryFileNodeChildrenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryFileNodeChildrenRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryFileNodeChildrenRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryFileNodeChildrenRequest.Merge(m, src)
+}
+func (m *QueryFileNodeChildrenRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryFileNodeChildrenRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryFileNodeChildrenRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryFileNodeChildrenRequest proto.InternalMessageInfo
+
+func (m *QueryFileNodeChildrenRequest) GetOwner() string {
+	if m != nil {
+		return m.Owner
+	}
+	return ""
+}
+
+func (m *QueryFileNodeChildrenRequest) GetPath() string {
+	if m != nil {
+		return m.Path
+	}
+	return ""
+}
+
+// QueryFileNodeChildrenResponse defines the QueryFileNodeChildrenResponse message.
+type QueryFileNodeChildrenResponse struct {
+	Nodes []*FileNode `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+}
+
+func (m *QueryFileNodeChildrenResponse) Reset()         { *m = QueryFileNodeChildrenResponse{} }
+func (m *QueryFileNodeChildrenResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryFileNodeChildrenResponse) ProtoMessage()    {}
+func (*QueryFileNodeChildrenResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9c044a2de08c3bb6, []int{7}
+}
+func (m *QueryFileNodeChildrenResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryFileNodeChildrenResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryFileNodeChildrenResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryFileNodeChildrenResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryFileNodeChildrenResponse.Merge(m, src)
+}
+func (m *QueryFileNodeChildrenResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryFileNodeChildrenResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryFileNodeChildrenResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryFileNodeChildrenResponse proto.InternalMessageInfo
+
+func (m *QueryFileNodeChildrenResponse) GetNodes() []*FileNode {
+	if m != nil {
+		return m.Nodes
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "nebulix.filetree.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "nebulix.filetree.v1.QueryParamsResponse")
-	proto.RegisterType((*QueryFileTreeNodeRequest)(nil), "nebulix.filetree.v1.QueryFileTreeNodeRequest")
-	proto.RegisterType((*QueryFileTreeNodeResponse)(nil), "nebulix.filetree.v1.QueryFileTreeNodeResponse")
+	proto.RegisterType((*QueryFileNodeRequest)(nil), "nebulix.filetree.v1.QueryFileNodeRequest")
+	proto.RegisterType((*QueryFileNodeResponse)(nil), "nebulix.filetree.v1.QueryFileNodeResponse")
 	proto.RegisterType((*QueryFileTreePathsRequest)(nil), "nebulix.filetree.v1.QueryFileTreePathsRequest")
 	proto.RegisterType((*QueryFileTreePathsResponse)(nil), "nebulix.filetree.v1.QueryFileTreePathsResponse")
+	proto.RegisterType((*QueryFileNodeChildrenRequest)(nil), "nebulix.filetree.v1.QueryFileNodeChildrenRequest")
+	proto.RegisterType((*QueryFileNodeChildrenResponse)(nil), "nebulix.filetree.v1.QueryFileNodeChildrenResponse")
 }
 
 func init() { proto.RegisterFile("nebulix/filetree/v1/query.proto", fileDescriptor_9c044a2de08c3bb6) }
 
 var fileDescriptor_9c044a2de08c3bb6 = []byte{
-	// 501 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0x41, 0x6b, 0x13, 0x41,
-	0x14, 0xc7, 0x33, 0x6d, 0x13, 0xec, 0xa8, 0x07, 0xa7, 0x39, 0xc4, 0xad, 0x6e, 0xeb, 0x7a, 0xb0,
-	0x04, 0xdd, 0x61, 0x57, 0xc4, 0x9b, 0x87, 0x22, 0xde, 0x94, 0x1a, 0xf4, 0xe2, 0xa5, 0x4c, 0xec,
-	0x73, 0xbb, 0x90, 0xcc, 0x6c, 0x77, 0x26, 0xd1, 0x52, 0x0a, 0xe2, 0x27, 0x10, 0xfc, 0x04, 0xde,
-	0xf4, 0xe6, 0xc7, 0xe8, 0xb1, 0xe0, 0x45, 0x3c, 0x88, 0x24, 0x82, 0x5f, 0x43, 0xe6, 0xed, 0x44,
-	0x12, 0x9d, 0x36, 0xb9, 0x84, 0xf7, 0x66, 0xfe, 0xef, 0xff, 0x7e, 0x79, 0x6f, 0x96, 0x6e, 0x48,
-	0xe8, 0x0e, 0x7a, 0xf9, 0x1b, 0xfe, 0x2a, 0xef, 0x81, 0x29, 0x01, 0xf8, 0x30, 0xe1, 0x07, 0x03,
-	0x28, 0x0f, 0xe3, 0xa2, 0x54, 0x46, 0xb1, 0x35, 0x27, 0x88, 0x27, 0x82, 0x78, 0x98, 0x04, 0x57,
-	0x44, 0x3f, 0x97, 0x8a, 0xe3, 0x6f, 0xa5, 0x0b, 0x9a, 0x99, 0xca, 0x14, 0x86, 0xdc, 0x46, 0xee,
-	0xf4, 0x5a, 0xa6, 0x54, 0xd6, 0x03, 0x2e, 0x8a, 0x9c, 0x0b, 0x29, 0x95, 0x11, 0x26, 0x57, 0x52,
-	0xbb, 0xdb, 0xf6, 0x4b, 0xa5, 0xfb, 0x4a, 0xf3, 0xae, 0xd0, 0x50, 0x35, 0xe5, 0xc3, 0xa4, 0x0b,
-	0x46, 0x24, 0xbc, 0x10, 0x59, 0x2e, 0x51, 0xec, 0xb4, 0x9b, 0x3e, 0xd0, 0x42, 0x94, 0xa2, 0x3f,
-	0x71, 0x0b, 0x7d, 0x0a, 0x24, 0xc6, 0xfb, 0xa8, 0x49, 0xd9, 0x53, 0xdb, 0x63, 0x07, 0x8b, 0x3a,
-	0x70, 0x30, 0x00, 0x6d, 0xa2, 0xe7, 0x74, 0x6d, 0xe6, 0x54, 0x17, 0x4a, 0x6a, 0x60, 0x0f, 0x68,
-	0xa3, 0x32, 0x6f, 0x91, 0x4d, 0xb2, 0x75, 0x31, 0x5d, 0x8f, 0x3d, 0x73, 0x88, 0xab, 0xa2, 0xed,
-	0xd5, 0x93, 0x1f, 0x1b, 0xb5, 0x4f, 0xbf, 0xbf, 0xb4, 0x49, 0xc7, 0x55, 0x45, 0x0f, 0x69, 0x0b,
-	0x6d, 0x1f, 0xe5, 0x3d, 0x78, 0x56, 0x02, 0x3c, 0x51, 0x7b, 0xe0, 0x5a, 0xb2, 0x26, 0xad, 0xab,
-	0xd7, 0x12, 0x4a, 0xb4, 0x5e, 0xed, 0x54, 0x09, 0x63, 0x74, 0xa5, 0x10, 0x66, 0xbf, 0xb5, 0x84,
-	0x87, 0x18, 0x47, 0x1d, 0x7a, 0xd5, 0xe3, 0xe2, 0x10, 0xef, 0xd1, 0x15, 0xa9, 0xf6, 0xc0, 0x01,
-	0xde, 0xf0, 0x02, 0xce, 0x14, 0xa2, 0x3c, 0x7a, 0xfc, 0x8f, 0xe7, 0x8e, 0x30, 0xfb, 0xfa, 0x7c,
-	0xb4, 0x80, 0x5e, 0xb0, 0x2b, 0x9a, 0xc2, 0xfb, 0x9b, 0x47, 0x29, 0x0d, 0x7c, 0x76, 0x8e, 0xb1,
-	0x49, 0xeb, 0x56, 0x65, 0xa7, 0xb8, 0x6c, 0xfd, 0x30, 0x49, 0xbf, 0x2f, 0xd3, 0x3a, 0x16, 0xb1,
-	0xb7, 0x84, 0x36, 0xaa, 0x21, 0xb2, 0x5b, 0xde, 0x3f, 0xf0, 0xff, 0xc6, 0x82, 0xad, 0xf9, 0xc2,
-	0xaa, 0x7b, 0x74, 0xf3, 0xdd, 0xd7, 0x5f, 0x1f, 0x96, 0xae, 0xb3, 0x75, 0x7e, 0xf6, 0xe3, 0x61,
-	0x1f, 0x09, 0xbd, 0x34, 0x3d, 0x26, 0x76, 0xe7, 0x6c, 0x7f, 0xcf, 0x36, 0x83, 0x78, 0x51, 0xb9,
-	0x83, 0x4a, 0x11, 0xea, 0x36, 0x6b, 0x7b, 0xa1, 0x6c, 0xbc, 0x6b, 0x93, 0x5d, 0xbb, 0x2c, 0x7e,
-	0x64, 0x07, 0x76, 0xcc, 0x3e, 0x13, 0x7a, 0x79, 0x66, 0xc0, 0x6c, 0x81, 0xae, 0xd3, 0x8b, 0x0d,
-	0xf8, 0xc2, 0x7a, 0x87, 0x79, 0x1f, 0x31, 0x13, 0xc6, 0xe7, 0x60, 0xe2, 0x46, 0xf9, 0xd1, 0xe4,
-	0x3d, 0x1c, 0x6f, 0xa7, 0x27, 0xa3, 0x90, 0x9c, 0x8e, 0x42, 0xf2, 0x73, 0x14, 0x92, 0xf7, 0xe3,
-	0xb0, 0x76, 0x3a, 0x0e, 0x6b, 0xdf, 0xc6, 0x61, 0xed, 0x45, 0x6b, 0xe2, 0x34, 0xe5, 0x65, 0x0e,
-	0x0b, 0xd0, 0xdd, 0x06, 0x7e, 0xa1, 0x77, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0x05, 0xe9, 0xc5,
-	0x8e, 0x8e, 0x04, 0x00, 0x00,
+	// 577 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0x41, 0x6b, 0x13, 0x4d,
+	0x1c, 0xc6, 0x33, 0x7d, 0x9b, 0xd0, 0xfe, 0x5f, 0x04, 0x9d, 0x46, 0x88, 0xdb, 0x66, 0x5b, 0xd6,
+	0x83, 0x35, 0xc8, 0x0e, 0xbb, 0x05, 0xf5, 0x54, 0xa4, 0x82, 0x88, 0xa0, 0xd4, 0x50, 0x2f, 0x5e,
+	0xc2, 0xa4, 0x19, 0x37, 0x0b, 0x9b, 0x99, 0xed, 0xee, 0x26, 0x5a, 0x42, 0x40, 0x3c, 0x7a, 0x12,
+	0xc4, 0xef, 0xa0, 0x37, 0xaf, 0x7e, 0x83, 0x1e, 0x0b, 0x5e, 0x3c, 0x89, 0x24, 0x82, 0x5f, 0x43,
+	0x66, 0x76, 0x36, 0x34, 0xeb, 0xa6, 0x69, 0x2f, 0x61, 0x66, 0xf6, 0xf9, 0x3f, 0xfb, 0xdb, 0x67,
+	0x1e, 0x02, 0x9b, 0x9c, 0xb5, 0xfb, 0x81, 0xff, 0x86, 0xbc, 0xf2, 0x03, 0x96, 0x44, 0x8c, 0x91,
+	0x81, 0x43, 0x8e, 0xfa, 0x2c, 0x3a, 0xb6, 0xc3, 0x48, 0x24, 0x02, 0xaf, 0x69, 0x81, 0x9d, 0x09,
+	0xec, 0x81, 0x63, 0x5c, 0xa3, 0x3d, 0x9f, 0x0b, 0xa2, 0x7e, 0x53, 0x9d, 0xd1, 0x38, 0x14, 0x71,
+	0x4f, 0xc4, 0xa4, 0x4d, 0x63, 0x96, 0x1a, 0x90, 0x81, 0xd3, 0x66, 0x09, 0x75, 0x48, 0x48, 0x3d,
+	0x9f, 0xd3, 0xc4, 0x17, 0x5c, 0x6b, 0xab, 0x9e, 0xf0, 0x84, 0x5a, 0x12, 0xb9, 0xd2, 0xa7, 0x1b,
+	0x9e, 0x10, 0x5e, 0xc0, 0x08, 0x0d, 0x7d, 0x42, 0x39, 0x17, 0x89, 0x1a, 0x89, 0xf5, 0xd3, 0xad,
+	0x22, 0xd0, 0x90, 0x46, 0xb4, 0x97, 0x29, 0xcc, 0x22, 0x85, 0x22, 0x56, 0xcf, 0xad, 0x2a, 0xe0,
+	0xe7, 0x92, 0x6b, 0x5f, 0x0d, 0x35, 0xd9, 0x51, 0x9f, 0xc5, 0x89, 0xf5, 0x02, 0xd6, 0x66, 0x4e,
+	0xe3, 0x50, 0xf0, 0x98, 0xe1, 0x5d, 0xa8, 0xa4, 0xe6, 0x35, 0xb4, 0x85, 0xb6, 0xff, 0x77, 0xd7,
+	0xed, 0x82, 0x1c, 0xec, 0x74, 0x68, 0x6f, 0xf5, 0xe4, 0xe7, 0x66, 0xe9, 0xf3, 0x9f, 0xaf, 0x0d,
+	0xd4, 0xd4, 0x53, 0xd6, 0x03, 0xa8, 0x2a, 0xdb, 0x47, 0x7e, 0xc0, 0x9e, 0x89, 0x0e, 0xd3, 0xaf,
+	0xc3, 0x55, 0x28, 0x8b, 0xd7, 0x9c, 0x45, 0xca, 0x76, 0xb5, 0x99, 0x6e, 0x30, 0x86, 0xe5, 0x90,
+	0x26, 0xdd, 0xda, 0x92, 0x3a, 0x54, 0x6b, 0xeb, 0x09, 0x5c, 0xcf, 0x39, 0x68, 0x34, 0x07, 0x96,
+	0xb9, 0xe8, 0x30, 0x0d, 0x56, 0x2f, 0x04, 0x9b, 0x0e, 0x29, 0xa9, 0xf5, 0x14, 0x6e, 0x4c, 0xbd,
+	0x0e, 0x22, 0xc6, 0xf6, 0x69, 0xd2, 0x8d, 0xcf, 0x47, 0x32, 0x60, 0x45, 0x5e, 0xe5, 0x19, 0xac,
+	0xe9, 0xde, 0x72, 0xc1, 0x28, 0xb2, 0xd3, 0x7c, 0x55, 0x28, 0x4b, 0x95, 0x4c, 0xee, 0x3f, 0xe9,
+	0xa7, 0x36, 0xd6, 0x63, 0xd8, 0x98, 0xf9, 0x9c, 0x87, 0x5d, 0x3f, 0xe8, 0x44, 0x8c, 0x5f, 0x3e,
+	0x98, 0x03, 0xa8, 0xcf, 0x71, 0xd2, 0x00, 0x3b, 0x50, 0x96, 0x5f, 0x9d, 0x02, 0x2c, 0x4c, 0x28,
+	0xd5, 0xba, 0xef, 0xcb, 0x50, 0x56, 0xb6, 0xf8, 0x2d, 0x82, 0x4a, 0x7a, 0xb1, 0xf8, 0x56, 0xe1,
+	0xe8, 0xbf, 0x2d, 0x32, 0xb6, 0x17, 0x0b, 0x53, 0x38, 0xeb, 0xe6, 0xbb, 0xef, 0xbf, 0x3f, 0x2e,
+	0xd5, 0xf1, 0x3a, 0x99, 0x5f, 0x68, 0xfc, 0x09, 0xc1, 0x4a, 0x06, 0x88, 0x6f, 0xcf, 0xf7, 0xce,
+	0xb5, 0xcb, 0x68, 0x5c, 0x44, 0xaa, 0x41, 0x5c, 0x05, 0x72, 0x07, 0x37, 0x0a, 0x41, 0xe4, 0xba,
+	0x25, 0x37, 0x2d, 0x19, 0x0f, 0x19, 0xca, 0xe4, 0x47, 0xf8, 0x0b, 0x82, 0x2b, 0x33, 0x97, 0x8e,
+	0xed, 0xf3, 0xdf, 0x98, 0x2f, 0x9b, 0x41, 0x2e, 0xac, 0xd7, 0x98, 0xf7, 0x14, 0xa6, 0x83, 0xc9,
+	0x02, 0x4c, 0xd5, 0x32, 0x32, 0xcc, 0x3a, 0x3a, 0xc2, 0xdf, 0x10, 0x5c, 0xcd, 0x57, 0x04, 0x3b,
+	0x8b, 0x03, 0xca, 0x15, 0xd3, 0x70, 0x2f, 0x33, 0xa2, 0xa1, 0x77, 0x15, 0xf4, 0x7d, 0x7c, 0x77,
+	0x3e, 0xb4, 0x8c, 0xb5, 0x75, 0xa8, 0x07, 0xc9, 0x50, 0xd5, 0x7d, 0xa4, 0x73, 0xde, 0x73, 0x4f,
+	0xc6, 0x26, 0x3a, 0x1d, 0x9b, 0xe8, 0xd7, 0xd8, 0x44, 0x1f, 0x26, 0x66, 0xe9, 0x74, 0x62, 0x96,
+	0x7e, 0x4c, 0xcc, 0xd2, 0xcb, 0x5a, 0x66, 0x78, 0xc6, 0x32, 0x39, 0x0e, 0x59, 0xdc, 0xae, 0xa8,
+	0x7f, 0xb9, 0x9d, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x75, 0x99, 0x58, 0xe7, 0xd2, 0x05, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -371,10 +476,12 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	// FileTreeNode Queries a list of FileTreeNode items.
-	FileTreeNode(ctx context.Context, in *QueryFileTreeNodeRequest, opts ...grpc.CallOption) (*QueryFileTreeNodeResponse, error)
+	// FileNode Queries a list of FileNode items.
+	FileNode(ctx context.Context, in *QueryFileNodeRequest, opts ...grpc.CallOption) (*QueryFileNodeResponse, error)
 	// FileTreePaths Queries a list of FileTreePaths items.
 	FileTreePaths(ctx context.Context, in *QueryFileTreePathsRequest, opts ...grpc.CallOption) (*QueryFileTreePathsResponse, error)
+	// FileNodeChildren Queries a list of FileNodeChildren items.
+	FileNodeChildren(ctx context.Context, in *QueryFileNodeChildrenRequest, opts ...grpc.CallOption) (*QueryFileNodeChildrenResponse, error)
 }
 
 type queryClient struct {
@@ -394,9 +501,9 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
-func (c *queryClient) FileTreeNode(ctx context.Context, in *QueryFileTreeNodeRequest, opts ...grpc.CallOption) (*QueryFileTreeNodeResponse, error) {
-	out := new(QueryFileTreeNodeResponse)
-	err := c.cc.Invoke(ctx, "/nebulix.filetree.v1.Query/FileTreeNode", in, out, opts...)
+func (c *queryClient) FileNode(ctx context.Context, in *QueryFileNodeRequest, opts ...grpc.CallOption) (*QueryFileNodeResponse, error) {
+	out := new(QueryFileNodeResponse)
+	err := c.cc.Invoke(ctx, "/nebulix.filetree.v1.Query/FileNode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -412,14 +519,25 @@ func (c *queryClient) FileTreePaths(ctx context.Context, in *QueryFileTreePathsR
 	return out, nil
 }
 
+func (c *queryClient) FileNodeChildren(ctx context.Context, in *QueryFileNodeChildrenRequest, opts ...grpc.CallOption) (*QueryFileNodeChildrenResponse, error) {
+	out := new(QueryFileNodeChildrenResponse)
+	err := c.cc.Invoke(ctx, "/nebulix.filetree.v1.Query/FileNodeChildren", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
-	// FileTreeNode Queries a list of FileTreeNode items.
-	FileTreeNode(context.Context, *QueryFileTreeNodeRequest) (*QueryFileTreeNodeResponse, error)
+	// FileNode Queries a list of FileNode items.
+	FileNode(context.Context, *QueryFileNodeRequest) (*QueryFileNodeResponse, error)
 	// FileTreePaths Queries a list of FileTreePaths items.
 	FileTreePaths(context.Context, *QueryFileTreePathsRequest) (*QueryFileTreePathsResponse, error)
+	// FileNodeChildren Queries a list of FileNodeChildren items.
+	FileNodeChildren(context.Context, *QueryFileNodeChildrenRequest) (*QueryFileNodeChildrenResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -429,11 +547,14 @@ type UnimplementedQueryServer struct {
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
 }
-func (*UnimplementedQueryServer) FileTreeNode(ctx context.Context, req *QueryFileTreeNodeRequest) (*QueryFileTreeNodeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FileTreeNode not implemented")
+func (*UnimplementedQueryServer) FileNode(ctx context.Context, req *QueryFileNodeRequest) (*QueryFileNodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FileNode not implemented")
 }
 func (*UnimplementedQueryServer) FileTreePaths(ctx context.Context, req *QueryFileTreePathsRequest) (*QueryFileTreePathsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FileTreePaths not implemented")
+}
+func (*UnimplementedQueryServer) FileNodeChildren(ctx context.Context, req *QueryFileNodeChildrenRequest) (*QueryFileNodeChildrenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FileNodeChildren not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -458,20 +579,20 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_FileTreeNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryFileTreeNodeRequest)
+func _Query_FileNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryFileNodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).FileTreeNode(ctx, in)
+		return srv.(QueryServer).FileNode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/nebulix.filetree.v1.Query/FileTreeNode",
+		FullMethod: "/nebulix.filetree.v1.Query/FileNode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).FileTreeNode(ctx, req.(*QueryFileTreeNodeRequest))
+		return srv.(QueryServer).FileNode(ctx, req.(*QueryFileNodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -494,6 +615,24 @@ func _Query_FileTreePaths_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_FileNodeChildren_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryFileNodeChildrenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).FileNodeChildren(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nebulix.filetree.v1.Query/FileNodeChildren",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).FileNodeChildren(ctx, req.(*QueryFileNodeChildrenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "nebulix.filetree.v1.Query",
@@ -504,12 +643,16 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Params_Handler,
 		},
 		{
-			MethodName: "FileTreeNode",
-			Handler:    _Query_FileTreeNode_Handler,
+			MethodName: "FileNode",
+			Handler:    _Query_FileNode_Handler,
 		},
 		{
 			MethodName: "FileTreePaths",
 			Handler:    _Query_FileTreePaths_Handler,
+		},
+		{
+			MethodName: "FileNodeChildren",
+			Handler:    _Query_FileNodeChildren_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -572,7 +715,7 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryFileTreeNodeRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryFileNodeRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -582,12 +725,12 @@ func (m *QueryFileTreeNodeRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryFileTreeNodeRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryFileNodeRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryFileTreeNodeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryFileNodeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -609,7 +752,7 @@ func (m *QueryFileTreeNodeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryFileTreeNodeResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryFileNodeResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -619,12 +762,12 @@ func (m *QueryFileTreeNodeResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryFileTreeNodeResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryFileNodeResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryFileTreeNodeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryFileNodeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -713,6 +856,80 @@ func (m *QueryFileTreePathsResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryFileNodeChildrenRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryFileNodeChildrenRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryFileNodeChildrenRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Path) > 0 {
+		i -= len(m.Path)
+		copy(dAtA[i:], m.Path)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Path)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Owner) > 0 {
+		i -= len(m.Owner)
+		copy(dAtA[i:], m.Owner)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Owner)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryFileNodeChildrenResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryFileNodeChildrenResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryFileNodeChildrenResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Nodes) > 0 {
+		for iNdEx := len(m.Nodes) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Nodes[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -744,7 +961,7 @@ func (m *QueryParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryFileTreeNodeRequest) Size() (n int) {
+func (m *QueryFileNodeRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -761,7 +978,7 @@ func (m *QueryFileTreeNodeRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryFileTreeNodeResponse) Size() (n int) {
+func (m *QueryFileNodeResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -800,6 +1017,38 @@ func (m *QueryFileTreePathsResponse) Size() (n int) {
 	if len(m.Paths) > 0 {
 		for _, s := range m.Paths {
 			l = len(s)
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QueryFileNodeChildrenRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Owner)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Path)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryFileNodeChildrenResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Nodes) > 0 {
+		for _, e := range m.Nodes {
+			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
@@ -945,7 +1194,7 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryFileTreeNodeRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryFileNodeRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -968,10 +1217,10 @@ func (m *QueryFileTreeNodeRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryFileTreeNodeRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryFileNodeRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryFileTreeNodeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryFileNodeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1059,7 +1308,7 @@ func (m *QueryFileTreeNodeRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryFileTreeNodeResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryFileNodeResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1082,10 +1331,10 @@ func (m *QueryFileTreeNodeResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryFileTreeNodeResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryFileNodeResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryFileTreeNodeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryFileNodeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1118,7 +1367,7 @@ func (m *QueryFileTreeNodeResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Node == nil {
-				m.Node = &FileTreeNode{}
+				m.Node = &FileNode{}
 			}
 			if err := m.Node.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -1319,6 +1568,204 @@ func (m *QueryFileTreePathsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Paths = append(m.Paths, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryFileNodeChildrenRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryFileNodeChildrenRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryFileNodeChildrenRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Owner = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Path", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Path = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryFileNodeChildrenResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryFileNodeChildrenResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryFileNodeChildrenResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Nodes", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Nodes = append(m.Nodes, &FileNode{})
+			if err := m.Nodes[len(m.Nodes)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

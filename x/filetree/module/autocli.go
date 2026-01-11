@@ -18,7 +18,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:     "Shows the parameters of the module",
 				},
 				{
-					RpcMethod:      "FileTreeNode",
+					RpcMethod:      "FileNode",
 					Use:            "file-tree-node [path]",
 					Short:          "Query file-tree-node",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
@@ -29,6 +29,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:            "file-tree-paths [basepath]",
 					Short:          "Query file-tree-paths",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "basepath"}},
+				},
+
+				{
+					RpcMethod:      "FileNodeChildren",
+					Use:            "file-node-children [owner] [path]",
+					Short:          "Query file-node-children",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "owner"}, {ProtoField: "path"}},
 				},
 
 				// this line is used by ignite scaffolding # autocli/query
@@ -49,12 +56,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
 				},
 				{
-			RpcMethod: "DeleteNode",
-			Use: "delete-node [path]",
-			Short: "Send a delete-node tx",
-			PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
-		},
-		// this line is used by ignite scaffolding # autocli/tx
+					RpcMethod:      "DeleteNode",
+					Use:            "delete-node [path]",
+					Short:          "Send a delete-node tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
+				},
+				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
 	}

@@ -13,7 +13,7 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
-	ftn := types.FileTreeNode{
+	ftn := types.FileNode{
 		NodeType: msg.NodeType,
 		Contents: msg.Contents,
 	}

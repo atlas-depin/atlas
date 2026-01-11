@@ -1,3 +1,5 @@
+ignite generate proto-go
+
 ignite scaffold message stage-file provider:string fid:string --module storage
 ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 is-default:bool --module storage
 ignite scaffold message prove-file challengeId:string fileId:string data:bytes hashes:array.bytes chunk:uint64 --module storage
@@ -14,10 +16,11 @@ ignite scaffold query subscriptions --response subscriptions:array.string --modu
 ignite scaffold message post-node path:string --module filetree
 ignite scaffold message delete-node path:string --module filetree
 
-ignite scaffold query file-tree-node path:string --response node:string --module filetree
+ignite scaffold query file-node owner:string path:string --response node:string --module filetree
+ignite scaffold query file-node-children owner:string path:string --response nodes:string --module filetree
+
 ignite scaffold query file-tree-paths path:string --response nodes:string --module filetree
 // [TODO] batch get nodes
-
 
 Generates Things In:
 autocli.go
