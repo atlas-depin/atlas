@@ -1,6 +1,8 @@
 version: 1
 validation: sovereign
 default_denom: uatl
+genesis:
+  chain_id: "atlas-1"
 accounts: 
 - name: alice
   mnemonic: "key monitor patrol electric buyer actor license stool script critic impulse next asset minute addict carpet pretty desert sponsor place resemble bike pause mirror"
