@@ -18,7 +18,7 @@ import (
 	"nebulix/x/storage/types"
 )
 
-func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int64, replicas int64, providers []string) types.File {
+func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int64, replicas int32, providers []string) types.File {
 	file := types.File{
 		FileId:    fileId,
 		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
@@ -145,7 +145,7 @@ func (suite *KeeperTestSuite) TestChallengeFiles_WithFiles() {
 	files := []struct {
 		id       string
 		size     int64
-		replicas int64
+		replicas int32
 		provs    []string
 	}{
 		{
