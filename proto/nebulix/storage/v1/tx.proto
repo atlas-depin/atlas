@@ -65,8 +65,9 @@ message MsgPostFile {
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   bytes merkle = 2;
   int64 file_size = 3;
-  int64 replicas = 4;
+  int32 replicas = 4;
   string subscription = 5;
+  int32 nonce = 6;
 }
 
 // MsgPostFileResponse defines the MsgPostFileResponse message.
