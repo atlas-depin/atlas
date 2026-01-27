@@ -29,7 +29,7 @@ func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*typ
 		if err != nil {
 			return nil, err
 		}
-		if int64(len(file.Providers)) >= file.Replicas {
+		if int32(len(file.Providers)) >= file.Replicas {
 			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "this file has sufficient providers")
 		}
 		root, _ := hex.DecodeString(file.Merkle)
