@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
@@ -8,7 +9,6 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-	"github.com/cespare/xxhash"
 )
 
 func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
@@ -18,6 +18,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	merkleHash := []byte("test-merkle-hash-1234567890")
 	fileSize := int64(1_000_000_000) // 1GB
 	subscriptionId := "sub_0"
+	nonce := int32(1)
 
 	// Create a valid subscription
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0) // 1 year from now
@@ -29,9 +30,10 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 		FileSize:     fileSize,
 		Subscription: subscriptionId,
 		Replicas:     0,
+		Nonce:        nonce,
 	}
-	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(ctx.BlockHeight(), 10)
-	fid := xxhash.Sum64([]byte(fidString))
+	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
+	fid := sha256.Sum256([]byte(fidString))
 
 	response, err := msgServer.PostFile(ctx, msg)
 	suite.Require().NoError(err)
@@ -69,7 +71,8 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 	merkleHash := []byte("test-merkle-hash-abcdef")
 	fileSize := int64(500_000_000) // 500MB
 	subscriptionId := "custom-sub"
-	replicas := int64(5)
+	replicas := int32(5)
+	nonce := int32(1)
 
 	// Create subscription with enough space
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0)
@@ -81,6 +84,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 		FileSize:     fileSize,
 		Subscription: subscriptionId,
 		Replicas:     replicas,
+		Nonce:        nonce,
 	}
 
 	response, err := msgServer.PostFile(ctx, msg)
@@ -95,6 +99,6 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 	// Verify subscription update
 	updatedSub, err := suite.keeper.GetStorageSubscription(ctx, creator, subscriptionId)
 	suite.Require().NoError(err)
-	suite.Require().Equal(fileSize*replicas, updatedSub.SpaceUsed)
-	suite.Require().Equal(fileSize*(replicas-1), updatedSub.ReplicaSpaceUsed)
+	suite.Require().Equal(fileSize*int64(replicas), updatedSub.SpaceUsed)
+	suite.Require().Equal(fileSize*(int64(replicas)-1), updatedSub.ReplicaSpaceUsed)
 }

@@ -11,9 +11,9 @@ message File {
   string subscription = 4;
   string status = 5;
   int64 file_size = 6;
-  int64 replicas = 7;
+  int32 replicas = 7;
   repeated string providers = 8;
   int64 start = 9;
-  int64 dedupe_index = 10;
+  int32 nonce = 10;
   int64 last_challenged_height = 11;
 }

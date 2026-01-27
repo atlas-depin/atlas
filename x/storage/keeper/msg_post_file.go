@@ -27,24 +27,17 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "must have 2 or more replicas")
 	}
 
-	/// --- Build file index element & metadata
-	fileIndex, err := k.FileCount.Get(ctx)
-	if err != nil {
-		return nil, err
-	}
-	fileIndex++
-	fileDeDupeIndex := fileIndex + ctx.BlockHeight()
-
-	fid := sha256.Sum256(append(append(msg.Merkle, []byte(msg.Creator)...), byte(fileDeDupeIndex)))
+	/// --- Build file index element
+	fid := sha256.Sum256(append(append(msg.Merkle, []byte(msg.Creator)...), byte(msg.Nonce)))
 	file := types.File{
-		FileId:      fmt.Sprintf("%x", fid),
-		Merkle:      hex.EncodeToString(msg.Merkle),
-		Creator:     msg.Creator,
-		Status:      "STAGED",
-		Start:       ctx.BlockHeight(),
-		FileSize:    msg.FileSize,
-		Replicas:    msg.Replicas,
-		DedupeIndex: fileDeDupeIndex,
+		FileId:   fmt.Sprintf("%x", fid),
+		Merkle:   hex.EncodeToString(msg.Merkle),
+		Creator:  msg.Creator,
+		Status:   "STAGED",
+		Start:    ctx.BlockHeight(),
+		FileSize: msg.FileSize,
+		Replicas: msg.Replicas,
+		Nonce:    msg.Nonce,
 	}
 
 	/// --- Update subscription
@@ -56,9 +49,6 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 	}
 
 	/// --- Commit file
-	if err = k.FileCount.Set(ctx, fileIndex); err != nil {
-		return nil, err
-	}
 	if err = k.SetNewFile(ctx, file); err != nil {
 		return nil, err
 	}

@@ -52,7 +52,7 @@ func (k Keeper) SetDefaultStorageSubscriptionId(ctx context.Context, address str
 }
 
 // helpers
-func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address string, subscriptionId string, bytes int64, replicas int64) (string, error) {
+func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address string, subscriptionId string, bytes int64, replicas int32) (string, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	subscription, err := k.GetStorageSubscription(ctx, address, subscriptionId)
 	if err != nil {
@@ -64,8 +64,8 @@ func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address stri
 		return "", sdkerrors.ErrUnauthorized
 	}
 
-	subscription.SpaceUsed += bytes * replicas
-	subscription.ReplicaSpaceUsed += bytes * (replicas - 1)
+	subscription.SpaceUsed += bytes * int64(replicas)
+	subscription.ReplicaSpaceUsed += bytes * (int64(replicas) - 1)
 
 	if subscription.SpaceUsed > subscription.SpaceAvailable {
 		return "", sdkerrors.ErrInvalidRequest
@@ -77,7 +77,7 @@ func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address stri
 	if err != nil {
 		return "", err
 	}
-	credits := math.NewInt(bytes * replicas).Mul(math.NewInt(int64(subscription.End.Sub(sdkCtx.BlockTime()) / time.Second)))
+	credits := math.NewInt(bytes * int64(replicas)).Mul(math.NewInt(int64(subscription.End.Sub(sdkCtx.BlockTime()) / time.Second)))
 
 	subscription.Credits = subscription.Credits.Sub(credits)
 	k.StorageCreditPool.Set(ctx, currentCreditPool.Add(credits))
