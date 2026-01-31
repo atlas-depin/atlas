@@ -1,9 +1,7 @@
 package keeper_test
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"nebulix/x/storage/types"
 	"strconv"
 	"time"
@@ -24,8 +22,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0) // 1 year from now
 	suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime)
 
-	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
-	fid := sha256.Sum256([]byte(fidString))
+	fid := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
 
 	msg := &types.MsgPostFile{
 		Fid:          fid,
@@ -42,7 +39,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	suite.Require().Equal(ctx.BlockHeight(), response.StartBlock)
 
 	// Verify file was stored
-	storedFile, err := suite.keeper.GetFile(ctx, fmt.Sprintf("%x", fid))
+	storedFile, err := suite.keeper.GetFile(ctx, fid)
 	suite.Require().NoError(err)
 	suite.Require().Equal(creator, storedFile.Creator)
 	suite.Require().Equal(fileSize, storedFile.FileSize)
@@ -79,8 +76,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0)
 	suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime)
 
-	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
-	fid := sha256.Sum256([]byte(fidString))
+	fid := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
 
 	msg := &types.MsgPostFile{
 		Fid:          fid,

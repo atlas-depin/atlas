@@ -25,7 +25,7 @@ func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*typ
 	}
 
 	if msg.ChallengeId == "" {
-		file, err := k.GetFile(ctx, msg.FileId)
+		file, err := k.GetFile(ctx, msg.Fid)
 		if err != nil {
 			return nil, err
 		}
