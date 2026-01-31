@@ -18,7 +18,7 @@ func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 			sb, collections.NewPrefix(40), "by_fid",
 			collections.StringKey, collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
 			func(pk collections.Triple[string, string, string], f types.File) (string, error) {
-				return f.FileId, nil
+				return f.Fid, nil
 			},
 		),
 	}
@@ -34,7 +34,7 @@ type fileIdIndex struct{}
 
 func (fa fileIdIndex) UnorderedKeys() bool { return false }
 func (fa fileIdIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
-	return file.FileId, nil
+	return file.Fid, nil
 }
 func (fa fileIdIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
 	return pk, nil

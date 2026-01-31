@@ -10,14 +10,14 @@ import (
 )
 
 func (k Keeper) SetFile(ctx context.Context, file types.File) error {
-	key := collections.Join3(file.Creator, file.Subscription, file.FileId)
+	key := collections.Join3(file.Creator, file.Subscription, file.Fid)
 	return k.FileStore.Set(ctx, key, file)
 }
 
 // StoreFile stores a new file with a provider
 func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	// Check if file already exists
-	key := collections.Join3(file.Creator, file.Subscription, file.FileId)
+	key := collections.Join3(file.Creator, file.Subscription, file.Fid)
 	exists, err := k.FileStore.Has(ctx, key)
 	if err != nil {
 		return err

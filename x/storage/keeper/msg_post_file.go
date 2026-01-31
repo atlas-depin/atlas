@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 
@@ -28,16 +27,14 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 	}
 
 	/// --- Build file index element
-	fid := sha256.Sum256(append(append(msg.Merkle, []byte(msg.Creator)...), byte(msg.Nonce)))
 	file := types.File{
-		FileId:   fmt.Sprintf("%x", fid),
+		Fid:      msg.Fid,
 		Merkle:   hex.EncodeToString(msg.Merkle),
 		Creator:  msg.Creator,
 		Status:   "STAGED",
 		Start:    ctx.BlockHeight(),
 		FileSize: msg.FileSize,
 		Replicas: msg.Replicas,
-		Nonce:    msg.Nonce,
 	}
 
 	/// --- Update subscription

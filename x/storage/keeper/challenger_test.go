@@ -20,7 +20,7 @@ import (
 
 func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int64, replicas int32, providers []string) types.File {
 	file := types.File{
-		FileId:    fileId,
+		Fid:       fileId,
 		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
 		Creator:   owner,
 		Start:     suite.ctx.BlockHeight(),

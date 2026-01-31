@@ -24,16 +24,17 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0) // 1 year from now
 	suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime)
 
+	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
+	fid := sha256.Sum256([]byte(fidString))
+
 	msg := &types.MsgPostFile{
+		Fid:          fid,
 		Creator:      creator,
 		Merkle:       merkleHash,
 		FileSize:     fileSize,
 		Subscription: subscriptionId,
 		Replicas:     0,
-		Nonce:        nonce,
 	}
-	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
-	fid := sha256.Sum256([]byte(fidString))
 
 	response, err := msgServer.PostFile(ctx, msg)
 	suite.Require().NoError(err)
@@ -78,13 +79,16 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0)
 	suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime)
 
+	fidString := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
+	fid := sha256.Sum256([]byte(fidString))
+
 	msg := &types.MsgPostFile{
+		Fid:          fid,
 		Creator:      creator,
 		Merkle:       merkleHash,
 		FileSize:     fileSize,
 		Subscription: subscriptionId,
 		Replicas:     replicas,
-		Nonce:        nonce,
 	}
 
 	response, err := msgServer.PostFile(ctx, msg)

@@ -5,7 +5,7 @@ option go_package = "nebulix/x/storage/types";
 
 // File defines the File message.
 message File {
-  string file_id = 1;
+  string fid = 1;
   string merkle = 2;
   string creator = 3;
   string subscription = 4;
@@ -14,6 +14,5 @@ message File {
   int32 replicas = 7;
   repeated string providers = 8;
   int64 start = 9;
-  int32 nonce = 10;
-  int64 last_challenged_height = 11;
+  int64 last_challenged_height = 10;
 }

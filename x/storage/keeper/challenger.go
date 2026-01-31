@@ -83,12 +83,12 @@ func (k Keeper) GenerateFileChallenges(
 
 	// Validate file has providers
 	if len(file.Providers) == 0 {
-		return nil, fmt.Errorf("file has no providers: %s", file.FileId)
+		return nil, fmt.Errorf("file has no providers: %s", file.Fid)
 	}
 
 	// Validate file size
 	if file.FileSize == 0 {
-		return nil, fmt.Errorf("file has zero size: %s", file.FileId)
+		return nil, fmt.Errorf("file has zero size: %s", file.Fid)
 	}
 
 	// Compute total chunks
@@ -106,7 +106,7 @@ func (k Keeper) GenerateFileChallenges(
 		if _, err := sdk.AccAddressFromBech32(providerAddr); err != nil {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Error("invalid provider address",
-				"file", file.FileId,
+				"file", file.Fid,
 				"provider", providerAddr,
 				"error", err,
 			)
@@ -125,7 +125,7 @@ func (k Keeper) GenerateFileChallenges(
 		chunkIndex, err := types.GenerateRandomChallengeChunkIndex(
 			providerSeed,
 			chunkCount,
-			file.FileId,
+			file.Fid,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate chunk index for provider %s: %w",
@@ -162,11 +162,11 @@ func CreateChallenge(
 	currentHeight uint64,
 	chunkCount uint64,
 ) (types.StorageChallenge, error) {
-	challengeID := types.GenerateChallengeID(currentHeight, file.FileId, providerAddr)
+	challengeID := types.GenerateChallengeID(currentHeight, file.Fid, providerAddr)
 
 	return types.StorageChallenge{
 		ChallengeId:   challengeID,
-		FileId:        file.FileId,
+		FileId:        file.Fid,
 		FileMerkle:    file.Merkle,
 		Provider:      providerAddr,
 		ChunkIndex:    chunkIndex,
