@@ -93,7 +93,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod:      "ProveFile",
 					Use:            "prove-file [challenge-id] [file-id] [data] [hashes] [chunk]",
 					Short:          "Send a prove-file tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "challenge_id"}, {ProtoField: "file_id"}, {ProtoField: "data"}, {ProtoField: "hashes"}, {ProtoField: "chunk"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "challenge_id"}, {ProtoField: "fid"}, {ProtoField: "data"}, {ProtoField: "hashes"}, {ProtoField: "chunk"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
