@@ -17,7 +17,7 @@ func (q queryServer) FileNodeChildren(ctx context.Context, req *types.QueryFileN
 	}
 
 	var nodes []*types.FileNode
-	basepath := strings.TrimSuffix(req.Path, "/")
+	basepath := strings.ToLower(strings.TrimSuffix(req.Path, "/"))
 
 	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
 		collections.Join3(req.Owner, basepath, ""),
