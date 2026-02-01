@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"path/filepath"
+	"strings"
 
 	"nebulix/x/filetree/types"
 
@@ -20,7 +21,12 @@ func (k Keeper) SetNode(ctx context.Context, owner string, path string, file typ
 }
 
 func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.FileNode, error) {
-	key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
+	var key collections.Triple[string, string, string]
+	if !strings.Contains(path, "/") {
+		key = collections.Join3(owner, "", path)
+	} else {
+		key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
+	}
 	return k.FileTree.Get(ctx, key)
 }
 
