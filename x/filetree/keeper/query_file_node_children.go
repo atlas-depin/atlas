@@ -23,11 +23,11 @@ func (q queryServer) FileNodeChildren(ctx context.Context, req *types.QueryFileN
 
 	if basepath == "" {
 		rng = new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-			collections.TripleSuperPrefix[string, string, string](req.Owner, basepath),
+			collections.TriplePrefix[string, string, string](req.Owner),
 		)
 	} else {
 		rng = new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-			collections.Join3(req.Owner, basepath, ""),
+			collections.TripleSuperPrefix[string, string, string](req.Owner, basepath),
 		)
 	}
 
