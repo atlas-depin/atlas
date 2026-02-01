@@ -25,7 +25,7 @@ func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.F
 	if !strings.Contains(path, "/") {
 		key = collections.Join3(owner, "", path)
 	} else {
-		key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
+		key = collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
 	}
 	return k.FileTree.Get(ctx, key)
 }
