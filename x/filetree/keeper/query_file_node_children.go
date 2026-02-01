@@ -19,9 +19,17 @@ func (q queryServer) FileNodeChildren(ctx context.Context, req *types.QueryFileN
 	var nodes []*types.FileNode
 	basepath := strings.ToLower(strings.TrimSuffix(req.Path, "/"))
 
-	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-		collections.Join3(req.Owner, basepath, ""),
-	)
+	var rng *collections.Range[collections.Triple[string, string, string]]
+
+	if basepath == "" {
+		rng = new(collections.Range[collections.Triple[string, string, string]]).Prefix(
+			collections.TripleSuperPrefix[string, string, string](req.Owner, basepath),
+		)
+	} else {
+		rng = new(collections.Range[collections.Triple[string, string, string]]).Prefix(
+			collections.Join3(req.Owner, basepath, ""),
+		)
+	}
 
 	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.FileNode) (_ bool, _ error) {
 		nodes = append(nodes, &node)
