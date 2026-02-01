@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strings"
 
 	"nebulix/x/filetree/types"
 
@@ -13,11 +14,13 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
+	// [TODO]: handle illegal path characters
+	path := strings.TrimSuffix(msg.Path, "/")
 	ftn := types.FileNode{
 		NodeType: msg.NodeType,
 		Contents: msg.Contents,
 	}
-	err := k.SetNode(ctx, msg.Creator, msg.Path, ftn)
+	err := k.SetNode(ctx, msg.Creator, path, ftn)
 
 	return &types.MsgPostNodeResponse{}, err
 }
