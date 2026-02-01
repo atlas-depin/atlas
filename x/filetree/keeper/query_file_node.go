@@ -15,7 +15,7 @@ func (q queryServer) FileNode(ctx context.Context, req *types.QueryFileNodeReque
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	path := strings.ToLower(strings.TrimSuffix(req.Path, "/"))
+	path := strings.ToLower(strings.Trim(req.Path, "/"))
 	node, err := q.k.GetNode(ctx, req.Owner, path)
 
 	return &types.QueryFileNodeResponse{Node: &node}, err

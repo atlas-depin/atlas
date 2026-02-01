@@ -17,7 +17,7 @@ func (q queryServer) FileTreePaths(ctx context.Context, req *types.QueryFileTree
 	}
 
 	var paths []string
-	basepath := strings.ToLower(strings.TrimSuffix(req.Basepath, "/"))
+	basepath := strings.ToLower(strings.Trim(req.Basepath, "/"))
 
 	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
 		collections.Join3(req.Owner, basepath, ""),

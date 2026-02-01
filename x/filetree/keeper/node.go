@@ -9,6 +9,11 @@ import (
 	"cosmossdk.io/collections"
 )
 
+func (k Keeper) SetRootNode(ctx context.Context, owner string, path string, file types.FileNode) error {
+	key := collections.Join3(owner, "", path)
+	return k.FileTree.Set(ctx, key, file)
+}
+
 func (k Keeper) SetNode(ctx context.Context, owner string, path string, file types.FileNode) error {
 	key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
 	return k.FileTree.Set(ctx, key, file)

@@ -15,12 +15,18 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 	}
 
 	// [TODO]: handle illegal path characters
-	path := strings.ToLower(strings.TrimSuffix(msg.Path, "/"))
+	path := strings.ToLower(strings.Trim(msg.Path, "/"))
 	ftn := types.FileNode{
 		NodeType: msg.NodeType,
 		Contents: msg.Contents,
 	}
-	err := k.SetNode(ctx, msg.Creator, path, ftn)
+
+	var err error
+	if strings.Contains(path, "/") {
+		err = k.SetNode(ctx, msg.Creator, path, ftn)
+	} else {
+		err = k.SetRootNode(ctx, msg.Creator, path, ftn)
+	}
 
 	return &types.MsgPostNodeResponse{}, err
 }
