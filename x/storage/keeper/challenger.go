@@ -7,10 +7,9 @@ import (
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
+	merkletree "github.com/ahm23/go-merkletree-xxh"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/wealdtech/go-merkletree/v2"
-	treeblake3 "github.com/wealdtech/go-merkletree/v2/blake3"
 	"github.com/zeebo/blake3"
 )
 
@@ -219,7 +218,7 @@ func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input type
 	hashName := hasher.Sum(nil)
 
 	var proof merkletree.Proof // unmarshal proof
-	proof.Hashes = input.Hashes
+	proof.Siblings = input.Hashes
 	proof.Index = uint64(input.ChunkIndex)
 	// err := json.Unmarshal(input.HashList, &proof)
 	// if err != nil {
@@ -230,9 +229,7 @@ func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input type
 		return false
 	}
 
-	treeHash := treeblake3.New256()
-
-	verified, err := merkletree.VerifyProofUsing(hashName, false, &proof, [][]byte{root}, treeHash)
+	verified, err := merkletree.Verify(hashName, root, &proof, &merkletree.Config{XXH128: true})
 	if err != nil {
 		return false
 	}
