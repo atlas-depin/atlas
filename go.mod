@@ -5,6 +5,9 @@ go 1.24.0
 replace (
 	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
+
+	github.com/spf13/cast => github.com/spf13/cast v1.9.2
+	github.com/spf13/viper => github.com/spf13/viper v1.20.1
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	// merkletree blake3 support
