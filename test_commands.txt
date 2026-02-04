@@ -1,2 +1,7 @@
 ./nebulixd tx storage buy-storage atl1gxuhzz4kf8r5g3ddevkprqk6mplth700cqxt7w 720 1000000000 false --from alice --broadcast-mode block
 ./nebulixd q storage get-subscription-info atl1gxuhzz4kf8r5g3ddevkprqk6mplth700cqxt7w sub_0
+
+
+nebulixd tx bank send atl1wszdmd04uxggyz2hq8u4ss30f8dy59zz28mn2x atl1wm4gvkczw3neeqmyuekxsxduvv9sh8sjcdvzdp 1000000uatl
+nebulixd tx bank send atl1wszdmd04uxggyz2hq8u4ss30f8dy59zz28mn2x atl1wwrfl6n5qfrhldpjngp7stshnd9tgcv0u2qzvu 1000000uatl
+nebulixd tx storage buy-storage atl1wwrfl6n5qfrhldpjngp7stshnd9tgcv0u2qzvu 720 1000000000 false --from alice
