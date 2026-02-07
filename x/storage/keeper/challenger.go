@@ -41,6 +41,7 @@ func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeI
 func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	// You already computed this (even distribution)
 	// numThisSubwindow := k.calculateFilesPerSubwindow(ctx, roundIdx) // your existing function
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	numThisSubwindow := uint64(300)
 
 	indices, err := k.SelectRandomChallengeIndices(ctx, numThisSubwindow, roundIdx)
@@ -65,6 +66,13 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		// Issue the actual challenge
 		k.IssueChallengeForFile(ctx, file, roundIdx)
 	}
+
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeNewChallengeRound,
+			sdk.NewAttribute("round", fmt.Sprintf("%d", roundIdx)),
+		),
+	)
 }
 
 func (k Keeper) IssueChallengeForFile(
@@ -94,8 +102,9 @@ func (k Keeper) IssueChallengeForFile(
 	// Generate unique chunk indices for each provider
 	chunkIndices := make(map[string]uint64) // provider -> chunkIndex
 
-	// Global seed base: prevHash + file.Fid + round
-	globalSeed := append(prevHash, []byte(file.Fid)...)
+	// Global seed base (deterministic per file + round)
+	globalSeed := append([]byte{}, prevHash...) // copy
+	globalSeed = append(globalSeed, []byte(file.Fid)...)
 	globalSeed = binary.BigEndian.AppendUint64(globalSeed, round)
 
 	for i, providerAddr := range file.Providers {
@@ -108,28 +117,24 @@ func (k Keeper) IssueChallengeForFile(
 	}
 
 	// Now create challenges
-	challenges := make([]types.StorageChallenge, 0, len(file.Providers))
 	for _, providerAddr := range file.Providers {
 		chunkIndex := chunkIndices[providerAddr]
 
 		// Create challenge
-		challenge, err := CreateChallenge(
+		challenge := CreateChallenge(
 			file,
 			providerAddr,
 			chunkIndex,
 			currentHeight,
 		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create challenge for provider %s: %w",
-				providerAddr, err)
+
+		if err := k.SetChallenge(ctx, challenge); err != nil {
+			sdkCtx.Logger().Error("failed to store challenge", "err", err, "fid", file.Fid, "provider", providerAddr)
+			continue
 		}
-
-		k.SetChallenge(ctx, challenge)
-
-		challenges = append(challenges, challenge)
 	}
 
-	return challenges, nil
+	return nil, nil
 }
 
 func CreateChallenge(
@@ -137,7 +142,7 @@ func CreateChallenge(
 	providerAddr string,
 	chunkIndex uint64,
 	currentHeight int64,
-) (types.StorageChallenge, error) {
+) types.StorageChallenge {
 	challengeID := types.GenerateChallengeID(currentHeight, file.Fid, providerAddr)
 
 	return types.StorageChallenge{
@@ -148,7 +153,7 @@ func CreateChallenge(
 		ChunkIndex:    chunkIndex,
 		CreatedHeight: currentHeight,
 		Completed:     false,
-	}, nil
+	}
 }
 
 func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {

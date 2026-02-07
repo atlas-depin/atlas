@@ -4,8 +4,10 @@ package types
 const (
 	EventTypeBuyStorage = "buy_storage"
 
-	EventTypeSignContract   = "post_file"
-	EventTypeCancelContract = "delete_file"
+	EventTypeSignContract       = "post_file"
+	EventTypeCancelContract     = "delete_file"
+	EventTypeNewChallengeRound  = "challenge_round_start"
+	EventTypeNewChallengeWindow = "challenge_window_start"
 
 	AttributeValueCategory = ModuleName
 
