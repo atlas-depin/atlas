@@ -2,21 +2,20 @@ package keeper
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
 	merkletree "github.com/ahm23/go-merkletree-xxh"
+	"github.com/cespare/xxhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/zeebo/blake3"
 )
 
 var json = jsoniter.ConfigFastest
-
-// [ENABLE] probabilistic auditing
-// const ChallengeRate = 10000
 
 func (k Keeper) SetChallenge(ctx context.Context, challenge types.StorageChallenge) error {
 	// Save challenge
@@ -39,106 +38,86 @@ func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeI
 	return k.ChallengeStore.Remove(ctx, key)
 }
 
-func (k Keeper) ChallengeFiles(ctx context.Context) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
+func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
+	// You already computed this (even distribution)
+	// numThisSubwindow := k.calculateFilesPerSubwindow(ctx, roundIdx) // your existing function
+	numThisSubwindow := uint64(300)
 
-	height := uint64(sdkCtx.BlockHeight())
-	baseSeed, err := types.GetVerifiableRandomSeed(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get randomness: %w", err)
+	indices, err := k.SelectRandomChallengeIndices(ctx, numThisSubwindow, roundIdx)
+	if err != nil || len(indices) == 0 {
+		// log and return or fallback
+		return
 	}
 
-	iter, err := k.FileStore.Iterate(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer iter.Close()
-
-	var i uint64 = 0
-	for ; iter.Valid(); i++ {
-		kv, err := iter.KeyValue()
+	for _, idx := range indices {
+		fileId, err := k.ChallengeSnapshot.Get(ctx, idx)
 		if err != nil {
-			return err
+			continue // shouldn't happen
 		}
 
-		k.GenerateFileChallenges(ctx, kv.Value, baseSeed, i, height)
+		// Check if file still exists (handles deletes)
+		file, err := k.GetFile(ctx, fileId) // your helper
+		if err != nil {
+			// file was deleted mid-window → skip
+			continue
+		}
 
-		iter.Next()
+		// Issue the actual challenge
+		k.IssueChallengeForFile(ctx, file, roundIdx)
 	}
-
-	return nil
 }
 
-// //
-// GenerateFileChallenges creates challenges for ALL providers of a file
-// //
-func (k Keeper) GenerateFileChallenges(
+func (k Keeper) IssueChallengeForFile(
 	ctx context.Context,
 	file types.File,
-	seed []byte,
-	seedOffset uint64,
-	currentHeight uint64,
+	round uint64,
 ) ([]types.StorageChallenge, error) {
-
 	// Validate file has providers
 	if len(file.Providers) == 0 {
 		return nil, fmt.Errorf("file has no providers: %s", file.Fid)
 	}
-
 	// Validate file size
 	if file.FileSize == 0 {
 		return nil, fmt.Errorf("file has zero size: %s", file.Fid)
 	}
-
 	// Compute total chunks
 	chunkCount := types.ComputeChunkCount(file.FileSize)
 	if chunkCount == 0 {
 		return nil, fmt.Errorf("invalid chunk count for file size %d", file.FileSize)
 	}
 
-	// Generate challenges for each provider
-	challenges := make([]types.StorageChallenge, 0, len(file.Providers))
+	// Get deterministic seed source: previous block hash
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	prevHash := sdkCtx.BlockHeader().LastBlockId.Hash
+	currentHeight := sdkCtx.BlockHeight()
+
+	// Generate unique chunk indices for each provider
+	chunkIndices := make(map[string]uint64) // provider -> chunkIndex
+
+	// Global seed base: prevHash + file.Fid + round
+	globalSeed := append(prevHash, []byte(file.Fid)...)
+	globalSeed = binary.BigEndian.AppendUint64(globalSeed, round)
 
 	for i, providerAddr := range file.Providers {
-		// Validate provider address
-		// [TBD]: do I really need this? or is it just a waste of CPU time
-		if _, err := sdk.AccAddressFromBech32(providerAddr); err != nil {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-			sdkCtx.Logger().Error("invalid provider address",
-				"file", file.Fid,
-				"provider", providerAddr,
-				"error", err,
-			)
-			continue
-		}
+		// Provider-specific seed: globalSeed + position + nonce
+		seed := append(globalSeed, byte(i)) // position as byte (assuming <256 providers)
+		// XXHash for randomness
+		hashVal := xxhash.Sum64(seed)
+		// Modulo to get chunk index
+		chunkIndices[providerAddr] = hashVal % chunkCount
+	}
 
-		// Generate provider-specific random seed
-		providerSeed := types.CreateProviderChallengeSeed(
-			seed,
-			seedOffset,
-			providerAddr,
-			uint64(i), // Provider position for seed diversity
-		)
-
-		// Generate random chunk index for THIS provider
-		chunkIndex, err := types.GenerateRandomChallengeChunkIndex(
-			providerSeed,
-			chunkCount,
-			file.Fid,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to generate chunk index for provider %s: %w",
-				providerAddr, err)
-		}
+	// Now create challenges
+	challenges := make([]types.StorageChallenge, 0, len(file.Providers))
+	for _, providerAddr := range file.Providers {
+		chunkIndex := chunkIndices[providerAddr]
 
 		// Create challenge
 		challenge, err := CreateChallenge(
 			file,
 			providerAddr,
 			chunkIndex,
-			providerSeed,
 			currentHeight,
-			chunkCount,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create challenge for provider %s: %w",
@@ -157,9 +136,7 @@ func CreateChallenge(
 	file types.File,
 	providerAddr string,
 	chunkIndex uint64,
-	seed []byte,
-	currentHeight uint64,
-	chunkCount uint64,
+	currentHeight int64,
 ) (types.StorageChallenge, error) {
 	challengeID := types.GenerateChallengeID(currentHeight, file.Fid, providerAddr)
 
@@ -170,7 +147,6 @@ func CreateChallenge(
 		Provider:      providerAddr,
 		ChunkIndex:    chunkIndex,
 		CreatedHeight: currentHeight,
-		Seed:          seed,
 		Completed:     false,
 	}, nil
 }

@@ -13,6 +13,7 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 	if ctx.BlockHeight() > 0 && ctx.BlockHeight()%300 == 0 {
 		ctx.Logger().Info("Processing provider rewards", "height", ctx.BlockHeight())
 
+		// k.ChallengeFiles(ctx)
 		// if err := k.RewardProviders(ctx); err != nil {
 		// 	// Log error but don't panic
 		// 	ctx.Logger().Error("Failed to reward providers", "error", err)
@@ -42,7 +43,7 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 	}
 
 	if ctx.BlockHeight() > 0 && ctx.BlockHeight()%2400 == 0 {
-		k.ChallengeFiles(ctx)
+		// k.ChallengeFiles(ctx)
 	}
 
 	return nil

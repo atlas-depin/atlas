@@ -48,9 +48,11 @@ type Keeper struct {
 	FileStore *collections.IndexedMap[collections.Triple[string, string, string], types.File, fileIndexes]
 	FileCount collections.Item[int64]
 
-	BinStore       collections.Map[string, types.Bin]      // file_id -> File
-	ProviderStore  collections.Map[string, types.Provider] // address -> Provider
-	ChallengeStore collections.Map[collections.Pair[string, string], types.StorageChallenge]
+	BinStore           collections.Map[string, types.Bin]      // file_id -> File
+	ProviderStore      collections.Map[string, types.Provider] // address -> Provider
+	ChallengeStore     collections.Map[collections.Pair[string, string], types.StorageChallenge]
+	ChallengeSnapshot  collections.Map[uint64, string] // index → fileId
+	ChallengeFileCount collections.Item[uint64]        // total files in snapshot
 
 	// Indicies
 	FilesByProvider collections.KeySet[string] // provider_address|file_id -> {}
@@ -110,7 +112,6 @@ func NewKeeper(
 			codec.CollValue[types.File](cdc),
 			NewFileIndexes(sb),
 		),
-
 		FileCount: collections.NewItem(sb, collections.NewPrefix(6), "file_count", collections.Int64Value),
 
 		ProviderStore: collections.NewMap(
@@ -123,6 +124,19 @@ func NewKeeper(
 			sb, collections.NewPrefix(8), "challenges",
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageChallenge](cdc),
+		),
+		ChallengeSnapshot: collections.NewMap(
+			sb,
+			collections.NewPrefix(81), // choose unused prefix
+			"challenge_snapshot",
+			collections.Uint64Key,
+			collections.StringValue,
+		),
+		ChallengeFileCount: collections.NewItem(
+			sb,
+			collections.NewPrefix(82),
+			"challenge_file_count",
+			collections.Uint64Value,
 		),
 
 		// FilesByProvider: collections.NewKeySet(
