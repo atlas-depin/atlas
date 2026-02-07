@@ -38,6 +38,28 @@ func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeI
 	return k.ChallengeStore.Remove(ctx, key)
 }
 
+func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
+	// Example placeholder logic:
+	// - Iterate over active storage providers or deals.
+	// - Compute a hash or Merkle root of the state.
+	// - Store it in KVStore with a key like "proof_snapshot:<window_start_height>".
+	// - Emit an event for traceability.
+
+	ctx.Logger().Info("Taking proof window snapshot", "height", ctx.BlockHeight())
+
+	// TODO: Your snapshot logic here, e.g.:
+	// snapshot := k.ComputeStorageStateSnapshot(ctx) // Hypothetical method
+	// store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte("proof_snapshots"))
+	// store.Set(sdk.Uint64ToBigEndian(uint64(ctx.BlockHeight())), snapshot.Bytes())
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeNewChallengeWindow,
+			// sdk.NewAttribute(, fmt.Sprintf("%d", ctx.BlockHeight())),
+		),
+	)
+}
+
 func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	// You already computed this (even distribution)
 	// numThisSubwindow := k.calculateFilesPerSubwindow(ctx, roundIdx) // your existing function
