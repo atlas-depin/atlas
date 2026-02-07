@@ -45,8 +45,12 @@ func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 	// - Compute a hash or Merkle root of the state.
 	// - Store it in KVStore with a key like "proof_snapshot:<window_start_height>".
 	// - Emit an event for traceability.
-	_ = k.ChallengeCursor.Set(ctx, []byte{})
-	ctx.Logger().Info("Taking proof window snapshot", "height", ctx.BlockHeight())
+	_ = k.ChallengeFilesCursor.Set(ctx, []byte{})
+
+	currentFileCount, _ := k.FileCount.Get(ctx)
+	_ = k.ChallengeFilesCount.Set(ctx, currentFileCount)
+
+	ctx.Logger().Info("Challenge window started", "height", ctx.BlockHeight(), "snapshot_eligible", currentFileCount)
 
 	// TODO: Your snapshot logic here, e.g.:
 	// snapshot := k.ComputeStorageStateSnapshot(ctx) // Hypothetical method
@@ -63,12 +67,14 @@ func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 
 func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	params, _ := k.Params.Get(ctx)
+	fileCount, _ := k.ChallengeFilesCount.Get(ctx)
+
 	windowIndex := uint64(ctx.BlockHeight() / int64(params.ProofWindowBlocks))
 	isAscending := windowIndex%2 == 0
 
-	numThisRound := uint64(300) // replace with your g(x) formula + snapshot N later
+	numThisRound := k.computeProofsThisRound(ctx, fileCount, roundIdx)
 
-	cursorBz, _ := k.ChallengeCursor.Get(ctx)
+	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
 
 	var startTriple collections.Triple[string, string, string]
 	var hasStart bool
@@ -152,12 +158,12 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	// Update cursor to last successfully processed key
 	if len(lastKeyBz) > 0 {
-		if setErr := k.ChallengeCursor.Set(ctx, lastKeyBz); setErr != nil {
+		if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
 			ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
 		}
 	} else if selectedCount == 0 && hasStart {
 		// Exhausted in this direction → reset cursor for next round/window
-		if setErr := k.ChallengeCursor.Set(ctx, []byte{}); setErr != nil {
+		if setErr := k.ChallengeFilesCursor.Set(ctx, []byte{}); setErr != nil {
 			ctx.Logger().Error("Failed to reset challenge cursor", "err", setErr)
 		}
 	}
@@ -323,4 +329,16 @@ func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input type
 	}
 
 	return verified
+}
+
+func (k Keeper) computeProofsThisRound(ctx sdk.Context, n uint64, roundIdx uint64) uint64 {
+	params, _ := k.Params.Get(ctx)
+	kBlocks := params.ProofRoundBlocks
+	gBlocks := params.ProofWindowBlocks
+
+	// g(x) = ceil((n * roundIdx + kBlocks) / gBlocks) - ceil((roundIdx * n) / gBlocks)
+	// ceil(a/b) = (a + b - 1) / b
+	term1 := (n*roundIdx + kBlocks + gBlocks - 1) / gBlocks
+	term2 := (roundIdx*n + gBlocks - 1) / gBlocks
+	return term1 - term2
 }

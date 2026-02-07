@@ -8,10 +8,10 @@ func NewParams() Params {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		PricePerGbDay:         400, // $0.0004 * 10^6
-		ProviderDeposit:       10000,
-		ChallengeWindow:       300,
-		MaxChallengesPerRound: 100,
+		PricePerGbDay:     400, // $0.0004 * 10^6
+		ProviderDeposit:   10000,
+		ProofWindowBlocks: 7200,
+		ProofRoundBlocks:  300,
 	}
 }
 

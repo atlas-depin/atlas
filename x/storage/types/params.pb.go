@@ -5,12 +5,13 @@ package types
 
 import (
 	fmt "fmt"
-	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
-	_ "github.com/cosmos/gogoproto/gogoproto"
-	proto "github.com/cosmos/gogoproto/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+
+	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -26,10 +27,10 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the module.
 type Params struct {
-	PricePerGbDay     int64 `protobuf:"varint,1,opt,name=price_per_gb_day,json=pricePerGbDay,proto3" json:"price_per_gb_day,omitempty"`
-	ProviderDeposit   int64 `protobuf:"varint,2,opt,name=provider_deposit,json=providerDeposit,proto3" json:"provider_deposit,omitempty"`
-	ProofWindowBlocks int64 `protobuf:"varint,3,opt,name=proof_window_blocks,json=proofWindowBlocks,proto3" json:"proof_window_blocks,omitempty"`
-	ProofRoundBlocks  int64 `protobuf:"varint,4,opt,name=proof_round_blocks,json=proofRoundBlocks,proto3" json:"proof_round_blocks,omitempty"`
+	PricePerGbDay     int64  `protobuf:"varint,1,opt,name=price_per_gb_day,json=pricePerGbDay,proto3" json:"price_per_gb_day,omitempty"`
+	ProviderDeposit   int64  `protobuf:"varint,2,opt,name=provider_deposit,json=providerDeposit,proto3" json:"provider_deposit,omitempty"`
+	ProofWindowBlocks uint64 `protobuf:"varint,3,opt,name=proof_window_blocks,json=proofWindowBlocks,proto3" json:"proof_window_blocks,omitempty"`
+	ProofRoundBlocks  uint64 `protobuf:"varint,4,opt,name=proof_round_blocks,json=proofRoundBlocks,proto3" json:"proof_round_blocks,omitempty"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -79,14 +80,14 @@ func (m *Params) GetProviderDeposit() int64 {
 	return 0
 }
 
-func (m *Params) GetProofWindowBlocks() int64 {
+func (m *Params) GetProofWindowBlocks() uint64 {
 	if m != nil {
 		return m.ProofWindowBlocks
 	}
 	return 0
 }
 
-func (m *Params) GetProofRoundBlocks() int64 {
+func (m *Params) GetProofRoundBlocks() uint64 {
 	if m != nil {
 		return m.ProofRoundBlocks
 	}
@@ -316,7 +317,7 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ProofWindowBlocks |= int64(b&0x7F) << shift
+				m.ProofWindowBlocks |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -335,7 +336,7 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ProofRoundBlocks |= int64(b&0x7F) << shift
+				m.ProofRoundBlocks |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

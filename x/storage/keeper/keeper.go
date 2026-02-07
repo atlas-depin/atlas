@@ -46,12 +46,13 @@ type Keeper struct {
 	SubscriptionSequence collections.Sequence
 	////
 	FileStore *collections.IndexedMap[collections.Triple[string, string, string], types.File, fileIndexes]
-	FileCount collections.Item[int64]
+	FileCount collections.Item[uint64]
 
-	BinStore        collections.Map[string, types.Bin]      // file_id -> File
-	ProviderStore   collections.Map[string, types.Provider] // address -> Provider
-	ChallengeStore  collections.Map[collections.Pair[string, string], types.StorageChallenge]
-	ChallengeCursor collections.Item[[]byte]
+	BinStore             collections.Map[string, types.Bin]      // file_id -> File
+	ProviderStore        collections.Map[string, types.Provider] // address -> Provider
+	ChallengeStore       collections.Map[collections.Pair[string, string], types.StorageChallenge]
+	ChallengeFilesCount  collections.Item[uint64]
+	ChallengeFilesCursor collections.Item[[]byte]
 
 	// Indicies
 	FilesByProvider collections.KeySet[string] // provider_address|file_id -> {}
@@ -111,7 +112,7 @@ func NewKeeper(
 			codec.CollValue[types.File](cdc),
 			NewFileIndexes(sb),
 		),
-		FileCount: collections.NewItem(sb, collections.NewPrefix(6), "file_count", collections.Int64Value),
+		FileCount: collections.NewItem(sb, collections.NewPrefix(6), "file_count", collections.Uint64Value),
 
 		ProviderStore: collections.NewMap(
 			sb, collections.NewPrefix(7), "providers",
@@ -124,12 +125,8 @@ func NewKeeper(
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageChallenge](cdc),
 		),
-		ChallengeCursor: collections.NewItem(
-			sb,
-			collections.NewPrefix(81), // new prefix
-			"challenge_cursor",
-			collections.BytesValue, // or BytesCodec
-		),
+		ChallengeFilesCount:  collections.NewItem(sb, collections.NewPrefix(81), "challenge_files_count", collections.Uint64Value),
+		ChallengeFilesCursor: collections.NewItem(sb, collections.NewPrefix(82), "challenge_files_cursor", collections.BytesValue),
 
 		// FilesByProvider: collections.NewKeySet(
 		// 	sb, collections.NewPrefix(3), "files_by_provider",

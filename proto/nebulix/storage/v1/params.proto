@@ -13,6 +13,6 @@ message Params {
 
   int64 price_per_gb_day = 1;
   int64 provider_deposit = 2;
-  int64 proof_window_blocks = 3;
-  int64 proof_round_blocks = 4;
+  uint64 proof_window_blocks = 3;
+  uint64 proof_round_blocks = 4;
 }

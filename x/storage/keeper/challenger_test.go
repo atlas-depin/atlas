@@ -63,7 +63,6 @@ func (suite *KeeperTestSuite) createTestChallenge(provider, challengeId, fileId 
 		Provider:      provider,
 		ChunkIndex:    chunkIndex,
 		CreatedHeight: suite.ctx.BlockHeight(),
-		Seed:          []byte("seed-" + challengeId),
 		Completed:     false,
 	}
 
