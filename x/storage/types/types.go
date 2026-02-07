@@ -1,5 +1,7 @@
 package types
 
+import "cosmossdk.io/collections"
+
 type ProviderStatus int32
 
 const (
@@ -26,6 +28,12 @@ const (
 	ChallengeStatusPassed
 	ChallengeStatusFailed
 	ChallengeStatusExpired
+)
+
+var MaxTripleSentinel = collections.Join3(
+	"\xff\xff\xff\xff\xff\xff\xff\xff", //(255 repeated)
+	"\xff\xff\xff\xff\xff\xff\xff\xff",
+	"\xff\xff\xff\xff\xff\xff\xff\xff",
 )
 
 // // Params defines the module parameters

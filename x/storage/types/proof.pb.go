@@ -5,10 +5,11 @@ package types
 
 import (
 	fmt "fmt"
-	proto "github.com/cosmos/gogoproto/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+
+	proto "github.com/cosmos/gogoproto/proto"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -88,7 +89,7 @@ type StorageChallenge struct {
 	FileMerkle    string `protobuf:"bytes,3,opt,name=file_merkle,json=fileMerkle,proto3" json:"file_merkle,omitempty"`
 	Provider      string `protobuf:"bytes,4,opt,name=provider,proto3" json:"provider,omitempty"`
 	ChunkIndex    uint64 `protobuf:"varint,5,opt,name=chunk_index,json=chunkIndex,proto3" json:"chunk_index,omitempty"`
-	CreatedHeight uint64 `protobuf:"varint,6,opt,name=created_height,json=createdHeight,proto3" json:"created_height,omitempty"`
+	CreatedHeight int64  `protobuf:"varint,6,opt,name=created_height,json=createdHeight,proto3" json:"created_height,omitempty"`
 	Seed          []byte `protobuf:"bytes,7,opt,name=seed,proto3" json:"seed,omitempty"`
 	Completed     bool   `protobuf:"varint,8,opt,name=completed,proto3" json:"completed,omitempty"`
 }
@@ -161,7 +162,7 @@ func (m *StorageChallenge) GetChunkIndex() uint64 {
 	return 0
 }
 
-func (m *StorageChallenge) GetCreatedHeight() uint64 {
+func (m *StorageChallenge) GetCreatedHeight() int64 {
 	if m != nil {
 		return m.CreatedHeight
 	}
@@ -738,7 +739,7 @@ func (m *StorageChallenge) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.CreatedHeight |= uint64(b&0x7F) << shift
+				m.CreatedHeight |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"encoding/hex"
@@ -44,7 +45,7 @@ func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 	// - Compute a hash or Merkle root of the state.
 	// - Store it in KVStore with a key like "proof_snapshot:<window_start_height>".
 	// - Emit an event for traceability.
-
+	_ = k.ChallengeCursor.Set(ctx, []byte{})
 	ctx.Logger().Info("Taking proof window snapshot", "height", ctx.BlockHeight())
 
 	// TODO: Your snapshot logic here, e.g.:
@@ -61,38 +62,122 @@ func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 }
 
 func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
-	// You already computed this (even distribution)
-	// numThisSubwindow := k.calculateFilesPerSubwindow(ctx, roundIdx) // your existing function
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	numThisSubwindow := uint64(300)
+	params, _ := k.Params.Get(ctx)
+	windowIndex := uint64(ctx.BlockHeight() / int64(params.ProofWindowBlocks))
+	isAscending := windowIndex%2 == 0
 
-	indices, err := k.SelectRandomChallengeIndices(ctx, numThisSubwindow, roundIdx)
-	if err != nil || len(indices) == 0 {
-		// log and return or fallback
-		return
+	numThisRound := uint64(300) // replace with your g(x) formula + snapshot N later
+
+	cursorBz, _ := k.ChallengeCursor.Get(ctx)
+
+	var startTriple collections.Triple[string, string, string]
+	var hasStart bool
+	if len(cursorBz) > 0 {
+		n, decoded, err := k.FileStore.KeyCodec().Decode(cursorBz)
+		if err == nil && n == len(cursorBz) {
+			startTriple = decoded
+			hasStart = true
+		} else {
+			ctx.Logger().Error("Invalid cursor decode, starting from beginning", "err", err)
+		}
 	}
 
-	for _, idx := range indices {
-		fileId, err := k.ChallengeSnapshot.Get(ctx, idx)
-		if err != nil {
-			continue // shouldn't happen
-		}
+	crange := &collections.Range[collections.Triple[string, string, string]]{}
 
-		// Check if file still exists (handles deletes)
-		file, err := k.GetFile(ctx, fileId) // your helper
-		if err != nil {
-			// file was deleted mid-window → skip
+	if isAscending {
+		if hasStart {
+			crange.StartInclusive(startTriple)
+		}
+	} else {
+		// Descending
+		if hasStart {
+			crange.StartInclusive(startTriple) // resume from previous cursor
+		} else {
+			// Fresh descending window: start from sentinel
+			crange.StartInclusive(types.MaxTripleSentinel)
+		}
+		crange.Descending()
+	}
+
+	iter, err := k.FileStore.Iterate(ctx, crange)
+	if err != nil {
+		ctx.Logger().Error("Failed to iterate FileStore", "err", err, "ascending", isAscending)
+		return
+	}
+	defer iter.Close()
+
+	var selectedCount uint64
+	var lastKeyBz []byte
+
+	for iter.Valid() && selectedCount < numThisRound {
+		triple, keyErr := iter.Key()
+		if keyErr != nil {
+			ctx.Logger().Error("Failed to decode key", "err", keyErr)
+			iter.Next()
 			continue
 		}
 
-		// Issue the actual challenge
+		file, valErr := iter.Value()
+		if valErr != nil {
+			ctx.Logger().Error("Failed to decode value", "err", valErr)
+			iter.Next()
+			continue
+		}
+
+		// Encode triple correctly
+		size := k.FileStore.KeyCodec().Size(triple)
+		keyBz := make([]byte, size)
+		written, encErr := k.FileStore.KeyCodec().Encode(keyBz, triple)
+		if encErr != nil {
+			ctx.Logger().Error("Encode failed", "err", encErr)
+			iter.Next()
+			continue
+		}
+		keyBz = keyBz[:written] // safe slice (normally written == size)
+
+		// Skip cursor key
+		if hasStart && bytes.Equal(keyBz, cursorBz) {
+			iter.Next()
+			continue
+		}
+
+		// if !k.IsFileEligibleForChallenge(ctx, file) { ... }
+
 		k.IssueChallengeForFile(ctx, file, roundIdx)
+		selectedCount++
+		lastKeyBz = keyBz // now safe to assign
+
+		iter.Next()
 	}
 
-	sdkCtx.EventManager().EmitEvent(
+	// Update cursor to last successfully processed key
+	if len(lastKeyBz) > 0 {
+		if setErr := k.ChallengeCursor.Set(ctx, lastKeyBz); setErr != nil {
+			ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
+		}
+	} else if selectedCount == 0 && hasStart {
+		// Exhausted in this direction → reset cursor for next round/window
+		if setErr := k.ChallengeCursor.Set(ctx, []byte{}); setErr != nil {
+			ctx.Logger().Error("Failed to reset challenge cursor", "err", setErr)
+		}
+	}
+
+	// Logging for observability
+	ctx.Logger().Info("Challenge round executed",
+		"round", roundIdx,
+		"window_index", windowIndex,
+		"direction_ascending", isAscending,
+		"challenged", selectedCount,
+	)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeNewChallengeRound,
 			sdk.NewAttribute("round", fmt.Sprintf("%d", roundIdx)),
+			sdk.NewAttribute("window_index", fmt.Sprintf("%d", windowIndex)),
+			sdk.NewAttribute("direction_ascending", fmt.Sprintf("%t", isAscending)),
+			sdk.NewAttribute("challenged_count", fmt.Sprintf("%d", selectedCount)),
 		),
 	)
 }
@@ -239,61 +324,3 @@ func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input type
 
 	return verified
 }
-
-// // GenerateChallenges iterates over all files and probabilistically generates a challenge.
-// func (k Keeper) GenerateChallenges(ctx sdk.Context) []types.Challenge {
-
-// 	// [ENABLE] probabilistic auditing
-// 	// blockHash := ctx.BlockHeader().LastBlockId.Hash
-// 	var challenges []types.Challenge
-
-// 	k.IterateAllFiles(ctx, func(file types.File) (stop bool) {
-
-// 		// [ENABLE] probabilistic auditing
-// 		// [NOTE]: disabled for now... until everything else works. I don't even know if what I'm doing here works lol!
-// 		// 1. Probabilistic Auditing
-// 		// -----------------------------------------------------
-// 		// seedData := append([]byte(file.Id), blockHash.Bytes()...)
-// 		// hash := address.Hash(seedData)
-// 		// hashInt := new(big.Int).SetBytes(hash)
-
-// 		// // Check if hashInt % ChallengeRate == 0
-// 		// zero := big.NewInt(0)
-// 		// rate := big.NewInt(ChallengeRate)
-// 		// if hashInt.Mod(hashInt, rate).Cmp(zero) != 0 {
-// 		// 	return false // Skip this file
-// 		// }
-
-// 		// 2. File Selected: Generate a challenge for each of the 3 responsible providers.
-// 		// -----------------------------------------------------
-// 		binRoot := k.GetBinRoot(ctx, file.BinId)
-
-// 		challengeSeed := make([]byte, 32)
-// 		_, err := rand.Read(challengeSeed)
-// 		if err != nil {
-// 			ctx.Logger().Error("Failed to generate challenge seed", "error", err)
-// 			return false
-// 		}
-
-// 		for _, providerAddr := range file.Providers {
-// 			challenge := types.Challenge{
-// 				FileId:        file.Merkle,
-// 				Provider:      providerAddr,
-// 				ChallengeSeed: string(challengeSeed),
-// 				BinRoot:       binRoot, // CRUCIAL: The Bin Root the SP must prove against
-// 			}
-
-// 			challenges = append(challenges, challenge)
-// 			k.SetChallenge(ctx, challenge)
-// 		}
-
-// 		// [TODO]: file challenge traceability
-// 		// file.LatestChallengeBlock = uint64(ctx.BlockHeight())
-// 		k.SetFile(ctx, file)
-
-// 		return false
-// 	})
-
-// 	ctx.Logger().Info("Generated challenges", "count", len(challenges))
-// 	return challenges
-// }

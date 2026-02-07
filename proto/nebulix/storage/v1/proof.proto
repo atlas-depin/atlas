@@ -15,7 +15,6 @@ message StorageChallenge {
   string file_merkle = 3;
   string provider = 4;
   uint64 chunk_index = 5;
-  uint64 created_height = 6;
-  bytes seed = 7;
-  bool completed = 8;
+  int64 created_height = 6;
+  bool completed = 7;
 }
