@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"context"
 	"encoding/binary"
 	"encoding/hex"
@@ -76,31 +75,29 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
 
-	var startTriple collections.Triple[string, string, string]
-	var hasStart bool
-	if len(cursorBz) > 0 {
-		n, decoded, err := k.FileStore.KeyCodec().Decode(cursorBz)
-		if err == nil && n == len(cursorBz) {
-			startTriple = decoded
-			hasStart = true
-		} else {
-			ctx.Logger().Error("Invalid cursor decode, starting from beginning", "err", err)
-		}
+	// compute iteration cursor
+	var resume bool
+	var cursor collections.Triple[string, string, string]
+	_, decoded, err := k.FileStore.KeyCodec().Decode(cursorBz)
+	if err == nil {
+		cursor = decoded
+		resume = true
 	} else if roundIdx > 0 {
 		ctx.Logger().Error("No more files remainin for proof round")
 		return
+	} else {
+		ctx.Logger().Error("Null cursor decode, starting from beginning", "err", err)
 	}
 
+	// set iteration cursor & direction
 	crange := &collections.Range[collections.Triple[string, string, string]]{}
-
 	if isAscending {
-		if hasStart {
-			crange.StartInclusive(startTriple)
+		if err != nil {
+			crange.StartInclusive(cursor)
 		}
 	} else {
-		// Descending
-		if hasStart {
-			crange.StartInclusive(startTriple) // resume from previous cursor
+		if resume {
+			crange.StartInclusive(cursor) // resume from previous cursor
 		} else {
 			// Fresh descending window: start from sentinel
 			crange.StartInclusive(types.MaxTripleSentinel)
@@ -108,17 +105,20 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		crange.Descending()
 	}
 
+	// iterate
+	var counter uint64
+	var lastKeyBz []byte
 	iter, err := k.FileStore.Iterate(ctx, crange)
 	if err != nil {
 		ctx.Logger().Error("Failed to iterate FileStore", "err", err, "ascending", isAscending)
 		return
 	}
 	defer iter.Close()
+	if iter.Valid() && resume {
+		iter.Next() // skip cursor key
+	}
 
-	var selectedCount uint64
-	var lastKeyBz []byte
-
-	for iter.Valid() && selectedCount < numThisRound {
+	for iter.Valid() && counter < numThisRound {
 		triple, keyErr := iter.Key()
 		if keyErr != nil {
 			ctx.Logger().Error("Failed to decode key", "err", keyErr)
@@ -133,28 +133,23 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			continue
 		}
 
-		// Encode triple correctly
-		size := k.FileStore.KeyCodec().Size(triple)
-		keyBz := make([]byte, size)
-		written, encErr := k.FileStore.KeyCodec().Encode(keyBz, triple)
-		if encErr != nil {
-			ctx.Logger().Error("Encode failed", "err", encErr)
-			iter.Next()
-			continue
-		}
-		keyBz = keyBz[:written] // safe slice (normally written == size)
-
-		// Skip cursor key
-		if hasStart && bytes.Equal(keyBz, cursorBz) {
-			iter.Next()
-			continue
-		}
-
 		// if !k.IsFileEligibleForChallenge(ctx, file) { ... }
 
 		k.IssueChallengeForFile(ctx, file, roundIdx)
-		selectedCount++
-		lastKeyBz = keyBz // now safe to assign
+
+		counter++
+		if counter == numThisRound {
+			// encode triple correctly
+			size := k.FileStore.KeyCodec().Size(triple)
+			keyBz := make([]byte, size)
+			written, encErr := k.FileStore.KeyCodec().Encode(keyBz, triple)
+			if encErr != nil {
+				ctx.Logger().Error("Encode failed", "err", encErr)
+				iter.Next()
+				continue
+			}
+			lastKeyBz = keyBz[:written] // safe slice (normally written == size)
+		}
 
 		iter.Next()
 	}
@@ -164,7 +159,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
 			ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
 		}
-	} else if selectedCount == 0 && hasStart {
+	} else if counter == 0 && resume {
 		// Exhausted in this direction reset cursor for next round/window
 		if setErr := k.ChallengeFilesCursor.Set(ctx, []byte{}); setErr != nil {
 			ctx.Logger().Error("Failed to reset challenge cursor", "err", setErr)
@@ -176,7 +171,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		"round", roundIdx,
 		"window_index", windowIndex,
 		"direction_ascending", isAscending,
-		"challenged", selectedCount,
+		"challenged", counter,
 	)
 
 	// Emit event
@@ -186,7 +181,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			sdk.NewAttribute("round", fmt.Sprintf("%d", roundIdx)),
 			sdk.NewAttribute("window_index", fmt.Sprintf("%d", windowIndex)),
 			sdk.NewAttribute("direction_ascending", fmt.Sprintf("%t", isAscending)),
-			sdk.NewAttribute("challenged_count", fmt.Sprintf("%d", selectedCount)),
+			sdk.NewAttribute("challenged_count", fmt.Sprintf("%d", counter)),
 		),
 	)
 }
@@ -212,8 +207,9 @@ func (k Keeper) IssueChallengeForFile(
 
 	// Get deterministic seed source: previous block hash
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	params, _ := k.Params.Get(ctx)
 	prevHash := sdkCtx.BlockHeader().LastBlockId.Hash
-	currentHeight := sdkCtx.BlockHeight()
+	currentHeight := uint64(sdkCtx.BlockHeight())
 
 	// Generate unique chunk indices for each provider
 	chunkIndices := make(map[string]uint64) // provider -> chunkIndex
@@ -242,6 +238,7 @@ func (k Keeper) IssueChallengeForFile(
 			providerAddr,
 			chunkIndex,
 			currentHeight,
+			currentHeight+params.ProofRoundBlocks,
 		)
 
 		if err := k.SetChallenge(ctx, challenge); err != nil {
@@ -257,18 +254,81 @@ func CreateChallenge(
 	file types.File,
 	providerAddr string,
 	chunkIndex uint64,
-	currentHeight int64,
+	currentHeight uint64,
+	deadlineHeight uint64,
 ) types.StorageChallenge {
 	challengeID := types.GenerateChallengeID(currentHeight, file.Fid, providerAddr)
 
 	return types.StorageChallenge{
-		ChallengeId:   challengeID,
-		FileId:        file.Fid,
-		FileMerkle:    file.Merkle,
-		Provider:      providerAddr,
-		ChunkIndex:    chunkIndex,
-		CreatedHeight: currentHeight,
-		Completed:     false,
+		ChallengeId:    challengeID,
+		FileId:         file.Fid,
+		FileMerkle:     file.Merkle,
+		Provider:       providerAddr,
+		ChunkIndex:     chunkIndex,
+		CreatedHeight:  currentHeight,
+		DeadlineHeight: deadlineHeight,
+	}
+}
+
+// DetectMissedChallenges scans all active challenges and handles timeouts
+func (k Keeper) DetectMissedChallenges(ctx sdk.Context) {
+	currentHeight := uint64(ctx.BlockHeight())
+
+	// Iterate over ALL challenges (assuming you have a prefix map for them)
+	iter, err := k.ChallengeStore.Iterate(ctx, nil) // full range; adjust if you have a different prefix
+	if err != nil {
+		ctx.Logger().Error("Failed to iterate challenges for missed detection", "err", err)
+		return
+	}
+	defer iter.Close()
+
+	var missedCount uint64
+
+	for iter.Valid() {
+		challenge, err := iter.Value()
+		if err != nil {
+			ctx.Logger().Error("Failed to decode challenge", "err", err)
+			iter.Next()
+			continue
+		}
+
+		// Skip if already completed (shouldn't happen due to deletion, but safety)
+		if challenge.Completed {
+			iter.Next()
+			continue
+		}
+
+		// Check deadline
+		if currentHeight >= uint64(challenge.DeadlineHeight) {
+			// Missed proof — apply penalty
+			// k.ApplyMissedProofPenalty(ctx, challenge)
+			missedCount++
+
+			// Remove it
+			if err := k.RemoveChallenge(ctx, challenge.Provider, challenge.ChallengeId); err != nil {
+				ctx.Logger().Error("Failed to remove missed challenge", "id", challenge.ChallengeId, "err", err)
+			}
+
+			ctx.Logger().Info("Detected and penalized missed challenge",
+				"challenge_id", challenge.ChallengeId,
+				"provider", challenge.Provider,
+				"file_id", challenge.FileId,
+				"deadline", challenge.DeadlineHeight,
+				"current_height", currentHeight,
+			)
+		}
+
+		iter.Next()
+	}
+
+	if missedCount > 0 {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeMissedProofsDetected,
+				sdk.NewAttribute("missed_count", fmt.Sprintf("%d", missedCount)),
+				sdk.NewAttribute("height", fmt.Sprintf("%d", currentHeight)),
+			),
+		)
 	}
 }
 

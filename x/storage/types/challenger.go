@@ -6,7 +6,7 @@ import (
 	fmt "fmt"
 )
 
-func GenerateChallengeID(height int64, fileID string, providerAddr string) string {
+func GenerateChallengeID(height uint64, fileID string, providerAddr string) string {
 	providerHash := sha256.Sum256([]byte(providerAddr))
 	providerShort := fmt.Sprintf("%x", providerHash[:4]) // First 4 bytes as hex
 
