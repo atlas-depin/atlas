@@ -92,7 +92,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	// set iteration cursor & direction
 	crange := &collections.Range[collections.Triple[string, string, string]]{}
 	if isAscending {
-		if err != nil {
+		if resume {
 			crange.StartInclusive(cursor)
 		}
 	} else {
@@ -155,15 +155,8 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	}
 
 	// Update cursor to last successfully processed key
-	if len(lastKeyBz) > 0 {
-		if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
-			ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
-		}
-	} else if counter == 0 && resume {
-		// Exhausted in this direction reset cursor for next round/window
-		if setErr := k.ChallengeFilesCursor.Set(ctx, []byte{}); setErr != nil {
-			ctx.Logger().Error("Failed to reset challenge cursor", "err", setErr)
-		}
+	if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
+		ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
 	}
 
 	// Logging for observability
@@ -288,12 +281,6 @@ func (k Keeper) DetectMissedChallenges(ctx sdk.Context) {
 		challenge, err := iter.Value()
 		if err != nil {
 			ctx.Logger().Error("Failed to decode challenge", "err", err)
-			iter.Next()
-			continue
-		}
-
-		// Skip if already completed (shouldn't happen due to deletion, but safety)
-		if challenge.Completed {
 			iter.Next()
 			continue
 		}

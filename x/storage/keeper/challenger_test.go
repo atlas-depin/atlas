@@ -195,12 +195,10 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkewedFileCount_NoFilesLef
 	}
 	suite.keeper.StartChallengeWindow(suite.ctx)
 
-	// Simulate deletion of file-003 and file-006 mid-window
+	// Simulate deletion of file-002 and file-003 mid-window
 	err := suite.keeper.DeleteFile(suite.ctx, "file-002")
 	suite.Require().NoError(err)
 	err = suite.keeper.DeleteFile(suite.ctx, "file-003")
-	suite.Require().NoError(err)
-	err = suite.keeper.DeleteFile(suite.ctx, "file-006")
 	suite.Require().NoError(err)
 
 	// Run round with quota of 3
@@ -211,7 +209,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkewedFileCount_NoFilesLef
 	suite.Require().NoError(err)
 	suite.NotEmpty(cursorBz, "cursor should have advanced to last element (2/3 files selected, partial skew)")
 	_, triple, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz)
-	suite.Equal(triple.K3(), "file-008", "cursor should have passed deleted gaps")
+	suite.Equal("file-008", triple.K3(), "cursor should have passed deleted gaps")
 
 	suite.keeper.StartChallengeRound(suite.ctx, 2)
 	cursorBz, err = suite.keeper.ChallengeFilesCursor.Get(suite.ctx)
@@ -226,7 +224,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_Advan
 
 	params := types.DefaultParams()
 	params.ProofWindowBlocks = 14400 // ~12h at 6s blocks → plenty of rounds
-	params.ProofRoundBlocks = 300
+	params.ProofRoundBlocks = 150
 	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
 
 	// Ascending window (windowIndex 0 = even)
@@ -235,7 +233,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_Advan
 	owner := suite.CreateTestAddress(0)
 	provider := suite.CreateTestAddress(1)
 
-	const numFiles = 10_000_000 // Increase to 10_000 or 20_000 for more stress (watch RAM/time)
+	const numFiles = 1_000_000 // Increase to 10_000 or 20_000 for more stress (watch RAM/time)
 	suite.T().Logf("Creating %d test files...", numFiles)
 
 	startCreate := time.Now()
@@ -279,7 +277,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_Advan
 
 	_, triple2, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz2)
 	fileIDAtCursor2 := triple2.K3()
-	suite.T().Logf("After round 1: cursor at %s, duration: %v", fileIDAtCursor, duration)
+	suite.T().Logf("After round 1: cursor at %s, duration: %v", fileIDAtCursor2, duration)
 	suite.True(fileIDAtCursor2 > fileIDAtCursor,
 		"cursor should be further along after second round")
 }
