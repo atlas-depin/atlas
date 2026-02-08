@@ -86,6 +86,9 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		} else {
 			ctx.Logger().Error("Invalid cursor decode, starting from beginning", "err", err)
 		}
+	} else if roundIdx > 0 {
+		ctx.Logger().Error("No more files remainin for proof round")
+		return
 	}
 
 	crange := &collections.Range[collections.Triple[string, string, string]]{}
@@ -162,7 +165,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
 		}
 	} else if selectedCount == 0 && hasStart {
-		// Exhausted in this direction → reset cursor for next round/window
+		// Exhausted in this direction reset cursor for next round/window
 		if setErr := k.ChallengeFilesCursor.Set(ctx, []byte{}); setErr != nil {
 			ctx.Logger().Error("Failed to reset challenge cursor", "err", setErr)
 		}
@@ -336,9 +339,11 @@ func (k Keeper) computeProofsThisRound(ctx sdk.Context, n uint64, roundIdx uint6
 	kBlocks := params.ProofRoundBlocks
 	gBlocks := params.ProofWindowBlocks
 
+	block := roundIdx * kBlocks
+
 	// g(x) = ceil((n * roundIdx + kBlocks) / gBlocks) - ceil((roundIdx * n) / gBlocks)
 	// ceil(a/b) = (a + b - 1) / b
-	term1 := (n*roundIdx + kBlocks + gBlocks - 1) / gBlocks
-	term2 := (roundIdx*n + gBlocks - 1) / gBlocks
+	term1 := (n*(block+kBlocks) + gBlocks - 1) / gBlocks
+	term2 := (block*n + gBlocks - 1) / gBlocks
 	return term1 - term2
 }

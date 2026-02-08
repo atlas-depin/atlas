@@ -15,7 +15,7 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 	if height%params.ProofRoundBlocks == 0 {
 		ctx.Logger().Info("Processing provider rewards", "height", height)
 
-		roundIdx := ((height % params.ProofWindowBlocks) / params.ProofRoundBlocks) + 1
+		roundIdx := ((height % params.ProofWindowBlocks) / params.ProofRoundBlocks)
 		k.StartChallengeRound(ctx, uint64(roundIdx))
 	}
 

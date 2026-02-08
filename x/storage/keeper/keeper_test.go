@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"encoding/hex"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -62,6 +63,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 	)
 
 	suite.ctx = sdktestutil.DefaultContextWithDB(suite.T(), suite.storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
+	suite.keeper.InitGenesis(suite.ctx, *types.DefaultGenesis())
 
 	// Initialize params
 	if err := suite.keeper.Params.Set(suite.ctx, types.DefaultParams()); err != nil {
@@ -98,6 +100,23 @@ func (suite *KeeperTestSuite) CreateTestAddress(index int) string {
 	addrStr, err := suite.addressCodec.BytesToString(addr)
 	suite.Require().NoError(err)
 	return addrStr
+}
+
+func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int64, replicas int32, providers []string) types.File {
+	file := types.File{
+		Fid:       fileId,
+		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
+		Creator:   owner,
+		Start:     suite.ctx.BlockHeight(),
+		FileSize:  fileSize,
+		Providers: providers,
+		Replicas:  replicas,
+	}
+
+	err := suite.keeper.SetNewFile(suite.ctx, file)
+	suite.Require().NoError(err)
+
+	return file
 }
 
 func TestKeeperTestSuite(t *testing.T) {
