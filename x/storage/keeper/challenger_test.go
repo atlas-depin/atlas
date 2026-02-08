@@ -223,8 +223,8 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_Advan
 	}
 
 	params := types.DefaultParams()
-	params.ProofWindowBlocks = 14400 // ~12h at 6s blocks → plenty of rounds
-	params.ProofRoundBlocks = 150
+	params.ProofWindowBlocks = 7200 // ~12h at 6s blocks → plenty of rounds
+	params.ProofRoundBlocks = 300
 	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
 
 	// Ascending window (windowIndex 0 = even)
