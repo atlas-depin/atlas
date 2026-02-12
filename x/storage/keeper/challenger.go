@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
+	"strconv"
 
 	"cosmossdk.io/collections"
 	merkletree "github.com/ahm23/go-merkletree-xxh"
@@ -39,11 +40,9 @@ func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeI
 }
 
 func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
-	// Example placeholder logic:
-	// - Iterate over active storage providers or deals.
-	// - Compute a hash or Merkle root of the state.
-	// - Store it in KVStore with a key like "proof_snapshot:<window_start_height>".
-	// - Emit an event for traceability.
+	params, _ := k.Params.Get(ctx)
+	windowIndex := uint64(ctx.BlockHeight() / int64(params.ProofWindowBlocks))
+
 	_ = k.ChallengeFilesCursor.Set(ctx, []byte{})
 
 	currentFileCount, _ := k.FileCount.Get(ctx)
@@ -51,15 +50,12 @@ func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 
 	ctx.Logger().Info("Challenge window started", "height", ctx.BlockHeight(), "snapshot_eligible", currentFileCount)
 
-	// TODO: Your snapshot logic here, e.g.:
-	// snapshot := k.ComputeStorageStateSnapshot(ctx) // Hypothetical method
-	// store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte("proof_snapshots"))
-	// store.Set(sdk.Uint64ToBigEndian(uint64(ctx.BlockHeight())), snapshot.Bytes())
-
+	// Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeNewChallengeWindow,
-			// sdk.NewAttribute(, fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute("module", types.ModuleName),
+			sdk.NewAttribute("window", strconv.FormatUint(windowIndex, 10)),
 		),
 	)
 }
@@ -162,7 +158,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	// Logging for observability
 	ctx.Logger().Info("Challenge round executed",
 		"round", roundIdx,
-		"window_index", windowIndex,
+		"window", windowIndex,
 		"direction_ascending", isAscending,
 		"challenged", counter,
 	)
@@ -171,10 +167,10 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeNewChallengeRound,
-			sdk.NewAttribute("round", fmt.Sprintf("%d", roundIdx)),
-			sdk.NewAttribute("window_index", fmt.Sprintf("%d", windowIndex)),
-			sdk.NewAttribute("direction_ascending", fmt.Sprintf("%t", isAscending)),
-			sdk.NewAttribute("challenged_count", fmt.Sprintf("%d", counter)),
+			sdk.NewAttribute("module", types.ModuleName),
+			sdk.NewAttribute("round", strconv.FormatUint(roundIdx, 10)),
+			sdk.NewAttribute("window", strconv.FormatUint(windowIndex, 10)),
+			sdk.NewAttribute("challenged_count", strconv.FormatUint(counter, 10)),
 		),
 	)
 }
