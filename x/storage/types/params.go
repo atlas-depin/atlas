@@ -10,8 +10,8 @@ func DefaultParams() Params {
 	return Params{
 		PricePerGbDay:     400, // $0.0004 * 10^6
 		ProviderDeposit:   10000,
-		ProofWindowBlocks: 7200,
-		ProofRoundBlocks:  300,
+		ProofWindowBlocks: 50,
+		ProofRoundBlocks:  10,
 	}
 }
 
