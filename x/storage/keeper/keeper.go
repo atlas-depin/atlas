@@ -50,7 +50,7 @@ type Keeper struct {
 
 	BinStore             collections.Map[string, types.Bin]      // file_id -> File
 	ProviderStore        collections.Map[string, types.Provider] // address -> Provider
-	ChallengeStore       collections.Map[collections.Pair[string, string], types.StorageChallenge]
+	ChallengeStore       *collections.IndexedMap[collections.Pair[string, string], types.StorageChallenge, challengeIndex]
 	ChallengeFilesCount  collections.Item[uint64]
 	ChallengeFilesCursor collections.Item[[]byte]
 
@@ -120,10 +120,11 @@ func NewKeeper(
 			codec.CollValue[types.Provider](cdc),
 		),
 
-		ChallengeStore: collections.NewMap(
+		ChallengeStore: collections.NewIndexedMap(
 			sb, collections.NewPrefix(8), "challenges",
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			codec.CollValue[types.StorageChallenge](cdc),
+			NewChallengeIndexes(sb),
 		),
 		ChallengeFilesCount:  collections.NewItem(sb, collections.NewPrefix(81), "challenge_files_count", collections.Uint64Value),
 		ChallengeFilesCursor: collections.NewItem(sb, collections.NewPrefix(82), "challenge_files_cursor", collections.BytesValue),

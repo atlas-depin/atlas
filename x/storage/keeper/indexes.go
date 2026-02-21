@@ -30,25 +30,31 @@ func (fi fileIndexes) IndexesList() []collections.Index[collections.Triple[strin
 	}
 }
 
-type fileIdIndex struct{}
+type challengeIndex struct {
+	ByProvider *indexes.Multi[string, collections.Pair[string, string], types.StorageChallenge]
+}
 
-func (fa fileIdIndex) UnorderedKeys() bool { return false }
-func (fa fileIdIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
+func NewChallengeIndexes(sb *collections.SchemaBuilder) challengeIndex {
+	return challengeIndex{
+		ByProvider: indexes.NewMulti[string, collections.Pair[string, string], types.StorageChallenge](
+			sb, collections.NewPrefix(80), "by_provider",
+			collections.StringKey, collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			func(pk collections.Pair[string, string], f types.StorageChallenge) (string, error) {
+				return f.Provider, nil
+			},
+		),
+	}
+}
+
+func (fi challengeIndex) IndexesList() []collections.Index[collections.Pair[string, string], types.StorageChallenge] {
+	return []collections.Index[collections.Pair[string, string], types.StorageChallenge]{
+		fi.ByProvider,
+	}
+}
+func (fa challengeIndex) UnorderedKeys() bool { return false }
+func (fa challengeIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
 	return file.Fid, nil
 }
-func (fa fileIdIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
+func (fa challengeIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
 	return pk, nil
 }
-
-// type fileProviderIndex struct{}
-
-// func (fp fileProviderIndex) UnorderedKeys() bool { return false }
-// func (fp fileProviderIndex) Index(_ context.Context, pk string, file types.File) ([]string, error) {
-// 	if len(file.Providers) == 0 {
-// 		return nil, collections.ErrNotFound
-// 	}
-// 	return file.Providers, nil
-// }
-// func (fp fileProviderIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
-// 	return pk, nil
-// }

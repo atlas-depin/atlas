@@ -12,6 +12,7 @@ ignite scaffold query file fid:string --response file:custom --module storage
 ignite scaffold query files --response files:string --module storage --paginated
 ignite scaffold query subscription --response subscription:string --module storage
 ignite scaffold query subscriptions --response subscriptions:array.string --module storage --paginated
+ignite scaffold query challenges --response challenges:array.string --module storage --paginated
 
 ignite scaffold message post-node path:string --module filetree
 ignite scaffold message delete-node path:string --module filetree
