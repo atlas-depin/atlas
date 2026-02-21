@@ -49,6 +49,11 @@ service Query {
   rpc Subscriptions(QuerySubscriptionsRequest) returns (QuerySubscriptionsResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/subscriptions";
   }
+
+  // Challenges Queries a list of Challenges items.
+  rpc Challenges(QueryChallengesRequest) returns (QueryChallengesResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/challenges";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -124,5 +129,16 @@ message QuerySubscriptionsRequest {
 // QuerySubscriptionsResponse defines the QuerySubscriptionsResponse message.
 message QuerySubscriptionsResponse {
   repeated StorageSubscription subscriptions = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryChallengesRequest defines the QueryChallengesRequest message.
+message QueryChallengesRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryChallengesResponse defines the QueryChallengesResponse message.
+message QueryChallengesResponse {
+  repeated string challenges = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

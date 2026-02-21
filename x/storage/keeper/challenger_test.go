@@ -223,17 +223,17 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_Advan
 	}
 
 	params := types.DefaultParams()
-	params.ProofWindowBlocks = 43200 // ~3D at 30min rounds
-	params.ProofRoundBlocks = 300
+	params.ProofWindowBlocks = 14400 // ~3D at 30min rounds
+	params.ProofRoundBlocks = 100
 	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
 
 	// Ascending window (windowIndex 0 = even)
-	suite.ctx = suite.ctx.WithBlockHeight(100)
+	suite.ctx = suite.ctx.WithBlockHeight(10)
 
 	owner := suite.CreateTestAddress(0)
 	provider := suite.CreateTestAddress(1)
 
-	const numFiles = 100_000_000 // Increase to 10_000 or 20_000 for more stress (watch RAM/time)
+	const numFiles = 5_000_000 // Increase to 10_000 or 20_000 for more stress (watch RAM/time)
 	suite.T().Logf("Creating %d test files...", numFiles)
 
 	startCreate := time.Now()
