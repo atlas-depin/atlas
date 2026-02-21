@@ -52,7 +52,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	numThisRound := k.computeProofsThisRound(ctx, fileCount, roundIdx)
 
 	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
-	ctx.Logger().Debug("<StartChallengeRound> challenge cursor: ", cursorBz)
+	ctx.Logger().Warn("<StartChallengeRound> challenge cursor: ", cursorBz)
 
 	// compute iteration cursor
 	var resume bool
