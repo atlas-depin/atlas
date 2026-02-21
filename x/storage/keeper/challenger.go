@@ -61,12 +61,12 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		if err == nil {
 			cursor = decoded
 			resume = true
-		} else if roundIdx > 0 {
-			ctx.Logger().Error("No more files remainin for proof round")
-			return
 		} else {
 			ctx.Logger().Error("Null cursor decode, starting from beginning", "err", err)
 		}
+	} else if roundIdx > 0 {
+		ctx.Logger().Warn("No more files remainin for proof round")
+		return
 	}
 
 	// set iteration cursor & direction
