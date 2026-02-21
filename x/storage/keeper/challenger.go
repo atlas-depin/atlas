@@ -18,27 +18,6 @@ import (
 
 var json = jsoniter.ConfigFastest
 
-func (k Keeper) SetChallenge(ctx context.Context, challenge types.StorageChallenge) error {
-	// Save challenge
-	key := collections.Join(challenge.Provider, challenge.ChallengeId)
-	if err := k.ChallengeStore.Set(ctx, key, challenge); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (k Keeper) GetChallenge(ctx context.Context, provider string, challengeId string) (types.StorageChallenge, error) {
-	// Save challenge
-	key := collections.Join(provider, challengeId)
-	return k.ChallengeStore.Get(ctx, key)
-}
-
-func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeId string) error {
-	// Save challenge
-	key := collections.Join(provider, challengeId)
-	return k.ChallengeStore.Remove(ctx, key)
-}
-
 func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 	params, _ := k.Params.Get(ctx)
 	windowIndex := uint64(ctx.BlockHeight() / int64(params.ProofWindowBlocks))

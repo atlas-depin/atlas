@@ -10,6 +10,7 @@ import "nebulix/storage/v1/file.proto";
 import "nebulix/storage/v1/params.proto";
 import "nebulix/storage/v1/provider.proto";
 import "nebulix/storage/v1/subscription.proto";
+import "proof.proto";
 
 option go_package = "nebulix/x/storage/types";
 
@@ -134,11 +135,12 @@ message QuerySubscriptionsResponse {
 
 // QueryChallengesRequest defines the QueryChallengesRequest message.
 message QueryChallengesRequest {
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+  string provider = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
 // QueryChallengesResponse defines the QueryChallengesResponse message.
 message QueryChallengesResponse {
-  repeated string challenges = 1;
+  repeated StorageChallenge challenges = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

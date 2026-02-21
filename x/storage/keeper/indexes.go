@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"context"
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
@@ -30,31 +29,31 @@ func (fi fileIndexes) IndexesList() []collections.Index[collections.Triple[strin
 	}
 }
 
-type challengeIndex struct {
-	ByProvider *indexes.Multi[string, collections.Pair[string, string], types.StorageChallenge]
-}
+// type challengeIndex struct {
+// 	ByProvider *indexes.Multi[string, collections.Pair[string, string], types.StorageChallenge]
+// }
 
-func NewChallengeIndexes(sb *collections.SchemaBuilder) challengeIndex {
-	return challengeIndex{
-		ByProvider: indexes.NewMulti[string, collections.Pair[string, string], types.StorageChallenge](
-			sb, collections.NewPrefix(80), "by_provider",
-			collections.StringKey, collections.PairKeyCodec(collections.StringKey, collections.StringKey),
-			func(pk collections.Pair[string, string], f types.StorageChallenge) (string, error) {
-				return f.Provider, nil
-			},
-		),
-	}
-}
+// func NewChallengeIndexes(sb *collections.SchemaBuilder) challengeIndex {
+// 	return challengeIndex{
+// 		ByProvider: indexes.NewMulti[string, collections.Pair[string, string], types.StorageChallenge](
+// 			sb, collections.NewPrefix(80), "by_provider",
+// 			collections.StringKey, collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+// 			func(pk collections.Pair[string, string], f types.StorageChallenge) (string, error) {
+// 				return f.Provider, nil
+// 			},
+// 		),
+// 	}
+// }
 
-func (fi challengeIndex) IndexesList() []collections.Index[collections.Pair[string, string], types.StorageChallenge] {
-	return []collections.Index[collections.Pair[string, string], types.StorageChallenge]{
-		fi.ByProvider,
-	}
-}
-func (fa challengeIndex) UnorderedKeys() bool { return false }
-func (fa challengeIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
-	return file.Fid, nil
-}
-func (fa challengeIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
-	return pk, nil
-}
+// func (fi challengeIndex) IndexesList() []collections.Index[collections.Pair[string, string], types.StorageChallenge] {
+// 	return []collections.Index[collections.Pair[string, string], types.StorageChallenge]{
+// 		fi.ByProvider,
+// 	}
+// }
+// func (fa challengeIndex) UnorderedKeys() bool { return false }
+// func (fa challengeIndex) Index(_ context.Context, pk string, file types.File) (string, error) {
+// 	return file.Fid, nil
+// }
+// func (fa challengeIndex) Reference(_ context.Context, pk string, file types.File) (string, error) {
+// 	return pk, nil
+// }
