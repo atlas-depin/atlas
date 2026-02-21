@@ -82,6 +82,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		} else {
 			// Fresh descending window: start from sentinel
 			crange.StartInclusive(types.MaxTripleSentinel)
+			ctx.Logger().Warn("<StartChallengeRound> descending sentinel cursor: ", types.MaxTripleSentinel)
 		}
 		crange.Descending()
 	}
@@ -244,8 +245,8 @@ func CreateChallenge(
 	}
 }
 
-// DetectMissedChallenges scans all active challenges and handles timeouts
-func (k Keeper) DetectMissedChallenges(ctx sdk.Context) {
+// HandleMissedChallenges scans all active challenges and handles timeouts
+func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 	currentHeight := uint64(ctx.BlockHeight())
 
 	// Iterate over ALL challenges (assuming you have a prefix map for them)
@@ -268,7 +269,7 @@ func (k Keeper) DetectMissedChallenges(ctx sdk.Context) {
 
 		// Check deadline
 		if currentHeight >= uint64(challenge.DeadlineHeight) {
-			// Missed proof — apply penalty
+			// Missed proof - apply penalty
 			// k.ApplyMissedProofPenalty(ctx, challenge)
 			missedCount++
 
