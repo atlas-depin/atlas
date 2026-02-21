@@ -16,6 +16,9 @@ import (
 	"github.com/zeebo/blake3"
 )
 
+// TODO: delete failed challenge on end of round?
+// TODO: fix issue where idk something bad happens every other window, maybe due to desc?
+
 var json = jsoniter.ConfigFastest
 
 func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
@@ -53,15 +56,17 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	// compute iteration cursor
 	var resume bool
 	var cursor collections.Triple[string, string, string]
-	_, decoded, err := k.FileStore.KeyCodec().Decode(cursorBz)
-	if err == nil {
-		cursor = decoded
-		resume = true
-	} else if roundIdx > 0 {
-		ctx.Logger().Error("No more files remainin for proof round")
-		return
-	} else {
-		ctx.Logger().Error("Null cursor decode, starting from beginning", "err", err)
+	if len(cursorBz) > 0 {
+		_, decoded, err := k.FileStore.KeyCodec().Decode(cursorBz)
+		if err == nil {
+			cursor = decoded
+			resume = true
+		} else if roundIdx > 0 {
+			ctx.Logger().Error("No more files remainin for proof round")
+			return
+		} else {
+			ctx.Logger().Error("Null cursor decode, starting from beginning", "err", err)
+		}
 	}
 
 	// set iteration cursor & direction
