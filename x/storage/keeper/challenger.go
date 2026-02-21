@@ -247,7 +247,7 @@ func CreateChallenge(
 
 // HandleMissedChallenges scans all active challenges and handles timeouts
 func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
-	currentHeight := uint64(ctx.BlockHeight())
+	currentHeight := uint64(ctx.BlockHeight()) + 1
 
 	// Iterate over ALL challenges (assuming you have a prefix map for them)
 	iter, err := k.ChallengeStore.Iterate(ctx, nil) // full range; adjust if you have a different prefix
@@ -278,7 +278,7 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 				ctx.Logger().Error("Failed to remove missed challenge", "id", challenge.ChallengeId, "err", err)
 			}
 
-			ctx.Logger().Info("Detected and penalized missed challenge",
+			ctx.Logger().Warn("Detected and penalized missed challenge",
 				"challenge_id", challenge.ChallengeId,
 				"provider", challenge.Provider,
 				"file_id", challenge.FileId,
