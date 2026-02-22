@@ -3,7 +3,10 @@ package keeper
 import (
 	"context"
 	"errors"
+	"fmt"
 	"nebulix/x/storage/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // \\ RegisterProvider registers a new storage provider
@@ -41,4 +44,32 @@ func (k Keeper) GetAllProviders(ctx context.Context) ([]*types.Provider, error) 
 		values = append(values, &provider)
 	}
 	return values, err
+}
+
+func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64) error {
+	provider, err := k.GetProvider(ctx, address)
+	if err != nil {
+		return err
+	}
+
+	provider.SpaceUsed += bytes
+	if provider.SpaceUsed > provider.SpaceAvailable {
+		return errors.New("cannot exceed space available")
+	}
+	return k.SetProvider(ctx, provider)
+}
+
+func (k Keeper) DecrementProviderSpaceUsed(ctx context.Context, address string, bytes int64) error {
+	provider, err := k.GetProvider(ctx, address)
+	if err != nil {
+		return err
+	}
+
+	provider.SpaceUsed -= bytes
+	if provider.SpaceUsed < 0 {
+		provider.SpaceUsed = 0
+		sdkCtx := sdk.UnwrapSDKContext(ctx)
+		sdkCtx.Logger().Warn(fmt.Sprintf("<DecrementProviderSpaceUsed> tried to decrement SpaceUsed below 0 for provider %s", &provider.Address))
+	}
+	return k.SetProvider(ctx, provider)
 }

@@ -5,7 +5,7 @@ const (
 	EventTypeBuyStorage = "buy_storage"
 
 	EventTypeSignContract         = "post_file"
-	EventTypeCancelContract       = "delete_file"
+	EventTypeDeleteFile           = "delete_file"
 	EventTypeNewChallengeRound    = "challenge_round_start"
 	EventTypeNewChallengeWindow   = "challenge_window_start"
 	EventTypeMissedProofsDetected = "proofs_missed"
@@ -17,8 +17,9 @@ const (
 	AttributeKeyBytesBought = "bytes_bought"
 	AttributeKeyTimeBought  = "days_bought"
 
-	AttributeKeySigner   = "signer" // sign storage deal
-	AttributeKeyContract = "file"
-	AttributeKeyPayOnce  = "pay_once"
-	AttributeKeyStart    = "start"
+	AttributeKeySigner    = "signer" // sign storage deal
+	AttributeKeyFile      = "file"
+	AttributeKeyProviders = "providers"
+	AttributeKeyPayOnce   = "pay_once"
+	AttributeKeyStart     = "start"
 )

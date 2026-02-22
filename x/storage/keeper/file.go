@@ -52,21 +52,13 @@ func (k Keeper) GetFiles(ctx context.Context) ([]types.File, error) {
 }
 
 // \\ DeleteFile marks a file as deleted
-func (k Keeper) DeleteFile(ctx context.Context, fileId string) error {
+func (k Keeper) RemoveFile(ctx context.Context, fileId string) error {
 	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
 	if err != nil {
 		return err
 	}
-	_, err = k.FileStore.Get(ctx, key)
-	if err != nil {
-		return err
-	}
 
-	err = k.FileStore.Remove(ctx, key)
-	// Soft delete
-	// file.IsDeleted = true
-	//k.FileStore.Set(ctx, fileId, file)
-	return err
+	return k.FileStore.Remove(ctx, key)
 }
 
 func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (stop bool)) error {
