@@ -53,8 +53,8 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
 	ctx.Logger().Warn("<StartChallengeRound> ---------------")
-	ctx.Logger().Warn("<StartChallengeRound> challenge cursor length: ", len(cursorBz))
-	ctx.Logger().Warn("<StartChallengeRound> files this round: ", numThisRound)
+	ctx.Logger().Warn(fmt.Sprintf("<StartChallengeRound> challenge cursor: %x", cursorBz))
+	ctx.Logger().Warn(fmt.Sprintf("<StartChallengeRound> files this round: %d", numThisRound))
 
 	// compute iteration cursor
 	var resume bool
@@ -140,7 +140,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	}
 
 	// Logging for observability
-	ctx.Logger().Info("Challenge round executed",
+	ctx.Logger().Warn("Challenge round executed",
 		"round", roundIdx,
 		"window", windowIndex,
 		"direction_ascending", isAscending,
