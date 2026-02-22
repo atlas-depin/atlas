@@ -10,7 +10,7 @@ import (
 )
 
 // \\ RegisterProvider registers a new storage provider
-func (k Keeper) SetProvider(ctx context.Context, provider types.Provider) error {
+func (k Keeper) CreateProvider(ctx context.Context, provider types.Provider) error {
 	exists, err := k.ProviderStore.Has(ctx, provider.Address)
 	if err != nil {
 		return err
@@ -20,6 +20,10 @@ func (k Keeper) SetProvider(ctx context.Context, provider types.Provider) error 
 		return errors.New("provider already exists")
 	}
 
+	return k.SetProvider(ctx, provider)
+}
+
+func (k Keeper) SetProvider(ctx context.Context, provider types.Provider) error {
 	return k.ProviderStore.Set(ctx, provider.Address, provider)
 }
 

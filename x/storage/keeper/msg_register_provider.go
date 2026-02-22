@@ -55,7 +55,7 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 		CreditDelta:    0,
 	}
 
-	k.SetProvider(ctx, provider)
+	k.CreateProvider(ctx, provider)
 
 	// [TOOD]: event emission
 

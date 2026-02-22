@@ -149,9 +149,9 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkipsDeletedFiles_CursorAd
 	suite.keeper.StartChallengeWindow(suite.ctx)
 
 	// Simulate deletion of file-003 and file-006 mid-window
-	err := suite.keeper.DeleteFile(suite.ctx, "file-003")
+	err := suite.keeper.RemoveFile(suite.ctx, "file-003")
 	suite.Require().NoError(err)
-	err = suite.keeper.DeleteFile(suite.ctx, "file-006")
+	err = suite.keeper.RemoveFile(suite.ctx, "file-006")
 	suite.Require().NoError(err)
 
 	// Run round with quota of 3
@@ -196,9 +196,9 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkewedFileCount_NoFilesLef
 	suite.keeper.StartChallengeWindow(suite.ctx)
 
 	// Simulate deletion of file-002 and file-003 mid-window
-	err := suite.keeper.DeleteFile(suite.ctx, "file-002")
+	err := suite.keeper.RemoveFile(suite.ctx, "file-002")
 	suite.Require().NoError(err)
-	err = suite.keeper.DeleteFile(suite.ctx, "file-003")
+	err = suite.keeper.RemoveFile(suite.ctx, "file-003")
 	suite.Require().NoError(err)
 
 	// Run round with quota of 3
