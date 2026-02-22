@@ -102,6 +102,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a prove-file tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "challenge_id"}, {ProtoField: "fid"}, {ProtoField: "data"}, {ProtoField: "hashes"}, {ProtoField: "chunk"}},
 				},
+				{
+					RpcMethod:      "DeleteFile",
+					Use:            "delete-file [file-id]",
+					Short:          "Send a delete-file tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "file_id"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

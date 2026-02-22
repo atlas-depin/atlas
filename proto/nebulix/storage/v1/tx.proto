@@ -25,6 +25,9 @@ service Msg {
 
   // ProveFile defines the ProveFile RPC.
   rpc ProveFile(MsgProveFile) returns (MsgProveFileResponse);
+
+  // DeleteFile defines the DeleteFile RPC.
+  rpc DeleteFile(MsgDeleteFile) returns (MsgDeleteFileResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -103,3 +106,13 @@ message MsgProveFile {
 
 // MsgProveFileResponse defines the MsgProveFileResponse message.
 message MsgProveFileResponse {}
+
+// MsgDeleteFile defines the MsgDeleteFile message.
+message MsgDeleteFile {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string file_id = 2;
+}
+
+// MsgDeleteFileResponse defines the MsgDeleteFileResponse message.
+message MsgDeleteFileResponse {}
