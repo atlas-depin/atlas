@@ -52,7 +52,9 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	numThisRound := k.computeProofsThisRound(ctx, fileCount, roundIdx)
 
 	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
-	ctx.Logger().Warn("<StartChallengeRound> challenge cursor: ", cursorBz)
+	ctx.Logger().Warn("<StartChallengeRound> ---------------")
+	ctx.Logger().Warn("<StartChallengeRound> challenge cursor length: ", len(cursorBz))
+	ctx.Logger().Warn("<StartChallengeRound> files this round: ", numThisRound)
 
 	// compute iteration cursor
 	var resume bool
@@ -85,7 +87,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	// iterate
 	var counter uint64
-	var lastKeyBz []byte
+	var lastKeyBz []byte = cursorBz
 	iter, err := k.FileStore.Iterate(ctx, crange)
 	if err != nil {
 		ctx.Logger().Error("Failed to iterate FileStore", "err", err, "ascending", isAscending)
@@ -144,7 +146,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		"direction_ascending", isAscending,
 		"challenged", counter,
 	)
-
+	ctx.Logger().Warn("<StartChallengeRound> ---------------")
 	// Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
