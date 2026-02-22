@@ -79,10 +79,6 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	} else {
 		if resume {
 			crange.StartInclusive(cursor) // resume from previous cursor
-		} else {
-			// Fresh descending window: start from sentinel
-			crange.StartInclusive(types.MaxTripleSentinel)
-			ctx.Logger().Warn("<StartChallengeRound> descending sentinel cursor: ", types.MaxTripleSentinel)
 		}
 		crange.Descending()
 	}
