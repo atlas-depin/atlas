@@ -80,7 +80,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		}
 	} else {
 		if resume {
-			crange.StartInclusive(cursor) // resume from previous cursor
+			crange.EndInclusive(cursor) // resume from previous cursor
 		}
 		crange.Descending()
 	}
@@ -370,6 +370,7 @@ func (k Keeper) computeProofsThisRound(ctx sdk.Context, n uint64, roundIdx uint6
 
 	// g(x) = ceil((n * roundIdx + kBlocks) / gBlocks) - ceil((roundIdx * n) / gBlocks)
 	// ceil(a/b) = (a + b - 1) / b
+	// THIS EXPRESSION IS SIMPLIFIED:
 	term1 := (n*(block+kBlocks) + gBlocks - 1) / gBlocks
 	term2 := (block*n + gBlocks - 1) / gBlocks
 	return term1 - term2
