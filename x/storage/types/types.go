@@ -31,9 +31,9 @@ const (
 )
 
 var MaxTripleSentinel = collections.Join3(
-	"\xff\xff\xff\xff\xff\xff\xff\xff", //(255 repeated)
-	"\xff\xff\xff\xff\xff\xff\xff\xff",
-	"\xff\xff\xff\xff\xff\xff\xff\xff",
+	string([]byte{0xff, 0xff, 0xff, 0xff}), // ~4×255
+	string([]byte{0xff, 0xff, 0xff, 0xff}),
+	string([]byte{0xff, 0xff, 0xff, 0xff}),
 )
 
 // // Params defines the module parameters
