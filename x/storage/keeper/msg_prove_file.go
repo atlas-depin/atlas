@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 
 	"nebulix/x/storage/types"
 
@@ -39,6 +40,15 @@ func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*typ
 			// [TODO]: eliminate stray from stays index if sufficient providers reached
 			if err = k.SetFile(ctx, file); err != nil {
 				return nil, err
+			}
+			currentCount, err := k.FileCount.Get(ctx)
+			if err != nil {
+				return nil, err // unexpected error
+			}
+
+			newCount := currentCount + 1
+			if err := k.FileCount.Set(ctx, newCount); err != nil {
+				return nil, fmt.Errorf("failed to increment file count: %w", err)
 			}
 		} else {
 			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "invalid file proof")

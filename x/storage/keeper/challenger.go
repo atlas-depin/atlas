@@ -113,7 +113,10 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			continue
 		}
 
-		// if !k.IsFileEligibleForChallenge(ctx, file) { ... }
+		if file.Status != "ACTIVE" {
+			iter.Next()
+			continue
+		}
 
 		k.IssueChallengeForFile(ctx, file, roundIdx)
 

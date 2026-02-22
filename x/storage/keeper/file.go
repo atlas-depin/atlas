@@ -3,7 +3,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"nebulix/x/storage/types"
 
@@ -31,19 +30,6 @@ func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 	if err := k.FileStore.Set(ctx, key, file); err != nil {
 		return err
 	}
-
-	currentCount, err := k.FileCount.Get(ctx)
-	if err != nil {
-		return err // unexpected error
-	}
-
-	newCount := currentCount + 1
-	if err := k.FileCount.Set(ctx, newCount); err != nil {
-		// Optional: rollback file set if count fails (atomicity)
-		_ = k.FileStore.Remove(ctx, key)
-		return fmt.Errorf("failed to increment file count: %w", err)
-	}
-
 	return nil
 }
 
