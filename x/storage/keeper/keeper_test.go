@@ -108,6 +108,7 @@ func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int6
 		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
 		Creator:   owner,
 		Start:     suite.ctx.BlockHeight(),
+		Status:    "ACTIVE",
 		FileSize:  fileSize,
 		Providers: providers,
 		Replicas:  replicas,
