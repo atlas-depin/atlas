@@ -9,7 +9,6 @@ import (
 	"cosmossdk.io/collections"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subscription types.StorageSubscription) (string, error) {
@@ -43,6 +42,17 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 	return k.SubscriptionStore.Get(ctx, key)
 }
 
+func (k Keeper) ExpireStorageSubscription(ctx context.Context, address string, subscriptionId string) error {
+	key := collections.Join(address, subscriptionId)
+
+	defaultId, _ := k.GetDefaultStorageSubscriptionId(ctx, address)
+	if defaultId == subscriptionId {
+		_ = k.DefaultSubscriptionIndex.Remove(ctx, address)
+	}
+
+	return k.SubscriptionStore.Remove(ctx, key)
+}
+
 func (k Keeper) GetDefaultStorageSubscriptionId(ctx context.Context, address string) (string, error) {
 	return k.DefaultSubscriptionIndex.Get(ctx, address)
 }
@@ -51,36 +61,37 @@ func (k Keeper) SetDefaultStorageSubscriptionId(ctx context.Context, address str
 	return k.DefaultSubscriptionIndex.Set(ctx, address, subscriptionId)
 }
 
-// helpers
+/*
+Update the usage of a storage subscription, incremented by the amount of bytes multiplied by the number of replicas.
+*/
 func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address string, subscriptionId string, bytes int64, replicas int32) (string, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	subscription, err := k.GetStorageSubscription(ctx, address, subscriptionId)
 	if err != nil {
-		return "", err
+		if err == collections.ErrNotFound {
+			return subscriptionId, types.ErrSubscriptionNotFound
+		} else {
+			return subscriptionId, err
+		}
 	}
+
 	if subscription.End.Before(sdkCtx.BlockTime()) {
-		// [TBD]: can I handle storage account expiry here? appstate remains unchanged on error so, idk how
-		// [TODO]: better error handling
-		return "", sdkerrors.ErrUnauthorized
+		k.ExpireStorageSubscription(ctx, address, subscriptionId)
+		return subscription.Id, types.ErrSubscriptionExpired
 	}
 
 	subscription.SpaceUsed += bytes * int64(replicas)
 	subscription.ReplicaSpaceUsed += bytes * (int64(replicas) - 1)
-
 	if subscription.SpaceUsed > subscription.SpaceAvailable {
-		return "", sdkerrors.ErrInvalidRequest
-		// [TODO]: better error handling
-		// return nil, errors.Wrapf(sdkerrors.ErrUnauthorized, "storage account does not have enough space available %d > %d", subscription.SpaceUsed, subscription.SpaceAvailable)
+		return subscription.Id, types.ErrSubscriptionFull
 	}
 
-	currentCreditPool, err := k.StorageCreditPool.Get(ctx)
-	if err != nil {
-		return "", err
-	}
 	credits := math.NewInt(bytes * int64(replicas)).Mul(math.NewInt(int64(subscription.End.Sub(sdkCtx.BlockTime()) / time.Second)))
-
 	subscription.Credits = subscription.Credits.Sub(credits)
-	k.StorageCreditPool.Set(ctx, currentCreditPool.Add(credits))
+	if subscription.Credits.LT(math.ZeroInt()) {
+		return subscription.Id, types.ErrSubscriptionInsufficientCredit
+	}
 
 	return subscription.Id, k.SetStorageSubscription(ctx, address, subscription)
 }

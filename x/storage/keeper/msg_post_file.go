@@ -13,9 +13,13 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+/*
+PostFile stages a new file and updates the file's subscription's usage,
+*/
 func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*types.MsgPostFileResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	/// --- Message validation
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errors.Wrap(err, "invalid authority address")
 	}
@@ -26,7 +30,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "must have 2 or more replicas")
 	}
 
-	/// --- Build file index element
+	/// --- Build file record
 	file := types.File{
 		Fid:      msg.Fid,
 		Merkle:   hex.EncodeToString(msg.Merkle),
@@ -40,7 +44,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 	/// --- Update subscription
 	subscriptionId, err := k.UpdateStorageSubscriptionUsage(ctx, msg.Creator, msg.Subscription, msg.FileSize, msg.Replicas)
 	if err != nil {
-		return nil, errors.Wrapf(sdkerrors.ErrInvalidRequest, "%s", err.Error())
+		return nil, errors.Wrapf(err, "Subscription: %s", subscriptionId)
 	} else {
 		file.Subscription = subscriptionId
 	}
@@ -60,7 +64,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypeSignContract,
+			types.EventTypeNewFile,
 			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
 			sdk.NewAttribute(types.AttributeKeyFile, hex.EncodeToString(msg.Merkle)),
 			sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", ctx.BlockHeight())),
