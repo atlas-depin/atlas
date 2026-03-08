@@ -14,8 +14,8 @@ var (
 	ErrProviderAlreadyExists = errors.Register(ModuleName, 2102, "provider already exists")
 	ErrInsufficientDeposit   = errors.Register(ModuleName, 2103, "insufficient provider deposit")
 
-	ErrFileAlreadyExists = errors.Register(ModuleName, 3100, "file already exists")
-	ErrNoFilesAvailable  = errors.Register(ModuleName, 3101, "no files available")
+	ErrFileAlreadyExists = errors.Register(ModuleName, 2301, "file already exists")
+	ErrFileNotFound      = errors.Register(ModuleName, 2304, "file not found")
 
 	ErrSubscriptionExpired            = errors.Register(ModuleName, 2301, "subscription is expired")
 	ErrSubscriptionFull               = errors.Register(ModuleName, 2302, "subscription has no remaining storage")

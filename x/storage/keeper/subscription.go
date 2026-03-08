@@ -51,7 +51,11 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 	}
 
 	key := collections.Join(address, subscriptionId)
-	return k.SubscriptionStore.Get(ctx, key)
+	subscription, err = k.SubscriptionStore.Get(ctx, key)
+	if err == collections.ErrNotFound {
+		err = types.ErrSubscriptionNotFound
+	}
+	return
 }
 
 /*
@@ -100,11 +104,7 @@ func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address stri
 
 	subscription, err := k.GetStorageSubscription(ctx, address, subscriptionId)
 	if err != nil {
-		if err == collections.ErrNotFound {
-			return subscriptionId, types.ErrSubscriptionNotFound
-		} else {
-			return subscriptionId, err
-		}
+		return subscriptionId, err
 	}
 
 	if subscription.End.Before(sdkCtx.BlockTime()) {

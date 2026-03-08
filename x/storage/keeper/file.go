@@ -9,15 +9,13 @@ import (
 	"cosmossdk.io/collections"
 )
 
-func (k Keeper) SetFile(ctx context.Context, file types.File) error {
-	key := collections.Join3(file.Creator, file.Subscription, file.Fid)
-	return k.FileStore.Set(ctx, key, file)
-}
-
-// StoreFile stores a new file with a provider
+/*
+Creates a new file record keyed by its Creator, Subscription, and Fid.
+Returns an error if the file key already exists.
+*/
 func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
-	// Check if file already exists
 	key := collections.Join3(file.Creator, file.Subscription, file.Fid)
+
 	exists, err := k.FileStore.Has(ctx, key)
 	if err != nil {
 		return err
@@ -26,32 +24,37 @@ func (k Keeper) SetNewFile(ctx context.Context, file types.File) error {
 		return types.ErrFileAlreadyExists
 	}
 
-	// Save file
-	if err := k.FileStore.Set(ctx, key, file); err != nil {
-		return err
-	}
-	return nil
+	return k.FileStore.Set(ctx, key, file)
 }
 
-// GetFile retrieves a file by ID
-func (k Keeper) GetFile(ctx context.Context, fileId string) (types.File, error) {
+/*
+Sets a file record keyed by its Creator, Subscription, and Fid.
+*/
+func (k Keeper) SetFile(ctx context.Context, file types.File) error {
+	key := collections.Join3(file.Creator, file.Subscription, file.Fid)
+	return k.FileStore.Set(ctx, key, file)
+}
+
+/*
+Gets a file record by fid.
+*/
+func (k Keeper) GetFile(ctx context.Context, fileId string) (file types.File, err error) {
 	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
-	// [TODO]: if key is "", there is an error
-	if err != nil {
-		return types.File{}, err
+	// TODO: investigate better error handling here
+	if err != nil || key == collections.Join3("", "", "") {
+		return file, types.ErrFileNotFound
 	}
-	return k.FileStore.Get(ctx, key)
+
+	file, err = k.FileStore.Get(ctx, key)
+	if err == collections.ErrNotFound {
+		err = types.ErrFileNotFound
+	}
+	return
 }
 
-func (k Keeper) GetFiles(ctx context.Context) ([]types.File, error) {
-	iter, err := k.FileStore.Iterate(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	return iter.Values()
-}
-
-// \\ DeleteFile marks a file as deleted
+/*
+Remove a file record by fid.
+*/
 func (k Keeper) RemoveFile(ctx context.Context, fileId string) error {
 	key, err := k.FileStore.Indexes.ByFileId.MatchExact(ctx, fileId)
 	if err != nil {
@@ -61,6 +64,10 @@ func (k Keeper) RemoveFile(ctx context.Context, fileId string) error {
 	return k.FileStore.Remove(ctx, key)
 }
 
+/*
+Iterate over all files and run the provided function argument for each record.
+The provided function must have a `types.File` argument.
+*/
 func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (stop bool)) error {
 	iter, err := k.FileStore.Iterate(ctx, nil)
 	if err != nil {
@@ -73,7 +80,6 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 		if err != nil {
 			return err
 		}
-
 		if fn(kv.Value) {
 			break
 		}
@@ -82,17 +88,20 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 	return nil
 }
 
-func (k Keeper) GetFileCount(ctx context.Context) (uint64, error) {
-	iter, err := k.FileStore.Iterate(ctx, nil)
-	if err != nil {
-		return 0, err
-	}
-	defer iter.Close()
+/*
+Get total file count using a FileStore iterator.
+*/
+// func (k Keeper) GetFileCount(ctx context.Context) (uint64, error) {
+// 	iter, err := k.FileStore.Iterate(ctx, nil)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	defer iter.Close()
 
-	keys, err := iter.Keys()
-	if err != nil {
-		return 0, err
-	}
+// 	keys, err := iter.Keys()
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	return uint64(len(keys)), nil
-}
+// 	return uint64(len(keys)), nil
+// }
