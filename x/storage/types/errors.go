@@ -8,11 +8,12 @@ import (
 
 // x/storage module sentinel errors
 var (
-	ErrInvalidSigner         = errors.Register(ModuleName, 1100, "expected gov account as only signer for proposal message")
-	ErrProviderNotFound      = errors.Register(ModuleName, 2100, "provider not found")
-	ErrProviderNotActive     = errors.Register(ModuleName, 2101, "provider not active")
-	ErrProviderAlreadyExists = errors.Register(ModuleName, 2102, "provider already exists")
-	ErrInsufficientDeposit   = errors.Register(ModuleName, 2103, "insufficient provider deposit")
+	ErrInvalidSigner               = errors.Register(ModuleName, 1100, "expected gov account as only signer for proposal message")
+	ErrProviderNotActive           = errors.Register(ModuleName, 2100, "provider not active")
+	ErrProviderAlreadyExists       = errors.Register(ModuleName, 2101, "provider already exists")
+	ErrProviderDepositInsufficient = errors.Register(ModuleName, 2102, "insufficient provider deposit")
+	ErrProviderNotFound            = errors.Register(ModuleName, 2104, "provider not found")
+	ErrProviderFull                = errors.Register(ModuleName, 2105, "insufficient provider storage. cannot exceed space available.")
 
 	ErrFileAlreadyExists = errors.Register(ModuleName, 2301, "file already exists")
 	ErrFileNotFound      = errors.Register(ModuleName, 2304, "file not found")

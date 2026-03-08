@@ -14,7 +14,7 @@ import (
 )
 
 /*
-PostFile stages a new file and updates the file's subscription's usage,
+PostFile stages a new file on-chain and updates the file's subscription's usage.
 */
 func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*types.MsgPostFileResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)

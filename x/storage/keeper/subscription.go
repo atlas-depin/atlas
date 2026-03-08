@@ -25,9 +25,7 @@ func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subsc
 	subscription.Id = fmt.Sprintf("sub_%d", seq)
 
 	// TODO: verify that there is enough provider capacity to accomodate the new subscription
-
-	key := collections.Join(address, subscription.Id)
-	return subscription.Id, k.SubscriptionStore.Set(ctx, key, subscription)
+	return subscription.Id, k.SetStorageSubscription(ctx, address, subscription)
 }
 
 /*

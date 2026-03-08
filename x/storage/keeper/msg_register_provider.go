@@ -2,50 +2,42 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"nebulix/x/storage/types"
 
-	"cosmossdk.io/errors"
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+/*
+RegisterProvider creates a new provider on-chain and escrows the required deposit.
+*/
 func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegisterProvider) (*types.MsgRegisterProviderResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	/// --- Message validation
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(err, "invalid creator address")
 	}
-	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// Check if provider already exists
-	exists, err := k.ProviderStore.Has(ctx, msg.Creator)
-	if err != nil {
-		return nil, err
-	}
-	if exists {
-		return nil, types.ErrProviderAlreadyExists
-	}
-
-	// Verify minimum deposit
+	/// --- Escrow uatl deposit tokens
 	params, err := k.Params.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	coin := sdk.NewInt64Coin("uatl", params.ProviderDeposit)
-	coins := sdk.NewCoins(coin)
+	coins := sdk.NewCoins(sdk.NewInt64Coin("uatl", params.ProviderDeposit))
 
 	account, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, err
 	}
-
-	// [TODO]: make sure this provider collector module account is created at genesis
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ProviderDepositAccountName, coins)
 	if err != nil {
-		return nil, errors.Wrapf(err, "%s does not have %s", account, coin.String())
+		return nil, types.ErrProviderDepositInsufficient
 	}
 
-	/// --- Register the provider
+	/// --- Build provider record
 	provider := types.Provider{
 		Address:        msg.Creator,
 		Hostname:       msg.Hostname,
@@ -55,9 +47,25 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 		CreditDelta:    0,
 	}
 
-	k.CreateProvider(ctx, provider)
+	/// --- Commit provider
+	k.SetNewProvider(ctx, provider)
 
-	// [TOOD]: event emission
+	/// --- Emit events
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+		),
+	)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeNewProvider,
+			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyProvider, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", ctx.BlockHeight())),
+		),
+	)
 
 	return &types.MsgRegisterProviderResponse{}, nil
 }
