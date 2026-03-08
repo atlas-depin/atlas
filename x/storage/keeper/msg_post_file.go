@@ -18,6 +18,7 @@ PostFile stages a new file and updates the file's subscription's usage,
 */
 func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*types.MsgPostFileResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	height := ctx.BlockHeight()
 
 	/// --- Message validation
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
@@ -36,7 +37,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		Merkle:   hex.EncodeToString(msg.Merkle),
 		Creator:  msg.Creator,
 		Status:   "STAGED",
-		Start:    ctx.BlockHeight(),
+		Start:    height,
 		FileSize: msg.FileSize,
 		Replicas: msg.Replicas,
 	}
@@ -67,9 +68,9 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 			types.EventTypeNewFile,
 			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
 			sdk.NewAttribute(types.AttributeKeyFile, hex.EncodeToString(msg.Merkle)),
-			sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute(types.AttributeKeyStart, fmt.Sprintf("%d", height)),
 		),
 	)
 
-	return &types.MsgPostFileResponse{StartBlock: ctx.BlockHeight()}, nil
+	return &types.MsgPostFileResponse{StartBlock: height}, nil
 }
