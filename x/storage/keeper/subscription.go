@@ -130,7 +130,7 @@ func (k Keeper) UpdateStorageSubscriptionUsage(ctx context.Context, address stri
 /*
 Increase the specified storage subscription's allocated capacity and/or duration.
 */
-func (k Keeper) ExpandStorageSubscription(ctx context.Context, address string, subscriptionId string, size int64, duration int64) error {\
+func (k Keeper) ExpandStorageSubscription(ctx context.Context, address string, subscriptionId string, size int64, duration int64) error {
 	// TODO: implement storage susbcription expansion
 	// TODO: verify that there is enough provider capacity to accomodate the new subscription
 	return nil
