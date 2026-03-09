@@ -33,20 +33,18 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 		return nil, err
 	}
 
-	// TODO: credit delta from rewards
 	// TODO: stray manager
-	// -------------------------------
-	// var rewardsTimeDelta int64
-	// blockTime := ctx.BlockTime().Unix()
-	// rewardStart, err := k.GetRewardWindowStartTime()
-	// if rewardStart > file.Start {
-	// 	rewardsTimeDelta = blockTime - rewardStart
-	// } else {
-	// 	rewardsTimeDelta = blockTime - file.Start
-	// }
+	var rewardsTimeDelta int64
+	blockTime := ctx.BlockTime().Unix()
+	rewardStart, err := k.LastRewardsTime.Get(ctx)
+	if rewardStart.Unix() > file.Start {
+		rewardsTimeDelta = blockTime - rewardStart.Unix()
+	} else {
+		rewardsTimeDelta = blockTime - file.Start
+	}
 
 	for _, address := range file.Providers {
-		err = k.DecrementProviderSpaceUsed(ctx, address, file.FileSize, 0 /*rewardsTimeDelta*/)
+		err = k.DecrementProviderSpaceUsed(ctx, address, file.FileSize, rewardsTimeDelta)
 		if err != nil && err != types.ErrProviderNotFound {
 			return nil, err
 		}

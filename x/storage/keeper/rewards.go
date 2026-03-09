@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// [TODO]: zero checks, especially for div-zero
 func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	t_0, err := k.LastRewardsTime.Get(ctx)
 	if err != nil {
@@ -25,10 +24,15 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		return err
 	}
 
+	if storageCreditsInPool.LTE(math.ZeroInt()) {
+		return nil
+	}
+
+	// --- iterate through all providers, distributing their rewards and resetting their credit delta
 	var totalCreditsDeducted math.Int
 	k.IterateAllProviders(ctx, func(key string, provider types.Provider) (stop bool) {
 		credits := t_delta.Mul(math.NewInt(provider.SpaceUsed)).Add(math.NewInt(provider.CreditDelta))
-		if credits.IsNegative() {
+		if credits.IsNegative() { // forward negative credits to next proof round delta
 			provider.CreditDelta = credits.Int64()
 			return false
 		}
@@ -60,7 +64,8 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	newCreditsInPool := storageCreditsInPool.Sub(totalCreditsDeducted)
 	err = k.StorageCreditPool.Set(ctx, newCreditsInPool)
 	if err != nil {
+		ctx.Logger().Error(fmt.Sprintf("Failed to burn %d storage credits", newCreditsInPool.Int64()))
 		return err
 	}
-	return k.LastRewardsTime.Set(ctx, t1)
+	return k.LastRewardsTime.Set(ctx, t_1)
 }
