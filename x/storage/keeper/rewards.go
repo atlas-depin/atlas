@@ -65,7 +65,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	err = k.StorageCreditPool.Set(ctx, newCreditsInPool)
 	if err != nil {
 		ctx.Logger().Error(fmt.Sprintf("Failed to burn %d storage credits", newCreditsInPool.Int64()))
-		return err
+		return nil
 	}
 	return k.LastRewardsTime.Set(ctx, t_1)
 }
