@@ -67,6 +67,29 @@ func (k Keeper) GetAllProviders(ctx context.Context) ([]*types.Provider, error) 
 	return values, nil
 }
 
+/*
+Iterate over all providers and run the provided function argument for each record.
+*/
+func (k Keeper) IterateAllProviders(ctx context.Context, fn func(key string, provider types.Provider) (stop bool)) error {
+	iter, err := k.ProviderStore.Iterate(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		kv, err := iter.KeyValue()
+		if err != nil {
+			return err
+		}
+		if fn(kv.Key, kv.Value) {
+			break
+		}
+	}
+
+	return nil
+}
+
 /// ---- Utility Methods ----
 
 /*

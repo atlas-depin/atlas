@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -19,6 +21,12 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 
 	if height%params.ProofRoundBlocks == 0 {
 		ctx.Logger().Info("Processing provider rewards", "height", height)
+
+		// TODO: reward processing
+		err := k.RewardProviders(ctx)
+		if err != nil {
+			ctx.Logger().Warn(fmt.Sprintf("Failed to distribute rewards..."))
+		}
 
 		roundIdx := ((height % params.ProofWindowBlocks) / params.ProofRoundBlocks)
 		k.StartChallengeRound(ctx, uint64(roundIdx))
