@@ -72,7 +72,7 @@ func (k Keeper) GetAllProviders(ctx context.Context) ([]*types.Provider, error) 
 /*
 Increment the space used of a given provider.
 */
-func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64) error {
+func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64, timeDelta int64) error {
 	provider, err := k.GetProvider(ctx, address)
 	if err != nil {
 		return err
@@ -82,13 +82,16 @@ func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, 
 	if provider.SpaceUsed > provider.SpaceAvailable {
 		return types.ErrProviderFull
 	}
+
+	provider.CreditDelta += bytes * -timeDelta
+
 	return k.SetProvider(ctx, provider)
 }
 
 /*
 Decrement the space used of a given provider.
 */
-func (k Keeper) DecrementProviderSpaceUsed(ctx context.Context, address string, bytes int64) error {
+func (k Keeper) DecrementProviderSpaceUsed(ctx context.Context, address string, bytes int64, timeDelta int64) error {
 	provider, err := k.GetProvider(ctx, address)
 	if err != nil {
 		return err
@@ -96,9 +99,13 @@ func (k Keeper) DecrementProviderSpaceUsed(ctx context.Context, address string, 
 
 	provider.SpaceUsed -= bytes
 	if provider.SpaceUsed < 0 {
+		bytes = bytes + provider.SpaceUsed
 		provider.SpaceUsed = 0
 		sdkCtx := sdk.UnwrapSDKContext(ctx)
-		sdkCtx.Logger().Warn(fmt.Sprintf("<DecrementProviderSpaceUsed> tried to decrement SpaceUsed below 0 for provider %s", provider.Address))
+		sdkCtx.Logger().Warn(fmt.Sprintf("Something is terribly wrong... Tried to decrement SpaceUsed below 0 for provider %s", provider.Address))
 	}
+
+	provider.CreditDelta += bytes * timeDelta
+
 	return k.SetProvider(ctx, provider)
 }

@@ -37,7 +37,7 @@ func (k msgServer) PostFile(goCtx context.Context, msg *types.MsgPostFile) (*typ
 		Merkle:   hex.EncodeToString(msg.Merkle),
 		Creator:  msg.Creator,
 		Status:   "STAGED",
-		Start:    height,
+		Start:    ctx.BlockTime().Unix(),
 		FileSize: msg.FileSize,
 		Replicas: msg.Replicas,
 	}
