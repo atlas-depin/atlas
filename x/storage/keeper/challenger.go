@@ -22,27 +22,31 @@ import (
 
 var json = jsoniter.ConfigFastest
 
+/*
+Initiates a challenge window by taking a snapshot of the total file count and resetting the iteration cursor.
+*/
 func (k Keeper) StartChallengeWindow(ctx sdk.Context) {
 	params, _ := k.Params.Get(ctx)
-	windowIndex := uint64(ctx.BlockHeight() / int64(params.ProofWindowBlocks))
-
-	_ = k.ChallengeFilesCursor.Set(ctx, []byte{})
+	windowIndex := ctx.BlockHeight() / int64(params.ProofWindowBlocks)
 
 	currentFileCount, _ := k.FileCount.Get(ctx)
 	_ = k.ChallengeFilesCount.Set(ctx, currentFileCount)
+	_ = k.ChallengeFilesCursor.Set(ctx, []byte{})
 
 	ctx.Logger().Info("Challenge window started", "height", ctx.BlockHeight(), "snapshot_eligible", currentFileCount)
-
-	// Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeNewChallengeWindow,
 			sdk.NewAttribute("module", types.ModuleName),
-			sdk.NewAttribute("window", strconv.FormatUint(windowIndex, 10)),
+			sdk.NewAttribute("window", strconv.FormatInt(windowIndex, 10)),
 		),
 	)
 }
 
+/*
+Initiates a challenge round.
+Computes the # of files to challenge this round, iterates through # more files and generates challenges for each file+provider.
+*/
 func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	params, _ := k.Params.Get(ctx)
 	fileCount, _ := k.ChallengeFilesCount.Get(ctx)
@@ -81,7 +85,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		}
 	} else {
 		if resume {
-			crange.EndInclusive(cursor) // resume from previous cursor
+			crange.EndInclusive(cursor)
 		}
 		crange.Descending()
 	}
@@ -96,7 +100,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	}
 	defer iter.Close()
 	if iter.Valid() && resume {
-		iter.Next() // skip cursor key
+		iter.Next()
 	}
 
 	for iter.Valid() && counter < numThisRound {
@@ -120,10 +124,8 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		}
 
 		k.IssueChallengeForFile(ctx, file, roundIdx)
-
 		counter++
 		if counter == numThisRound {
-			// encode triple correctly
 			size := k.FileStore.KeyCodec().Size(triple)
 			keyBz := make([]byte, size)
 			written, encErr := k.FileStore.KeyCodec().Encode(keyBz, triple)
@@ -132,18 +134,17 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 				iter.Next()
 				continue
 			}
-			lastKeyBz = keyBz[:written] // safe slice (normally written == size)
+			lastKeyBz = keyBz[:written] // safe slice
 		}
 
 		iter.Next()
 	}
 
-	// Update cursor to last successfully processed key
+	// update cursor to last successfully processed key
 	if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
 		ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
 	}
 
-	// Logging for observability
 	ctx.Logger().Warn("Challenge round executed",
 		"round", roundIdx,
 		"window", windowIndex,
@@ -151,6 +152,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 		"challenged", counter,
 	)
 	ctx.Logger().Warn("<StartChallengeRound> ---------------")
+
 	// Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
@@ -163,11 +165,17 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	)
 }
 
+/*
+Generate and issue proof challenges for a file.
+*/
 func (k Keeper) IssueChallengeForFile(
 	ctx context.Context,
 	file types.File,
 	round uint64,
 ) ([]types.StorageChallenge, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	params, _ := k.Params.Get(ctx)
+
 	// Validate file has providers
 	if len(file.Providers) == 0 {
 		return nil, fmt.Errorf("file has no providers: %s", file.Fid)
@@ -183,10 +191,8 @@ func (k Keeper) IssueChallengeForFile(
 	}
 
 	// Get deterministic seed source: previous block hash
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	params, _ := k.Params.Get(ctx)
 	prevHash := sdkCtx.BlockHeader().LastBlockId.Hash
-	currentHeight := uint64(sdkCtx.BlockHeight())
+	height := uint64(sdkCtx.BlockHeight())
 
 	// Generate unique chunk indices for each provider
 	chunkIndices := make(map[string]uint64) // provider -> chunkIndex
@@ -210,13 +216,16 @@ func (k Keeper) IssueChallengeForFile(
 		chunkIndex := chunkIndices[providerAddr]
 
 		// Create challenge
-		challenge := CreateChallenge(
-			file,
-			providerAddr,
-			chunkIndex,
-			currentHeight,
-			currentHeight+params.ProofRoundBlocks,
-		)
+		challengeID := types.GenerateChallengeID(height, file.Fid, providerAddr)
+		challenge := types.StorageChallenge{
+			ChallengeId:    challengeID,
+			FileId:         file.Fid,
+			FileMerkle:     file.Merkle,
+			Provider:       providerAddr,
+			ChunkIndex:     chunkIndex,
+			CreatedHeight:  height,
+			DeadlineHeight: height + params.ProofRoundBlocks,
+		}
 
 		if err := k.SetChallenge(ctx, challenge); err != nil {
 			sdkCtx.Logger().Error("failed to store challenge", "err", err, "fid", file.Fid, "provider", providerAddr)
@@ -225,26 +234,6 @@ func (k Keeper) IssueChallengeForFile(
 	}
 
 	return nil, nil
-}
-
-func CreateChallenge(
-	file types.File,
-	providerAddr string,
-	chunkIndex uint64,
-	currentHeight uint64,
-	deadlineHeight uint64,
-) types.StorageChallenge {
-	challengeID := types.GenerateChallengeID(currentHeight, file.Fid, providerAddr)
-
-	return types.StorageChallenge{
-		ChallengeId:    challengeID,
-		FileId:         file.Fid,
-		FileMerkle:     file.Merkle,
-		Provider:       providerAddr,
-		ChunkIndex:     chunkIndex,
-		CreatedHeight:  currentHeight,
-		DeadlineHeight: deadlineHeight,
-	}
 }
 
 /*
