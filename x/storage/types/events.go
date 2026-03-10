@@ -12,6 +12,7 @@ const (
 	EventTypeNewChallengeRound    = "challenge_round_start"
 	EventTypeNewChallengeWindow   = "challenge_window_start"
 	EventTypeMissedProofsDetected = "proofs_missed"
+	EventTypeChallengeAttempt     = "challenge_attempt"
 
 	AttributeValueCategory = ModuleName
 
@@ -20,10 +21,12 @@ const (
 	AttributeKeyBytesBought = "bytes_bought"
 	AttributeKeyTimeBought  = "days_bought"
 
-	AttributeKeySigner    = "signer" // sign storage deal
-	AttributeKeyFile      = "file"
-	AttributeKeyProvider  = "provider"
-	AttributeKeyProviders = "providers"
-	AttributeKeyPayOnce   = "pay_once"
-	AttributeKeyStart     = "start"
+	AttributeKeySigner      = "signer" // sign storage deal
+	AttributeKeyFile        = "file_id"
+	AttributeKeyProvider    = "provider"
+	AttributeKeyProviders   = "providers"
+	AttributeKeyPayOnce     = "pay_once"
+	AttributeKeyStart       = "start"
+	AttributeKeyChallengeId = "challenge_id"
+	AttributeKeyProofChunk  = "chunk"
 )

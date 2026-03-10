@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"slices"
+	"strconv"
 
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
@@ -15,7 +17,9 @@ import (
 ProveFile validates a file proof for a given challenge.
 If there is no challenge and the file is a stray, the provider is added to the list of the file's providers.
 */
-func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*types.MsgProveFileResponse, error) {
+func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*types.MsgProveFileResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	/// --- Message validation
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "invalid address")
@@ -72,6 +76,24 @@ func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*typ
 	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil { // else: this is a response to a challenge
 		return nil, err
 	}
+
+	/// --- Emit events
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+		),
+	)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeChallengeAttempt,
+			sdk.NewAttribute(types.AttributeKeySigner, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyFile, msg.Fid),
+			sdk.NewAttribute(types.AttributeKeyChallengeId, msg.ChallengeId),
+			sdk.NewAttribute(types.AttributeKeyProofChunk, strconv.Itoa(int(msg.Chunk))),
+		),
+	)
 
 	return &types.MsgProveFileResponse{}, nil
 }
