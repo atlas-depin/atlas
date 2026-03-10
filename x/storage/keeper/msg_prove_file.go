@@ -3,58 +3,73 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
+	"slices"
 
 	"nebulix/x/storage/types"
 
-	errorsmod "cosmossdk.io/errors"
+	"cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+/*
+ProveFile validates a file proof for a given challenge.
+If there is no challenge and the file is a stray, the provider is added to the list of the file's providers.
+*/
 func (k msgServer) ProveFile(ctx context.Context, msg *types.MsgProveFile) (*types.MsgProveFileResponse, error) {
+	/// --- Message validation
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
-		return nil, errorsmod.Wrap(err, "invalid authority address")
+		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "invalid address")
 	}
 	if _, err := k.GetProvider(ctx, msg.Creator); err != nil {
-		return nil, errorsmod.Wrap(err, "invalid provider address")
+		return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "invalid provider address")
 	}
 
+	/// --- Message validation
 	proofInput := types.Proof{
 		Data:       msg.Data,
 		Hashes:     msg.Hashes,
 		ChunkIndex: msg.Chunk,
 	}
 
-	if msg.ChallengeId == "" {
+	if msg.ChallengeId == "" { // if: no challenge provider (new provider proof)
+		/// --- Validate file is not ACTIVE and provider not already assigned to this file
 		file, err := k.GetFile(ctx, msg.Fid)
 		if err != nil {
 			return nil, err
 		}
-		if int32(len(file.Providers)) >= file.Replicas {
-			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "this file has sufficient providers")
+		if file.Status == "ACTIVE" {
+			return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "this file is not a stray")
 		}
+		if slices.Contains(file.Providers, msg.Creator) {
+			return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "this provider is already assigned to the file")
+		}
+
+		/// --- Attempt initial proof of the file
 		root, _ := hex.DecodeString(file.Merkle)
 		if k.Prove(ctx, root, msg.Chunk, proofInput) {
+			/// --- Add provider to the file after a successful proof
 			file.Providers = append(file.Providers, msg.Creator)
-			file.Status = "ACTIVE"
-			// [TODO]: eliminate stray from stays index if sufficient providers reached
-			if err = k.SetFile(ctx, file); err != nil {
-				return nil, err
-			}
-			currentCount, err := k.FileCount.Get(ctx)
-			if err != nil {
-				return nil, err // unexpected error
+			if int32(len(file.Providers)) >= file.Replicas {
+				file.Status = "ACTIVE"
+			} else {
+				file.Status = "STRAY"
 			}
 
-			newCount := currentCount + 1
-			if err := k.FileCount.Set(ctx, newCount); err != nil {
-				return nil, fmt.Errorf("failed to increment file count: %w", err)
+			/// --- Commit file update with new list of providers & increment total file count
+			if err = k.SetFile(ctx, file); err != nil {
+				return nil, errors.Wrap(err, "failed to update the file's provider list")
+			}
+			oldCount, err := k.FileCount.Get(ctx)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get total file count")
+			}
+			if err := k.FileCount.Set(ctx, oldCount+1); err != nil {
+				return nil, errors.Wrap(err, "failed to increment total file count")
 			}
 		} else {
-			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "invalid file proof")
+			return nil, types.ErrProofInvalid
 		}
-	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil {
-		// [TODO]: clearing out provider?
+	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil { // else: this is a response to a challenge
 		return nil, err
 	}
 

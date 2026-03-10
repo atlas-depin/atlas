@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
+	"slices"
 	"strconv"
 
 	"cosmossdk.io/collections"
@@ -113,7 +114,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			continue
 		}
 
-		if file.Status != "ACTIVE" {
+		if file.Status == "STAGED" {
 			iter.Next()
 			continue
 		}
@@ -246,7 +247,9 @@ func CreateChallenge(
 	}
 }
 
-// HandleMissedChallenges scans all active challenges and handles timeouts
+/*
+HandleMissedChallenges scans all active challenges and handles timeouts
+*/
 func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 	currentHeight := uint64(ctx.BlockHeight()) + 1
 
@@ -302,55 +305,46 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 	}
 }
 
+/*
+Process a challenge attempt by verifying the provided file proof from a given provider.
+*/
 func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {
 	challenge, err := k.GetChallenge(ctx, provider, proofInput.ChallengeId)
-	// [TODO]: allow no challenge
 	if err != nil {
+		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
 		return nil
 	}
 
 	file, err := k.GetFile(ctx, challenge.FileId)
 	if err != nil {
-		// [TODO]: remove challenge
+		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
 		return nil
 	}
 
-	if containsProver(file, provider) {
+	if slices.Contains(file.Providers, provider) {
 		root, _ := hex.DecodeString(file.Merkle)
-		success := k.Prove(ctx, root, challenge.ChunkIndex, proofInput)
-		if success {
+		if k.Prove(ctx, root, challenge.ChunkIndex, proofInput) {
 			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+		} else {
+			return types.ErrProofInvalid
 		}
-		return nil
-	} else if len(file.Providers) == int(file.Replicas) {
-		// [TODO]: not your file
-		return nil
 	} else {
-		return nil
+		return types.ErrProofFileBadProvider
 	}
+	return nil
 }
 
-func containsProver(file types.File, prover string) bool {
-	for _, provider := range file.Providers {
-		if provider == prover {
-			return true
-		}
-	}
-	return false
-}
-
+/*
+Verify a merkle proof.
+*/
 func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input types.Proof) bool {
 	hasher := blake3.New()
 	hasher.Write(input.Data)
 	hashName := hasher.Sum(nil)
 
-	var proof merkletree.Proof // unmarshal proof
+	var proof merkletree.Proof
 	proof.Siblings = input.Hashes
 	proof.Index = uint64(input.ChunkIndex)
-	// err := json.Unmarshal(input.HashList, &proof)
-	// if err != nil {
-	// 	return false
-	// }
 
 	if index != proof.Index {
 		return false

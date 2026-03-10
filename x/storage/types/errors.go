@@ -15,11 +15,14 @@ var (
 	ErrProviderNotFound            = errors.Register(ModuleName, 2104, "provider not found")
 	ErrProviderFull                = errors.Register(ModuleName, 2105, "insufficient provider storage. cannot exceed space available.")
 
-	ErrFileAlreadyExists = errors.Register(ModuleName, 2301, "file already exists")
-	ErrFileNotFound      = errors.Register(ModuleName, 2304, "file not found")
+	ErrFileAlreadyExists = errors.Register(ModuleName, 2201, "file already exists")
+	ErrFileNotFound      = errors.Register(ModuleName, 2204, "file not found")
 
 	ErrSubscriptionExpired            = errors.Register(ModuleName, 2301, "subscription is expired")
 	ErrSubscriptionFull               = errors.Register(ModuleName, 2302, "subscription has no remaining storage")
 	ErrSubscriptionInsufficientCredit = errors.Register(ModuleName, 2303, "subscription has insufficient credit")
 	ErrSubscriptionNotFound           = errors.Register(ModuleName, 2304, "subscription not found")
+
+	ErrProofInvalid         = errors.Register(ModuleName, 2401, "invalid file proof")
+	ErrProofFileBadProvider = errors.Register(ModuleName, 2402, "proof rejected because this file does not belong to you")
 )
