@@ -87,21 +87,3 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 
 	return nil
 }
-
-/*
-Get total file count using a FileStore iterator.
-*/
-// func (k Keeper) GetFileCount(ctx context.Context) (uint64, error) {
-// 	iter, err := k.FileStore.Iterate(ctx, nil)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	defer iter.Close()
-
-// 	keys, err := iter.Keys()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	return uint64(len(keys)), nil
-// }

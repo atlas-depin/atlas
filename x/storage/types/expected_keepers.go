@@ -26,6 +26,7 @@ type BankKeeper interface {
 
 	SendCoinsFromAccountToModule(context.Context, sdk.AccAddress, string, sdk.Coins) error
 	SendCoinsFromModuleToAccount(context.Context, string, sdk.AccAddress, sdk.Coins) error
+	SendCoinsFromModuleToModule(context.Context, string, string, sdk.Coins) error
 	GetBalance(context.Context, sdk.AccAddress, string) sdk.Coin
 	// Methods imported from bank should be defined here
 }

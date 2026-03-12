@@ -1,69 +1,39 @@
 package keeper
 
-// import (
-// 	"encoding/binary"
-// 	"hash"
+import (
+	"context"
+	"encoding/hex"
+	"nebulix/x/storage/types"
 
-// 	"github.com/cespare/xxhash"
-// 	"github.com/wealdtech/go-merkletree/v2"
-// 	"github.com/zeebo/blake3"
-// )
+	"cosmossdk.io/errors"
+)
 
-// func HashChunk(chunk []byte) []byte {
-// 	// Using SHA256 as placeholder - replace with actual xxhash64
-// 	// In production: use "github.com/cespare/xxhash"
-// 	hash := xxhash.Sum64(chunk)
-// 	return hash[:]
-// }
+func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address string, proof types.Proof) error {
+	/// --- Attempt initial proof of the file
+	root, _ := hex.DecodeString(file.Merkle)
+	if k.Prove(ctx, root, proof.ChunkIndex, proof) {
+		/// --- Add provider to the file after a successful proof
+		file.Providers = append(file.Providers, address)
+		if int32(len(file.Providers)) >= file.Replicas {
+			file.Status = "ACTIVE"
+		} else {
+			file.Status = "STRAY"
+		}
 
-// // VerifyMerkleProof verifies a chunk against Merkle root
-// func VerifyMerkleProof(root []byte, proof *MerkleProof) (bool, error) {
-// 	// Hash the chunk first
-// 	chunkHash := HashChunk(proof.Chunk)
+		/// --- Commit file update with new list of providers & increment total file count
+		if err := k.SetFile(ctx, file); err != nil {
+			return errors.Wrap(err, "failed to update the file's provider list")
+		}
+		oldCount, err := k.FileCount.Get(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to get total file count")
+		}
+		if err := k.FileCount.Set(ctx, oldCount+1); err != nil {
+			return errors.Wrap(err, "failed to increment total file count")
+		}
+	} else {
+		return types.ErrProofInvalid
+	}
 
-// 	// Create proof struct for the library
-// 	merkleProof := &merkletree.Proof{
-// 		Hash:   chunkHash,
-// 		Index:  proof.Index,
-// 		Hashes: proof.Siblings,
-// 	}
-
-// 	// Verify using Blake3
-// 	return merkletree.VerifyProof(chunkHash, merkleProof, root, blake3.New())
-// }
-
-// /// *** VRF Methods *** ///
-
-// type VerifiableRandomness struct {
-// 	blockHash []byte
-// 	hasher    hash.Hash
-// 	counter   uint64
-// }
-
-// func NewVerifiableRandomness(blockHash []byte) *VerifiableRandomness {
-// 	hasher := blake3.New()
-// 	return &VerifiableRandomness{
-// 		blockHash: blockHash,
-// 		hasher:    hasher,
-// 		counter:   0,
-// 	}
-// }
-
-// // NextRandom generates next random number in sequence
-// func (vr *VerifiableRandomness) NextRandom(max uint64) uint64 {
-// 	// Mix counter with block hash
-// 	vr.hasher.Reset()
-// 	vr.hasher.Write(vr.blockHash)
-
-// 	counterBytes := make([]byte, 8)
-// 	binary.BigEndian.PutUint64(counterBytes, vr.counter)
-// 	vr.hasher.Write(counterBytes)
-
-// 	hash := vr.hasher.Sum(nil)
-
-// 	// Convert first 8 bytes to uint64
-// 	result := binary.BigEndian.Uint64(hash[:8])
-
-// 	vr.counter++
-// 	return result % max
-// }
+	return nil
+}

@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"encoding/hex"
 	"slices"
 	"strconv"
 
@@ -48,31 +47,23 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 			return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "this provider is already assigned to the file")
 		}
 
-		/// --- Attempt initial proof of the file
-		root, _ := hex.DecodeString(file.Merkle)
-		if k.Prove(ctx, root, msg.Chunk, proofInput) {
-			/// --- Add provider to the file after a successful proof
-			file.Providers = append(file.Providers, msg.Creator)
-			if int32(len(file.Providers)) >= file.Replicas {
-				file.Status = "ACTIVE"
-			} else {
-				file.Status = "STRAY"
-			}
-
-			/// --- Commit file update with new list of providers & increment total file count
-			if err = k.SetFile(ctx, file); err != nil {
-				return nil, errors.Wrap(err, "failed to update the file's provider list")
-			}
-			oldCount, err := k.FileCount.Get(ctx)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to get total file count")
-			}
-			if err := k.FileCount.Set(ctx, oldCount+1); err != nil {
-				return nil, errors.Wrap(err, "failed to increment total file count")
-			}
-		} else {
-			return nil, types.ErrProofInvalid
+		// deal with storage credits first to avoid having to compute proof on an invalid request
+		t_r0, err := k.LastRewardsTime.Get(ctx)
+		if err != nil {
+			return nil, err
 		}
+		t_0 := max(t_r0.Unix(), file.Start)
+
+		delta_r := ctx.BlockTime().Unix() - t_r0.Unix()
+		delta_s := ctx.BlockTime().Unix() - t_0
+		if err := k.IncrementProviderSpaceUsed(ctx, msg.Creator, file.FileSize, delta_r, delta_s); err != nil {
+			return nil, err
+		}
+
+		if err := k.AttemptAddProvider(ctx, file, msg.Creator, proofInput); err != nil {
+			return nil, err
+		}
+
 	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil { // else: this is a response to a challenge
 		return nil, err
 	}

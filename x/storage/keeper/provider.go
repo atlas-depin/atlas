@@ -6,6 +6,7 @@ import (
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -95,7 +96,7 @@ func (k Keeper) IterateAllProviders(ctx context.Context, fn func(key string, pro
 /*
 Increment the space used of a given provider.
 */
-func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64, timeDelta int64) error {
+func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64, d_r int64, d_s int64) error {
 	provider, err := k.GetProvider(ctx, address)
 	if err != nil {
 		return err
@@ -106,7 +107,10 @@ func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, 
 		return types.ErrProviderFull
 	}
 
-	provider.CreditDelta += bytes * -timeDelta
+	provider.CreditDelta += bytes * -d_r
+	if err = k.DistributeCreditReward(ctx, math.NewInt(bytes*d_s), types.ProtocolOwnedLiquidityAccountName); err != nil {
+		return err
+	}
 
 	return k.SetProvider(ctx, provider)
 }
