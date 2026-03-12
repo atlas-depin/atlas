@@ -34,14 +34,9 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 	}
 
 	// TODO: stray manager
-	var rewardsTimeDelta int64
 	blockTime := ctx.BlockTime().Unix()
 	rewardStart, err := k.LastRewardsTime.Get(ctx)
-	if rewardStart.Unix() > file.Start {
-		rewardsTimeDelta = blockTime - rewardStart.Unix()
-	} else {
-		rewardsTimeDelta = blockTime - file.Start
-	}
+	rewardsTimeDelta := blockTime - rewardStart.Unix()
 
 	for _, address := range file.Providers {
 		err = k.DecrementProviderSpaceUsed(ctx, address, file.FileSize, rewardsTimeDelta)

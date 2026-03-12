@@ -14,6 +14,9 @@ func (k Keeper) DistributeCreditReward(ctx context.Context, credits math.Int, re
 	if err != nil {
 		return err
 	}
+	if cpool.LTE(math.ZeroInt()) {
+		return types.ErrRewardPoolEmpty
+	}
 	tokens := sdk.NewCoin(
 		tpool.Denom,
 		tpool.Amount.Mul(credits).Quo(cpool),

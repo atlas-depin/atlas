@@ -9,15 +9,23 @@ import (
 
 type fileIndexes struct {
 	ByFileId *indexes.Unique[string, collections.Triple[string, string, string], types.File]
+	ByStatus *indexes.Multi[string, collections.Triple[string, string, string], types.File]
 }
 
 func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 	return fileIndexes{
-		ByFileId: indexes.NewUnique[string, collections.Triple[string, string, string], types.File](
+		ByFileId: indexes.NewUnique(
 			sb, collections.NewPrefix(40), "by_fid",
 			collections.StringKey, collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
 			func(pk collections.Triple[string, string, string], f types.File) (string, error) {
 				return f.Fid, nil
+			},
+		),
+		ByStatus: indexes.NewMulti(
+			sb, collections.NewPrefix(41), "by_status",
+			collections.StringKey, collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
+			func(pk collections.Triple[string, string, string], f types.File) (string, error) {
+				return f.Status, nil
 			},
 		),
 	}
@@ -26,6 +34,7 @@ func NewFileIndexes(sb *collections.SchemaBuilder) fileIndexes {
 func (fi fileIndexes) IndexesList() []collections.Index[collections.Triple[string, string, string], types.File] {
 	return []collections.Index[collections.Triple[string, string, string], types.File]{
 		fi.ByFileId,
+		fi.ByStatus,
 	}
 }
 

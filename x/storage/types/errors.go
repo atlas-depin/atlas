@@ -25,4 +25,6 @@ var (
 
 	ErrProofInvalid         = errors.Register(ModuleName, 2401, "invalid file proof")
 	ErrProofFileBadProvider = errors.Register(ModuleName, 2402, "proof rejected because this file does not belong to you")
+
+	ErrRewardPoolEmpty = errors.Register(ModuleName, 2501, "storage credit reward pool is empty (this should not happen)")
 )

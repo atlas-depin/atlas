@@ -24,6 +24,7 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 		if err != nil {
 			ctx.Logger().Error("Failed to distribute rewards...")
 		}
+		k.RewardStrays(ctx)
 
 		roundIdx := ((height % params.ProofWindowBlocks) / params.ProofRoundBlocks)
 		k.StartChallengeRound(ctx, uint64(roundIdx))

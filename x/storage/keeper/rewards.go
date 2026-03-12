@@ -15,7 +15,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		return err
 	}
 	t_1 := ctx.BlockTime().Truncate(time.Second)
-	t_delta := math.NewInt(int64(t_1.Sub(t_0).Seconds()))
+	d_t := math.NewInt(int64(t_1.Sub(t_0).Seconds()))
 
 	/// --- get current storage tokens and storage credits kept by the module
 	storageTokensInPool := k.bankKeeper.GetBalance(ctx, types.ModuleAddress, "uatl")
@@ -23,16 +23,15 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	if err != nil {
 		return err
 	}
-
 	if storageCreditsInPool.LTE(math.ZeroInt()) {
-		return nil
+		return types.ErrRewardPoolEmpty
 	}
 
 	// --- iterate through all providers, distributing their rewards and resetting their credit delta
 	var totalCreditsDeducted math.Int
 	k.IterateAllProviders(ctx, func(key string, provider types.Provider) (stop bool) {
-		credits := t_delta.Mul(math.NewInt(provider.SpaceUsed)).Add(math.NewInt(provider.CreditDelta))
-		if credits.IsNegative() { // forward negative credits to next proof round delta
+		credits := d_t.Mul(math.NewInt(provider.SpaceUsed)).Add(math.NewInt(provider.CreditDelta))
+		if credits.IsNegative() { // forward remaining negative credits to next proof round delta
 			provider.CreditDelta = credits.Int64()
 			return false
 		}
@@ -68,4 +67,35 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		return nil
 	}
 	return k.LastRewardsTime.Set(ctx, t_1)
+}
+
+func (k Keeper) RewardStrays(ctx sdk.Context) error {
+	t_r, err := k.LastRewardsTime.Get(ctx)
+	if err != nil {
+		return err
+	}
+	t_0 := t_r.Unix()
+	t_1 := ctx.BlockTime().Unix()
+
+	var d_c math.Int
+	iter, _ := k.FileStore.Indexes.ByStatus.MatchExact(ctx, "STRAY")
+	for ; iter.Valid(); iter.Next() {
+		pk, _ := iter.PrimaryKey()
+		file, err := k.GetFile(ctx, pk.K3())
+		if err != nil {
+			continue
+		}
+
+		if t_0 < file.Start {
+			d_c = math.NewInt((t_1 - file.Start) * file.FileSize)
+		} else {
+			d_c = math.NewInt((t_1 - t_0) * file.FileSize)
+		}
+
+		err = k.DistributeCreditReward(ctx, d_c, types.ProtocolOwnedLiquidityAccountName)
+		if err != nil {
+			ctx.Logger().Error("Failed to distribute reward to POL for stray %s", file.Fid)
+		}
+	}
+	return nil
 }
