@@ -262,9 +262,11 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 
 		// Check deadline
 		if currentHeight >= uint64(challenge.DeadlineHeight) {
+
 			// Missed proof - apply penalty
-			// k.ApplyMissedProofPenalty(ctx, challenge)
-			missedCount++
+			if k.HandleMissedChallenge(ctx, challenge) {
+				missedCount++
+			}
 
 			// Remove it
 			if err := k.RemoveChallenge(ctx, challenge.Provider, challenge.ChallengeId); err != nil {
@@ -292,6 +294,34 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 			),
 		)
 	}
+}
+
+/*
+Slash provider rewards and remove the provider from the file.
+*/
+func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageChallenge) bool {
+	file, err := k.GetFile(ctx, challenge.FileId)
+	if err != nil {
+		return false
+	}
+
+	t_0, err := k.LastRewardsTime.Get(ctx)
+	if err != nil {
+		return false
+	}
+	t_1 := ctx.BlockTime().Unix()
+	d_t := t_0.Unix() - t_1
+
+	k.DecrementProviderSpaceUsed(ctx, challenge.Provider, file.FileSize, d_t*2)
+
+	for i, v := range file.Providers {
+		if v == challenge.Provider {
+			file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
+			break
+		}
+	}
+	k.SetFile(ctx, file)
+	return true
 }
 
 /*
