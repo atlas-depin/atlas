@@ -8,6 +8,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+/*
+Helper function for credit reward distribution from the module to a given receiver.
+*/
 func (k Keeper) DistributeCreditReward(ctx context.Context, credits math.Int, receiver string) error {
 	tpool := k.bankKeeper.GetBalance(ctx, types.ModuleAddress, "uatl")
 	cpool, err := k.StorageCreditPool.Get(ctx)

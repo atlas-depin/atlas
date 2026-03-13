@@ -27,7 +27,3 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 
 	return nil
 }
-
-// if (ctx.BlockHeight()+1)%params.ProofWindowBlocks == 0 {
-// 	// [TODO]: cleanup challenges & apply penalties
-// }

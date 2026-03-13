@@ -10,13 +10,7 @@ import (
 	"cosmossdk.io/collections"
 	"github.com/cespare/xxhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	jsoniter "github.com/json-iterator/go"
 )
-
-// TODO: delete failed challenge on end of round?
-// TODO: fix issue where idk something bad happens every other window, maybe due to desc?
-
-var json = jsoniter.ConfigFastest
 
 /*
 Initiates a challenge window by taking a snapshot of the total file count and resetting the iteration cursor.
