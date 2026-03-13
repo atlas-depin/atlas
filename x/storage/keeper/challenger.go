@@ -3,18 +3,14 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"nebulix/x/storage/types"
-	"slices"
 	"strconv"
 
 	"cosmossdk.io/collections"
-	merkletree "github.com/ahm23/go-merkletree-xxh"
 	"github.com/cespare/xxhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/zeebo/blake3"
 )
 
 // TODO: delete failed challenge on end of round?
@@ -168,11 +164,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 /*
 Generate and issue proof challenges for a file.
 */
-func (k Keeper) IssueChallengeForFile(
-	ctx context.Context,
-	file types.File,
-	round uint64,
-) ([]types.StorageChallenge, error) {
+func (k Keeper) IssueChallengeForFile(ctx context.Context, file types.File, round uint64) ([]types.StorageChallenge, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	params, _ := k.Params.Get(ctx)
 
@@ -322,59 +314,6 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 	}
 	k.SetFile(ctx, file)
 	return true
-}
-
-/*
-Process a challenge attempt by verifying the provided file proof from a given provider.
-*/
-func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {
-	challenge, err := k.GetChallenge(ctx, provider, proofInput.ChallengeId)
-	if err != nil {
-		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return nil
-	}
-
-	file, err := k.GetFile(ctx, challenge.FileId)
-	if err != nil {
-		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return nil
-	}
-
-	if slices.Contains(file.Providers, provider) {
-		root, _ := hex.DecodeString(file.Merkle)
-		if k.Prove(ctx, root, challenge.ChunkIndex, proofInput) {
-			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		} else {
-			return types.ErrProofInvalid
-		}
-	} else {
-		return types.ErrProofFileBadProvider
-	}
-	return nil
-}
-
-/*
-Verify a merkle proof.
-*/
-func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input types.Proof) bool {
-	hasher := blake3.New()
-	hasher.Write(input.Data)
-	hashName := hasher.Sum(nil)
-
-	var proof merkletree.Proof
-	proof.Siblings = input.Hashes
-	proof.Index = uint64(input.ChunkIndex)
-
-	if index != proof.Index {
-		return false
-	}
-
-	verified, err := merkletree.Verify(hashName, root, &proof, &merkletree.Config{XXH128: true})
-	if err != nil {
-		return false
-	}
-
-	return verified
 }
 
 func (k Keeper) computeProofsThisRound(ctx sdk.Context, n uint64, roundIdx uint64) uint64 {

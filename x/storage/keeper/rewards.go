@@ -9,6 +9,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+/*
+Reward providers at the end of each reward session (currently equivalent to challenge rounds)
+*/
 func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	t_0, err := k.LastRewardsTime.Get(ctx)
 	if err != nil {
@@ -69,6 +72,9 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	return k.LastRewardsTime.Set(ctx, t_1)
 }
 
+/*
+Distribute potential rewards from strays to POL
+*/
 func (k Keeper) RewardStrays(ctx sdk.Context) error {
 	t_r, err := k.LastRewardsTime.Get(ctx)
 	if err != nil {

@@ -12,14 +12,9 @@ func (k Keeper) EndBlocker(ctx sdk.Context) error {
 		k.StartChallengeWindow(ctx)
 	}
 
-	if (height+1)%params.ProofRoundBlocks == 0 {
-		// [TODO]: apply penalties
-		k.HandleMissedChallenges(ctx)
-	}
-
 	if height%params.ProofRoundBlocks == 0 {
 		ctx.Logger().Info("Processing provider rewards", "height", height)
-
+		k.HandleMissedChallenges(ctx)
 		err := k.RewardProviders(ctx)
 		if err != nil {
 			ctx.Logger().Error("Failed to distribute rewards...")
