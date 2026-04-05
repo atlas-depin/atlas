@@ -21,10 +21,13 @@ const (
 	gb_bytes int64 = 1_000_000_000
 )
 
-func validateBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
+func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
 	if denom != "uatl" {
 		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than ujkl")
 		return
+	}
+	if duration < 0 || bytes < 0 {
+		return time.Duration(0), 0, types.ErrSubscriptionInvalid
 	}
 
 	duration = time.Duration(days) * time.Hour * 24
@@ -64,7 +67,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// [TBD]: do I need to return duration?
-	duration, gbs, err := validateBuy(msg.Duration, msg.Bytes, "uatl")
+	duration, gbs, err := validateStorageBuy(msg.Duration, msg.Bytes, "uatl")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate buy request")
 	}

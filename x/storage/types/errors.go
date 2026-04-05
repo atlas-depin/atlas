@@ -22,6 +22,7 @@ var (
 	ErrSubscriptionFull               = errors.Register(ModuleName, 2302, "subscription has no remaining storage")
 	ErrSubscriptionInsufficientCredit = errors.Register(ModuleName, 2303, "subscription has insufficient credit")
 	ErrSubscriptionNotFound           = errors.Register(ModuleName, 2304, "subscription not found")
+	ErrSubscriptionInvalid            = errors.Register(ModuleName, 2305, "duration and/or bytes cannot be negative")
 
 	ErrProofInvalid         = errors.Register(ModuleName, 2401, "invalid file proof")
 	ErrProofFileBadProvider = errors.Register(ModuleName, 2402, "proof rejected because this file does not belong to you")

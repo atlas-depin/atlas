@@ -28,3 +28,23 @@ func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int 
 
 	return uatlCost.Ceil().TruncateInt()
 }
+
+// func (k Keeper) GetStorageExpansionCost(ctx sdk.Context, gbs int64, days int64, delta_s int64) math.Int {
+// 	params, _ := k.Params.Get(ctx)
+// 	pricePerGbDay := params.PricePerGbDay
+
+// 	expandCost := float64(pricePerGbDay*gbs) * float64(delta_s) / 86400
+// 	newCost := float64(pricePerGbDay * gbs * days)
+
+// 	// [TODO]: oracle for price fetching
+// 	totalCost := (newCost + expandCost) / 1000000
+// 	atlPrice := 1.0
+// 	// ^ temporary price for testing
+
+// 	atlCost := totalCost / atlPrice
+
+// 	uatlUnit := 1_000_000.0
+// 	uatlCost := atlCost * uatlUnit
+
+// 	return math.NewInt(int64(gomath.Ceil(uatlCost)))
+// }
