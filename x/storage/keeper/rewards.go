@@ -19,11 +19,11 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	}
 	t_1 := ctx.BlockTime().Truncate(time.Second)
 
-	if t_0.IsZero() {
-		k.LastRewardsTime.Set(ctx, t_1)
+	if t_0 == 0 {
+		k.LastRewardsTime.Set(ctx, t_1.Unix())
 		return nil
 	}
-	d_t := math.NewInt(int64(t_1.Sub(t_0).Seconds()))
+	d_t := math.NewInt(int64(t_1.Unix() - t_0))
 
 	/// --- get current storage tokens and storage credits kept by the module
 	storageTokensInPool := k.bankKeeper.GetBalance(ctx, types.ModuleAddress, "uatl")
@@ -74,7 +74,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		ctx.Logger().Error(fmt.Sprintf("Failed to burn %d storage credits", newCreditsInPool.Int64()))
 		return nil
 	}
-	return k.LastRewardsTime.Set(ctx, t_1)
+	return k.LastRewardsTime.Set(ctx, t_1.Unix())
 }
 
 /*
@@ -85,7 +85,7 @@ func (k Keeper) RewardStrays(ctx sdk.Context) error {
 	if err != nil {
 		return err
 	}
-	t_0 := t_r.Unix()
+	t_0 := t_r
 	t_1 := ctx.BlockTime().Unix()
 
 	var d_c math.Int

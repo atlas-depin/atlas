@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"time"
 
 	"nebulix/x/storage/types"
 
@@ -20,7 +19,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		panic(err)
 	}
 
-	if err := k.LastRewardsTime.Set(ctx, time.Time{}); err != nil {
+	if err := k.LastRewardsTime.Set(ctx, 0); err != nil {
 		panic(err)
 	}
 

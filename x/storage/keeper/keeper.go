@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -37,7 +36,7 @@ type Keeper struct {
 
 	// Collections
 	StorageCreditPool collections.Item[math.Int]
-	LastRewardsTime   collections.Item[time.Time]
+	LastRewardsTime   collections.Item[int64]
 
 	SubscriptionStore        collections.Map[collections.Pair[string, string], types.StorageSubscription]
 	DefaultSubscriptionIndex collections.Map[string, string]
@@ -91,6 +90,12 @@ func NewKeeper(
 		StorageCreditPool: collections.NewItem(
 			sb, collections.NewPrefix(0), "storage_credit_pool",
 			sdk.IntValue,
+		),
+		LastRewardsTime: collections.NewItem(
+			sb, collections.NewPrefix(0), "last_rewards_time",
+			collections.Int64Value,
+			//TODO: CosmosSDK release coming soon for TimeValue
+			//collections.TimeValue,
 		),
 
 		SubscriptionStore: collections.NewMap(

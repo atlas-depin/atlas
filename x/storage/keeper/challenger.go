@@ -296,7 +296,7 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 		return false
 	}
 	t_1 := ctx.BlockTime().Unix()
-	d_t := t_0.Unix() - t_1
+	d_t := t_0 - t_1
 
 	k.DecrementProviderSpaceUsed(ctx, challenge.Provider, file.FileSize, d_t*2)
 

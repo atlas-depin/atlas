@@ -111,6 +111,11 @@ type MockBankKeeper struct {
 	recorder *MockBankKeeperMockRecorder
 }
 
+// SendCoinsFromModuleToModule implements types.BankKeeper.
+func (m *MockBankKeeper) SendCoinsFromModuleToModule(context.Context, string, string, types.Coins) error {
+	panic("unimplemented")
+}
+
 // MockBankKeeperMockRecorder is the mock recorder for MockBankKeeper.
 type MockBankKeeperMockRecorder struct {
 	mock *MockBankKeeper

@@ -52,9 +52,9 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 		if err != nil {
 			return nil, err
 		}
-		t_0 := max(t_r0.Unix(), file.Start)
+		t_0 := max(t_r0, file.Start)
 
-		delta_r := ctx.BlockTime().Unix() - t_r0.Unix()
+		delta_r := ctx.BlockTime().Unix() - t_r0
 		delta_s := ctx.BlockTime().Unix() - t_0
 		if err := k.IncrementProviderSpaceUsed(ctx, msg.Creator, file.FileSize, delta_r, delta_s); err != nil {
 			return nil, err
