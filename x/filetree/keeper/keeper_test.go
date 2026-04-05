@@ -1,57 +1,119 @@
 package keeper_test
 
 import (
-	"context"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/suite"
 
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/store/types"
-	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
-	"github.com/cosmos/cosmos-sdk/runtime"
-	"github.com/cosmos/cosmos-sdk/testutil"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+	"github.com/cosmos/cosmos-sdk/runtime"
+
+	sdktestutil "github.com/cosmos/cosmos-sdk/testutil"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	modtestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+
+	"nebulix/testutils"
 	"nebulix/x/filetree/keeper"
 	module "nebulix/x/filetree/module"
 	"nebulix/x/filetree/types"
 )
 
-type fixture struct {
-	ctx          context.Context
+type KeeperTestSuite struct {
+	suite.Suite
+
+	ctx          sdk.Context
 	keeper       keeper.Keeper
+	bankKeeper   *testutils.MockBankKeeper
+	authKeeper   *testutils.MockAuthKeeper
 	addressCodec address.Codec
+	storeKey     *storetypes.KVStoreKey
+	ctrl         *gomock.Controller
+
+	helpers *testutils.MockHelpers
 }
 
-func initFixture(t *testing.T) *fixture {
-	t.Helper()
+func (suite *KeeperTestSuite) SetupTest() {
+	suite.ctrl = gomock.NewController(suite.T())
+	encCfg := modtestutil.MakeTestEncodingConfig(module.AppModule{})
 
-	encCfg := moduletestutil.MakeTestEncodingConfig(module.AppModule{})
-	addressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
-	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
-
-	storeService := runtime.NewKVStoreService(storeKey)
-	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
-
+	suite.storeKey = storetypes.NewKVStoreKey(types.StoreKey)
+	storeService := runtime.NewKVStoreService(suite.storeKey)
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
-	k := keeper.NewKeeper(
+	suite.helpers = testutils.NewMockHelpers()
+	suite.bankKeeper = testutils.NewMockBankKeeper(suite.ctrl)
+	suite.authKeeper = testutils.NewMockAuthKeeper(suite.ctrl)
+
+	suite.addressCodec = addresscodec.NewBech32Codec("cosmos")
+	suite.keeper = keeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
-		addressCodec,
+		suite.addressCodec,
 		authority,
-		nil,
+		suite.authKeeper,
 	)
 
-	// Initialize params
-	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
-		t.Fatalf("failed to set params: %v", err)
-	}
+	suite.ctx = sdktestutil.DefaultContextWithDB(suite.T(), suite.storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
+	suite.keeper.InitGenesis(suite.ctx, *types.DefaultGenesis())
 
-	return &fixture{
-		ctx:          ctx,
-		keeper:       k,
-		addressCodec: addressCodec,
+	// Initialize params
+	if err := suite.keeper.Params.Set(suite.ctx, types.DefaultParams()); err != nil {
+		suite.T().Fatalf("failed to set params: %v", err)
 	}
+}
+
+func (suite *KeeperTestSuite) TearDownTest() {
+	suite.ctrl.Finish()
+}
+
+func (suite *KeeperTestSuite) setupMsgServerWithParams(params types.Params) (types.MsgServer, sdk.Context) {
+	// Initialize genesis state
+	types.DefaultGenesis()
+
+	// Set params
+	err := suite.keeper.Params.Set(suite.ctx, params)
+	suite.Require().NoError(err)
+
+	// Return the message server and context
+	return keeper.NewMsgServerImpl(suite.keeper), suite.ctx
+}
+
+// setupMsgServer is the helper function that sets up everything needed for message server tests
+func (suite *KeeperTestSuite) setupMsgServer() (types.MsgServer, sdk.Context) {
+	return suite.setupMsgServerWithParams(types.DefaultParams())
+}
+
+func (suite *KeeperTestSuite) CreateTestAddress(index int) string {
+	addr := sdk.AccAddress([]byte{byte(index + 1), byte(index + 1), byte(index + 1), byte(index + 1)})
+	addrStr, err := suite.addressCodec.BytesToString(addr)
+	suite.Require().NoError(err)
+	return addrStr
+}
+
+// func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int64, replicas int32, providers []string) types.File {
+// 	file := types.File{
+// 		Fid:       fileId,
+// 		Merkle:    hex.EncodeToString([]byte("merkle-root-" + fileId)),
+// 		Creator:   owner,
+// 		Start:     suite.ctx.BlockHeight(),
+// 		Status:    "ACTIVE",
+// 		FileSize:  fileSize,
+// 		Providers: providers,
+// 		Replicas:  replicas,
+// 	}
+
+// 	err := suite.keeper.SetNewFile(suite.ctx, file)
+// 	suite.Require().NoError(err)
+
+// 	return file
+// }
+
+func TestKeeperTestSuite(t *testing.T) {
+	suite.Run(t, new(KeeperTestSuite))
 }
