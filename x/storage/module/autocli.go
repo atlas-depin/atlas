@@ -108,6 +108,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a delete-file tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "file_id"}},
 				},
+				{
+					RpcMethod:      "ExpandStorage",
+					Use:            "expand-storage [receiver] [duration] [bytes]",
+					Short:          "Send a expand-storage tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "receiver"}, {ProtoField: "duration"}, {ProtoField: "bytes"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

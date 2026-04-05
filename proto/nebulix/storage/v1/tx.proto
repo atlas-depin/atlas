@@ -28,6 +28,9 @@ service Msg {
 
   // DeleteFile defines the DeleteFile RPC.
   rpc DeleteFile(MsgDeleteFile) returns (MsgDeleteFileResponse);
+
+  // ExpandStorage defines the ExpandStorage RPC.
+  rpc ExpandStorage(MsgExpandStorage) returns (MsgExpandStorageResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -116,3 +119,15 @@ message MsgDeleteFile {
 
 // MsgDeleteFileResponse defines the MsgDeleteFileResponse message.
 message MsgDeleteFileResponse {}
+
+// MsgExpandStorage defines the MsgExpandStorage message.
+message MsgExpandStorage {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string receiver = 2;
+  int64 duration = 3;
+  int64 bytes = 4;
+}
+
+// MsgExpandStorageResponse defines the MsgExpandStorageResponse message.
+message MsgExpandStorageResponse {}
