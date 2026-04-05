@@ -18,6 +18,11 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		return err
 	}
 	t_1 := ctx.BlockTime().Truncate(time.Second)
+
+	if t_0.IsZero() {
+		k.LastRewardsTime.Set(ctx, t_1)
+		return nil
+	}
 	d_t := math.NewInt(int64(t_1.Sub(t_0).Seconds()))
 
 	/// --- get current storage tokens and storage credits kept by the module
