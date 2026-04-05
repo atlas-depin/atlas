@@ -20,8 +20,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		panic(err)
 	}
 
-	var t time.Time
-	if err := k.LastRewardsTime.Set(ctx, t); err != nil {
+	if err := k.LastRewardsTime.Set(ctx, time.Time{}); err != nil {
 		panic(err)
 	}
 
