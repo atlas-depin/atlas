@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"errors"
+
 	"nebulix/x/filetree/types"
 
 	"cosmossdk.io/collections"
@@ -16,7 +18,7 @@ func (k Keeper) SetRootNode(ctx context.Context, owner string, path string, file
 }
 
 func (k Keeper) SetNode(ctx context.Context, owner string, path string, file types.FileNode) error {
-	key := collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
+	key := collections.Join3(owner, filepath.Dir(path)+"/", filepath.Base(path))
 	return k.FileTree.Set(ctx, key, file)
 }
 
@@ -25,18 +27,35 @@ func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.F
 	if !strings.Contains(path, "/") {
 		key = collections.Join3(owner, "", path)
 	} else {
-		key = collections.Join3(owner, filepath.Dir(path), filepath.Base(path))
+		key = collections.Join3(owner, filepath.Dir(path)+"/", filepath.Base(path))
 	}
 	return k.FileTree.Get(ctx, key)
 }
 
 // [NOTE]: to be stress-tested, may have to default to regular DeleteNode
 func (k Keeper) RemoveNode(ctx context.Context, owner string, path string) error {
-	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-		collections.Join3(owner, path, ""),
-	)
+	// Ensure path has trailing slash for consistent storage
+	storagePath := path
+	if storagePath != "" && !strings.HasSuffix(storagePath, "/") {
+		storagePath = storagePath + "/"
+	}
 
-	// this is "safe"
+	// Delete the node itself
+	var selfKey collections.Triple[string, string, string]
+	if storagePath == "" {
+		selfKey = collections.Join3(owner, "", path) // root file
+	} else {
+		selfKey = collections.Join3(owner, filepath.Dir(storagePath), filepath.Base(storagePath))
+	}
+
+	if err := k.FileTree.Remove(ctx, selfKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
+		return err
+	}
+
+	// Delete ALL children with ONE range - they all have second component starting with storagePath
+	rng := new(collections.Range[collections.Triple[string, string, string]]).
+		Prefix(collections.Join3(owner, storagePath, ""))
+
 	return k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], _ types.FileNode) (bool, error) {
 		if err := k.FileTree.Remove(ctx, key); err != nil {
 			return true, err
