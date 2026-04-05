@@ -124,10 +124,14 @@ message MsgDeleteFileResponse {}
 message MsgExpandStorage {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string receiver = 2;
+  string subscription_id = 2;
   int64 duration = 3;
   int64 bytes = 4;
 }
 
 // MsgExpandStorageResponse defines the MsgExpandStorageResponse message.
-message MsgExpandStorageResponse {}
+message MsgExpandStorageResponse {
+  string subscription_id = 1;
+  int64 new_expiration = 2;
+  int64 new_space_available = 3;
+}
