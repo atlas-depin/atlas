@@ -13,7 +13,7 @@ import (
 )
 
 func (k Keeper) SetRootNode(ctx context.Context, owner string, path string, file types.FileNode) error {
-	key := collections.Join3(owner, "", path)
+	key := collections.Join3(owner, "", path+"/")
 	return k.FileTree.Set(ctx, key, file)
 }
 
@@ -25,7 +25,7 @@ func (k Keeper) SetNode(ctx context.Context, owner string, path string, file typ
 func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.FileNode, error) {
 	var key collections.Triple[string, string, string]
 	if !strings.Contains(path, "/") {
-		key = collections.Join3(owner, "", path)
+		key = collections.Join3(owner, "", path+"/")
 	} else {
 		key = collections.Join3(owner, filepath.Dir(path)+"/", filepath.Base(path))
 	}
