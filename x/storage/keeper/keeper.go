@@ -92,7 +92,7 @@ func NewKeeper(
 			sdk.IntValue,
 		),
 		LastRewardsTime: collections.NewItem(
-			sb, collections.NewPrefix(0), "last_rewards_time",
+			sb, collections.NewPrefix(10), "last_rewards_time",
 			collections.Int64Value,
 			//TODO: CosmosSDK release coming soon for TimeValue
 			//collections.TimeValue,
