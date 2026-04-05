@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -43,6 +44,9 @@ func validateBuy(days int64, bytes int64, denom string) (duration time.Duration,
 
 func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (*types.MsgBuyStorageResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
+		return nil, errorsmod.Wrap(err, "invalid authority address")
+	}
 
 	/// --- Validate request
 	if msg.Receiver == "" {
@@ -127,6 +131,3 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 
 	return &types.MsgBuyStorageResponse{SubscriptionId: subscriptionId}, nil
 }
-
-// TODO: upgrade storage duration
-// TODO: upgrade storage quantity
