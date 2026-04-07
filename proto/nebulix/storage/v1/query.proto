@@ -60,6 +60,11 @@ service Query {
   rpc StorageStats(QueryStorageStatsRequest) returns (QueryStorageStatsResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/storage_stats";
   }
+
+  // FileStats Queries a list of FileStats items.
+  rpc FileStats(QueryFileStatsRequest) returns (QueryFileStatsResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/file_stats/{stray_files}/{dead_files}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -161,4 +166,15 @@ message QueryStorageStatsResponse {
   int64 spaceReplicas = 4;
   int32 providerCount = 5;
   int64 spaceAvailable = 6;
+}
+
+// QueryFileStatsRequest defines the QueryFileStatsRequest message.
+message QueryFileStatsRequest {
+  int64 stray_files = 1;
+  int64 dead_files = 2;
+}
+
+// QueryFileStatsResponse defines the QueryFileStatsResponse message.
+message QueryFileStatsResponse {
+  int64 total_files = 1;
 }
