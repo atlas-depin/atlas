@@ -57,6 +57,30 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 }
 
 /*
+Iterate over all subscriptions and run the provided function argument for each record.
+The provided function must have a `types.StorageSubscription` argument.
+*/
+func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], file types.StorageSubscription) (stop bool)) error {
+	iter, err := k.SubscriptionStore.Iterate(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		kv, err := iter.KeyValue()
+		if err != nil {
+			return err
+		}
+		if fn(kv.Key, kv.Value) {
+			break
+		}
+	}
+
+	return nil
+}
+
+/*
 Remove a storage subscription by owner address and subscription id.
 If the subscription is the address's default subscription, the default subscription record is erased.
 */

@@ -154,4 +154,11 @@ message QueryChallengesResponse {
 message QueryStorageStatsRequest {}
 
 // QueryStorageStatsResponse defines the QueryStorageStatsResponse message.
-message QueryStorageStatsResponse {}
+message QueryStorageStatsResponse {
+  int32 subscriptionCount = 1;
+  int64 spacePurchased = 2;
+  int64 spaceUsed = 3;
+  int64 spaceReplicas = 4;
+  int32 providerCount = 5;
+  int64 spaceAvailable = 6;
+}
