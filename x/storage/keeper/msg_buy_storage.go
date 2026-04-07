@@ -104,6 +104,15 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "cannot send tokens from %s", msg.Creator)
 	}
 
+	cpool, err := k.StorageCreditPool.Get(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to update storage credit pool")
+	}
+	err = k.StorageCreditPool.Set(ctx, cpool.Add(credits))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to update storage credit pool")
+	}
+
 	// commit subscription to kvstore
 	subscriptionId, err := k.SetNewStorageSubscription(ctx, msg.Receiver, subscription)
 	if err != nil {

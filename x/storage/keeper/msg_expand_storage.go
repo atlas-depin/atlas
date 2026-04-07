@@ -72,17 +72,6 @@ func (k msgServer) ExpandStorage(goCtx context.Context, msg *types.MsgExpandStor
 	c2 := k.GetStorageCost(ctx, subscription.SpaceAvailable/3/1_000_000_000+gbs, msg.Duration) // duration
 	toPay := sdk.NewCoin("uatl", c1.Add(c2))
 
-	// --- Transfer payment ---
-	spender, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot parse creator address %s", msg.Creator)
-	}
-
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spender, types.ModuleName, sdk.NewCoins(toPay))
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to send payment for subscription expansion")
-	}
-
 	// --- Update subscription ---
 	newSeconds := math.NewInt(msg.Duration).Mul(math.NewInt(24 * 60 * 60))
 
@@ -94,6 +83,26 @@ func (k msgServer) ExpandStorage(goCtx context.Context, msg *types.MsgExpandStor
 	newCredits := math.NewInt(subscription.SpaceAvailable).Mul(newSeconds)
 	additionalCredits := math.NewInt(msg.Bytes).MulRaw(3 * oldSeconds).Add(newCredits)
 	subscription.Credits = subscription.Credits.Add(additionalCredits)
+
+	// --- Transfer payment ---
+	spender, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot parse creator address %s", msg.Creator)
+	}
+
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spender, types.ModuleName, sdk.NewCoins(toPay))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to send payment for subscription expansion")
+	}
+
+	cpool, err := k.StorageCreditPool.Get(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to update storage credit pool")
+	}
+	err = k.StorageCreditPool.Set(ctx, cpool.Add(additionalCredits))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to update storage credit pool")
+	}
 
 	// Save updated subscription
 	err = k.SetStorageSubscription(ctx, msg.Creator, subscription)
