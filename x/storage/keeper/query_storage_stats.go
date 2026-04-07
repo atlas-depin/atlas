@@ -15,8 +15,8 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	var active int64 = 0
-	var providers int64 = 0
+	var active int32 = 0
+	var providers int32 = 0
 	var spacePurchased int64 = 0
 	var spaceUsed int64 = 0
 	var spaceReplicas int64 = 0
