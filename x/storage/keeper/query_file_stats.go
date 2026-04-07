@@ -14,7 +14,22 @@ func (q queryServer) FileStats(ctx context.Context, req *types.QueryFileStatsReq
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	// TODO: Process the query
+	totalFiles, _ := q.k.FileCount.Get(ctx)
 
-	return &types.QueryFileStatsResponse{}, nil
+	var strayFiles int64 = 0
+	var deadFiles int64 = 0
+	iterStray, _ := q.k.FileStore.Indexes.ByStatus.MatchExact(ctx, "STRAY")
+	for ; iterStray.Valid(); iterStray.Next() {
+		strayFiles++
+	}
+	iterDead, _ := q.k.FileStore.Indexes.ByStatus.MatchExact(ctx, "DEAD")
+	for ; iterDead.Valid(); iterDead.Next() {
+		deadFiles++
+	}
+
+	return &types.QueryFileStatsResponse{
+		TotalFiles: int64(totalFiles),
+		StrayFiles: strayFiles,
+		DeadFiles:  deadFiles,
+	}, nil
 }

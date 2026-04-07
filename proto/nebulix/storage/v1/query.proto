@@ -169,12 +169,11 @@ message QueryStorageStatsResponse {
 }
 
 // QueryFileStatsRequest defines the QueryFileStatsRequest message.
-message QueryFileStatsRequest {
-  int64 stray_files = 1;
-  int64 dead_files = 2;
-}
+message QueryFileStatsRequest {}
 
 // QueryFileStatsResponse defines the QueryFileStatsResponse message.
 message QueryFileStatsResponse {
   int64 total_files = 1;
+  int64 stray_files = 2;
+  int64 dead_files = 3;
 }

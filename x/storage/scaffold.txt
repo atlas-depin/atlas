@@ -9,6 +9,9 @@ ignite scaffold message delete-file fileId:string --module storage
 ignite scaffold query get-subscription-info subscriberAddress:string subscriptionId:string --module storage
 ignite scaffold query provider address:string --response provider:string --module storage
 
+ignite scaffold query storage-stats --module storage
+ignite scaffold query file-stats --response total-files:int64 stray-files:int64 dead-files:int64 --module storage
+
 ignite scaffold query providers --module storage
 ignite scaffold query file fid:string --response file:custom --module storage
 ignite scaffold query files --response files:string --module storage --paginated
