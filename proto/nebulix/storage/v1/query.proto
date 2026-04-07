@@ -55,6 +55,11 @@ service Query {
   rpc Challenges(QueryChallengesRequest) returns (QueryChallengesResponse) {
     option (google.api.http).get = "/nebulix/storage/v1/challenges";
   }
+
+  // StorageStats Queries a list of StorageStats items.
+  rpc StorageStats(QueryStorageStatsRequest) returns (QueryStorageStatsResponse) {
+    option (google.api.http).get = "/nebulix/storage/v1/storage_stats";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -144,3 +149,9 @@ message QueryChallengesResponse {
   repeated StorageChallenge challenges = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
+
+// QueryStorageStatsRequest defines the QueryStorageStatsRequest message.
+message QueryStorageStatsRequest {}
+
+// QueryStorageStatsResponse defines the QueryStorageStatsResponse message.
+message QueryStorageStatsResponse {}
