@@ -343,35 +343,6 @@ func request_Query_FileStats_0(ctx context.Context, marshaler runtime.Marshaler,
 	var protoReq QueryFileStatsRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["stray_files"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "stray_files")
-	}
-
-	protoReq.StrayFiles, err = runtime.Int64(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "stray_files", err)
-	}
-
-	val, ok = pathParams["dead_files"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "dead_files")
-	}
-
-	protoReq.DeadFiles, err = runtime.Int64(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "dead_files", err)
-	}
-
 	msg, err := client.FileStats(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -380,35 +351,6 @@ func request_Query_FileStats_0(ctx context.Context, marshaler runtime.Marshaler,
 func local_request_Query_FileStats_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq QueryFileStatsRequest
 	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["stray_files"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "stray_files")
-	}
-
-	protoReq.StrayFiles, err = runtime.Int64(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "stray_files", err)
-	}
-
-	val, ok = pathParams["dead_files"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "dead_files")
-	}
-
-	protoReq.DeadFiles, err = runtime.Int64(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "dead_files", err)
-	}
 
 	msg, err := server.FileStats(ctx, &protoReq)
 	return msg, metadata, err
@@ -914,7 +856,7 @@ var (
 
 	pattern_Query_StorageStats_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"nebulix", "storage", "v1", "storage_stats"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_FileStats_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"nebulix", "storage", "v1", "file_stats", "stray_files", "dead_files"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_FileStats_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"nebulix", "storage", "v1", "file_stats"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
