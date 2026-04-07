@@ -124,9 +124,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod:      "ExpandStorage",
-					Use:            "expand-storage [receiver] [duration] [bytes]",
+					Use:            "expand-storage [subscription-id] [duration] [bytes]",
 					Short:          "Send a expand-storage tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "receiver"}, {ProtoField: "duration"}, {ProtoField: "bytes"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subscription_id"}, {ProtoField: "duration"}, {ProtoField: "bytes"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
