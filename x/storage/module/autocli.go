@@ -78,7 +78,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod:      "FileStats",
 					Use:            "file-stats [stray-files] [dead-files]",
 					Short:          "Query file-stats",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "stray_files"}, {ProtoField: "dead_files"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
 				},
 
 				// this line is used by ignite scaffolding # autocli/query
