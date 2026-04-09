@@ -35,6 +35,8 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		return types.ErrRewardPoolEmpty
 	}
 
+	// CRITICAL [TODO]: how the fuck do we get past here with 0 providers and 0 credits
+
 	// --- iterate through all providers, distributing their rewards and resetting their credit delta
 	var totalCreditsDeducted math.Int = math.ZeroInt()
 	k.IterateAllProviders(ctx, func(key string, provider types.Provider) (stop bool) {
