@@ -36,7 +36,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 	}
 
 	// --- iterate through all providers, distributing their rewards and resetting their credit delta
-	var totalCreditsDeducted math.Int
+	var totalCreditsDeducted math.Int = math.ZeroInt()
 	k.IterateAllProviders(ctx, func(key string, provider types.Provider) (stop bool) {
 		credits := d_t.Mul(math.NewInt(provider.SpaceUsed)).Add(math.NewInt(provider.CreditDelta))
 		if credits.IsNegative() { // forward remaining negative credits to next proof round delta
