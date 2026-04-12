@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"nebulix/x/storage/types"
 	"slices"
 
@@ -48,18 +49,21 @@ func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address
 Process a challenge attempt by verifying the provided file proof from a given provider.
 */
 func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {
+	fmt.Println("<AttemptChallenge> ---------------")
+	fmt.Println(provider, proofInput)
 	challenge, err := k.GetChallenge(ctx, provider, proofInput.ChallengeId)
 	if err != nil {
 		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return nil
+		return err
 	}
 
 	file, err := k.GetFile(ctx, challenge.FileId)
 	if err != nil {
 		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return nil
+		return err
 	}
 
+	fmt.Println(file)
 	if slices.Contains(file.Providers, provider) {
 		root, _ := hex.DecodeString(file.Merkle)
 		if k.Prove(ctx, root, challenge.ChunkIndex, proofInput) {

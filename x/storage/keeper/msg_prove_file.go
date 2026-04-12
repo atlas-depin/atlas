@@ -65,6 +65,7 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 		}
 
 	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil { // else: this is a response to a challenge
+		ctx.Logger().Warn("Challenge Failed", err)
 		return nil, err
 	}
 
