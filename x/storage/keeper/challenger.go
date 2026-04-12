@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"nebulix/x/storage/types"
+	"slices"
 	"strconv"
 
 	"cosmossdk.io/collections"
@@ -302,11 +303,15 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 
 	for i, v := range file.Providers {
 		if v == challenge.Provider {
-			file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
+			if slices.Contains(file.UnstableProviders, challenge.Provider) {
+				file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
+				k.StabilizeProvider(ctx, challenge.Provider, file)
+			} else {
+				k.DestabilizeProvider(ctx, challenge.Provider, file)
+			}
 			break
 		}
 	}
-	k.SetFile(ctx, file)
 	return true
 }
 

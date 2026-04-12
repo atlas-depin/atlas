@@ -13,6 +13,6 @@ message File {
   int64 file_size = 6;
   int32 replicas = 7;
   repeated string providers = 8;
-  int64 start = 9;
-  int64 last_challenged_height = 10;
+  repeated string unstable_providers = 9;
+  int64 start = 10;
 }

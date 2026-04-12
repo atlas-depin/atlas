@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 	"nebulix/x/storage/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type MsgPostProofs struct {
@@ -13,8 +15,8 @@ type MsgPostProofs struct {
 type MsgPostProofsResponse struct {
 }
 
-func (k msgServer) SubmitProofs(ctx context.Context, msg *MsgPostProofs) (*MsgPostProofsResponse, error) {
-	// sdkCtx := sdk.UnwrapSDKContext(ctx)
+func (k msgServer) SubmitProofs(goCtx context.Context, msg *MsgPostProofs) (*MsgPostProofsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	/// JUNK TO BE REUSED ELSEWHERE
 	// ranger := collections.NewPrefixedPairRange[string, string](msg.Provider)

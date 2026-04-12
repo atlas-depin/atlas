@@ -3,12 +3,12 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
 	"nebulix/x/storage/types"
 	"slices"
 
 	"cosmossdk.io/errors"
 	"github.com/ahm23/go-merkletree-xxh"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/zeebo/blake3"
 )
 
@@ -48,26 +48,28 @@ func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address
 /*
 Process a challenge attempt by verifying the provided file proof from a given provider.
 */
-func (k Keeper) AttemptChallenge(ctx context.Context, provider string, proofInput types.Proof) error {
-	fmt.Println("<AttemptChallenge> ---------------")
-	fmt.Println(provider, proofInput)
+func (k Keeper) AttemptChallenge(ctx sdk.Context, provider string, proofInput types.Proof) error {
 	challenge, err := k.GetChallenge(ctx, provider, proofInput.ChallengeId)
 	if err != nil {
-		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return err
+		_ = k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+		ctx.Logger().Error("Unable to find challenge:",
+			"challenge_id", proofInput.ChallengeId,
+			"provider", provider,
+		)
+		return nil
 	}
 
 	file, err := k.GetFile(ctx, challenge.FileId)
 	if err != nil {
-		k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return err
+		_ = k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+		return nil
 	}
 
-	fmt.Println(file)
 	if slices.Contains(file.Providers, provider) {
 		root, _ := hex.DecodeString(file.Merkle)
 		if k.Prove(ctx, root, challenge.ChunkIndex, proofInput) {
-			k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+			_ = k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+			_ = k.StabilizeProvider(ctx, provider, file)
 		} else {
 			return types.ErrProofInvalid
 		}

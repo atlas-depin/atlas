@@ -3,10 +3,12 @@ package keeper
 
 import (
 	"context"
+	"slices"
 
 	"nebulix/x/storage/types"
 
 	"cosmossdk.io/collections"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 /*
@@ -83,6 +85,43 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 		if fn(kv.Value) {
 			break
 		}
+	}
+
+	return nil
+}
+
+/*
+Remove a provider from the list of unstable providers for a given file.
+*/
+func (k Keeper) StabilizeProvider(ctx sdk.Context, provider string, file types.File) error {
+	if slices.Contains(file.UnstableProviders, provider) {
+		file.UnstableProviders = slices.DeleteFunc(file.UnstableProviders, func(p string) bool {
+			return p == provider
+		})
+
+		if err := k.SetFile(ctx, file); err != nil {
+			ctx.Logger().Error("Failed to remove provider from unstable providers:",
+				"provider", provider,
+				"fid", file.Fid,
+			)
+			return err
+		}
+	}
+
+	return nil
+}
+
+/*
+Add a provider to the list of unstable providers for a given file.
+*/
+func (k Keeper) DestabilizeProvider(ctx sdk.Context, provider string, file types.File) error {
+	file.UnstableProviders = append(file.UnstableProviders, provider)
+	if err := k.SetFile(ctx, file); err != nil {
+		ctx.Logger().Warn("Failed to add provider to unstable providers:",
+			"provider", provider,
+			"fid", file.Fid,
+		)
+		return err
 	}
 
 	return nil
