@@ -89,6 +89,7 @@ var (
 		{Account: icatypes.ModuleName},
 		{Account: storagemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
 		{Account: storagemoduletypes.ProviderDepositAccountName, Permissions: []string{}},
+		{Account: storagemoduletypes.ProtocolOwnedLiquidityAccountName, Permissions: []string{}},
 	}
 
 	// blocked account addresses
