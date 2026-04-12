@@ -305,6 +305,9 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 		if v == challenge.Provider {
 			if slices.Contains(file.UnstableProviders, challenge.Provider) {
 				file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
+				if len(file.Providers) == 0 {
+					file.Status = "DEAD"
+				}
 				k.StabilizeProvider(ctx, challenge.Provider, file)
 			} else {
 				k.DestabilizeProvider(ctx, challenge.Provider, file)
