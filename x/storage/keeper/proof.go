@@ -18,7 +18,7 @@ Process a proof from a provider attempting to claim it has a file for the first 
 func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address string, proof types.Proof) error {
 	/// --- Attempt initial proof of the file
 	root, _ := hex.DecodeString(file.Merkle)
-	if k.Prove(ctx, root, proof.ChunkIndex, proof) {
+	if k.Prove(ctx, root, proof.Index, proof) {
 		/// --- Add provider to the file after a successful proof
 		file.Providers = append(file.Providers, address)
 		if int32(len(file.Providers)) >= file.Replicas {
