@@ -109,7 +109,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			continue
 		}
 
-		if file.Status == "STAGED" {
+		if file.Status == "STAGED" || file.Status == "DEAD" {
 			iter.Next()
 			continue
 		}
