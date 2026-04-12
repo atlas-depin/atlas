@@ -87,13 +87,13 @@ func (k Keeper) Prove(ctx context.Context, root []byte, index uint64, input type
 	hasher.Write(input.Data)
 	hashName := hasher.Sum(nil)
 
-	var proof merkletree.Proof
-	proof.Siblings = input.Hashes
-	proof.Index = uint64(input.ChunkIndex)
-
-	if index != proof.Index {
+	if index != input.Index {
 		return false
 	}
+
+	var proof merkletree.Proof
+	proof.Siblings = input.Hashes
+	proof.PathBits = input.Path
 
 	verified, err := merkletree.Verify(hashName, root, &proof, &merkletree.Config{XXH128: true})
 	if err != nil {

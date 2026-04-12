@@ -31,8 +31,9 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 	proofInput := types.Proof{
 		ChallengeId: msg.ChallengeId,
 		Data:        msg.Data,
+		Index:       msg.Chunk,
+		Path:        msg.Path,
 		Hashes:      msg.Hashes,
-		ChunkIndex:  msg.Chunk,
 	}
 
 	if msg.ChallengeId == "" { // if: no challenge provider (new provider proof)

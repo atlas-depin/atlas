@@ -11,10 +11,3 @@ type StoragePaymentInfo struct {
 	SpaceUsed      int64     `protobuf:"varint,4,opt,name=spaceUsed,proto3" json:"spaceUsed,omitempty"`
 	Address        string    `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
 }
-
-type Proof struct {
-	ChallengeId string
-	Data        []byte
-	Hashes      [][]byte
-	ChunkIndex  uint64
-}

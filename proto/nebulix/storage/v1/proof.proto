@@ -5,8 +5,16 @@ option go_package = "nebulix/x/storage/types";
 
 message MerkleProof {
   bytes chunk = 1; // The 1KB chunk data
-  uint64 index = 2; // Position in file (0-based)
+  uint64 path = 2; // Path bits for unbalanced tree
   repeated bytes siblings = 3; // Sibling hashes for Merkle path
+}
+
+message Proof {
+  string challenge_id = 1;
+  bytes data = 2;
+  uint64 index = 3;
+  uint64 path = 4;
+  repeated bytes hashes = 5;
 }
 
 message StorageChallenge {

@@ -105,6 +105,7 @@ message MsgProveFile {
   bytes data = 4;
   repeated bytes hashes = 5;
   uint64 chunk = 6;
+  uint64 path = 7;
 }
 
 // MsgProveFileResponse defines the MsgProveFileResponse message.
