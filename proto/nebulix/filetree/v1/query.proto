@@ -18,8 +18,8 @@ service Query {
     option (google.api.http).get = "/nebulix/filetree/v1/params";
   }
 
-  // FileNode Queries a list of FileNode items.
-  rpc FileNode(QueryFileNodeRequest) returns (QueryFileNodeResponse) {
+  // TreeNode Queries a list of TreeNode items.
+  rpc TreeNode(QueryTreeNodeRequest) returns (QueryTreeNodeResponse) {
     option (google.api.http).get = "/nebulix/filetree/v1/file_tree_node/{path}";
   }
 
@@ -28,8 +28,8 @@ service Query {
     option (google.api.http).get = "/nebulix/filetree/v1/file_tree_paths/{basepath}";
   }
 
-  // FileNodeChildren Queries a list of FileNodeChildren items.
-  rpc FileNodeChildren(QueryFileNodeChildrenRequest) returns (QueryFileNodeChildrenResponse) {
+  // TreeNodeChildren Queries a list of TreeNodeChildren items.
+  rpc TreeNodeChildren(QueryTreeNodeChildrenRequest) returns (QueryTreeNodeChildrenResponse) {
     option (google.api.http).get = "/nebulix/filetree/v1/file_node_children/{owner}/{path}";
   }
 }
@@ -46,15 +46,15 @@ message QueryParamsResponse {
   ];
 }
 
-// QueryFileNodeRequest defines the QueryFileNodeRequest message.
-message QueryFileNodeRequest {
+// QueryTreeNodeRequest defines the QueryTreeNodeRequest message.
+message QueryTreeNodeRequest {
   string owner = 1;
   string path = 2;
 }
 
-// QueryFileNodeResponse defines the QueryFileNodeResponse message.
-message QueryFileNodeResponse {
-  FileNode node = 1;
+// QueryTreeNodeResponse defines the QueryTreeNodeResponse message.
+message QueryTreeNodeResponse {
+  TreeNode node = 1;
 }
 
 // QueryFileTreePathsRequest defines the QueryFileTreePathsRequest message.
@@ -68,13 +68,13 @@ message QueryFileTreePathsResponse {
   repeated string paths = 1;
 }
 
-// QueryFileNodeChildrenRequest defines the QueryFileNodeChildrenRequest message.
-message QueryFileNodeChildrenRequest {
+// QueryTreeNodeChildrenRequest defines the QueryTreeNodeChildrenRequest message.
+message QueryTreeNodeChildrenRequest {
   string owner = 1;
   string path = 2;
 }
 
-// QueryFileNodeChildrenResponse defines the QueryFileNodeChildrenResponse message.
-message QueryFileNodeChildrenResponse {
-  repeated FileNode nodes = 1;
+// QueryTreeNodeChildrenResponse defines the QueryTreeNodeChildrenResponse message.
+message QueryTreeNodeChildrenResponse {
+  repeated TreeNode nodes = 1;
 }
