@@ -23,7 +23,7 @@ func (q queryServer) FileTreePaths(ctx context.Context, req *types.QueryFileTree
 		collections.Join3(req.Owner, basepath, ""),
 	)
 
-	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.FileNode) (_ bool, _ error) {
+	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.TreeNode) (_ bool, _ error) {
 		paths = append(paths, key.K3())
 		return false, nil
 	})

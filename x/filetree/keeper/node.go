@@ -11,17 +11,17 @@ import (
 	"cosmossdk.io/collections"
 )
 
-func (k Keeper) SetRootNode(ctx context.Context, owner string, path string, file types.FileNode) error {
+func (k Keeper) SetRootNode(ctx context.Context, owner string, path string, file types.TreeNode) error {
 	key := collections.Join3(owner, "", path)
 	return k.FileTree.Set(ctx, key, file)
 }
 
-func (k Keeper) SetNode(ctx context.Context, owner string, path string, file types.FileNode) error {
+func (k Keeper) SetNode(ctx context.Context, owner string, path string, file types.TreeNode) error {
 	key := collections.Join3(owner, pathDir(path), pathBase(path))
 	return k.FileTree.Set(ctx, key, file)
 }
 
-func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.FileNode, error) {
+func (k Keeper) GetNode(ctx context.Context, owner string, path string) (types.TreeNode, error) {
 	var key collections.Triple[string, string, string]
 	if !strings.Contains(path, "/") {
 		key = collections.Join3(owner, "", path)
@@ -47,7 +47,7 @@ func (k Keeper) RemoveNode(ctx context.Context, owner string, path string, recur
 	rng := new(collections.Range[collections.Triple[string, string, string]]).
 		Prefix(collections.Join3(owner, path, ""))
 
-	if err := k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], _ types.FileNode) (bool, error) {
+	if err := k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], _ types.TreeNode) (bool, error) {
 		return false, k.FileTree.Remove(ctx, key)
 	}); err != nil {
 		return err
@@ -60,7 +60,7 @@ func (k Keeper) RemoveNode(ctx context.Context, owner string, path string, recur
 		recusiveRng.StartInclusive(start)
 		recusiveRng.EndInclusive(end)
 
-		return k.IterateNodes(ctx, recusiveRng, func(key collections.Triple[string, string, string], _ types.FileNode) (bool, error) {
+		return k.IterateNodes(ctx, recusiveRng, func(key collections.Triple[string, string, string], _ types.TreeNode) (bool, error) {
 			return false, k.FileTree.Remove(ctx, key)
 		})
 	} else {
@@ -71,7 +71,7 @@ func (k Keeper) RemoveNode(ctx context.Context, owner string, path string, recur
 func (k Keeper) IterateNodes(
 	ctx context.Context,
 	rng collections.Ranger[collections.Triple[string, string, string]],
-	fn func(key collections.Triple[string, string, string], value types.FileNode) (stop bool, err error),
+	fn func(key collections.Triple[string, string, string], value types.TreeNode) (stop bool, err error),
 ) error {
 	iter, err := k.FileTree.Iterate(ctx, rng)
 	if err != nil {

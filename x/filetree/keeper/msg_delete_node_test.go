@@ -22,13 +22,13 @@ func (suite *KeeperTestSuite) TestRemoveNodeRecursively() {
 		"s/Test1/Test2/Test4",
 	}
 	for _, path := range testPaths {
-		err := suite.keeper.SetNode(ctx, owner, path, types.FileNode{ /* some data */ })
+		err := suite.keeper.SetNode(ctx, owner, path, types.TreeNode{ /* some data */ })
 		suite.Require().NoError(err)
 	}
 
 	// Also create an unrelated key to ensure it's not deleted
 	unrelatedPath := "other/path"
-	err := suite.keeper.SetNode(ctx, owner, unrelatedPath, types.FileNode{})
+	err := suite.keeper.SetNode(ctx, owner, unrelatedPath, types.TreeNode{})
 	suite.Require().NoError(err)
 
 	// Delete s/Test1 recursively

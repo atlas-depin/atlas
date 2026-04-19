@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) FileNode(ctx context.Context, req *types.QueryFileNodeRequest) (*types.QueryFileNodeResponse, error) {
+func (q queryServer) TreeNode(ctx context.Context, req *types.QueryTreeNodeRequest) (*types.QueryTreeNodeResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -18,5 +18,5 @@ func (q queryServer) FileNode(ctx context.Context, req *types.QueryFileNodeReque
 	path := strings.ToLower(strings.Trim(req.Path, "/"))
 	node, err := q.k.GetNode(ctx, req.Owner, path)
 
-	return &types.QueryFileNodeResponse{Node: &node}, err
+	return &types.QueryTreeNodeResponse{Node: &node}, err
 }

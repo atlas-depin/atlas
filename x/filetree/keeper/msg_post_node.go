@@ -16,7 +16,7 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 
 	// [TODO]: handle illegal path characters
 	path := strings.ToLower(strings.Trim(msg.Path, "/"))
-	ftn := types.FileNode{
+	ftn := types.TreeNode{
 		NodeType: msg.NodeType,
 		Contents: msg.Contents,
 	}

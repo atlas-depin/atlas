@@ -18,7 +18,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:     "Shows the parameters of the module",
 				},
 				{
-					RpcMethod:      "FileNode",
+					RpcMethod:      "TreeNode",
 					Use:            "file-tree-node [path]",
 					Short:          "Query file-tree-node",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "path"}},
@@ -32,7 +32,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 
 				{
-					RpcMethod:      "FileNodeChildren",
+					RpcMethod:      "TreeNodeChildren",
 					Use:            "file-node-children [owner] [path]",
 					Short:          "Query file-node-children",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "owner"}, {ProtoField: "path"}},

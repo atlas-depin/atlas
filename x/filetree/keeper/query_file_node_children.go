@@ -11,12 +11,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) FileNodeChildren(ctx context.Context, req *types.QueryFileNodeChildrenRequest) (*types.QueryFileNodeChildrenResponse, error) {
+func (q queryServer) TreeNodeChildren(ctx context.Context, req *types.QueryTreeNodeChildrenRequest) (*types.QueryTreeNodeChildrenResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	var nodes []*types.FileNode
+	var nodes []*types.TreeNode
 	basepath := strings.ToLower(strings.Trim(req.Path, "/"))
 
 	var rng *collections.Range[collections.Triple[string, string, string]]
@@ -25,10 +25,10 @@ func (q queryServer) FileNodeChildren(ctx context.Context, req *types.QueryFileN
 		collections.TripleSuperPrefix[string, string, string](req.Owner, basepath),
 	)
 
-	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.FileNode) (_ bool, _ error) {
+	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.TreeNode) (_ bool, _ error) {
 		nodes = append(nodes, &node)
 		return false, nil
 	})
 
-	return &types.QueryFileNodeChildrenResponse{Nodes: nodes}, err
+	return &types.QueryTreeNodeChildrenResponse{Nodes: nodes}, err
 }

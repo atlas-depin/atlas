@@ -22,7 +22,7 @@ type Keeper struct {
 	Schema collections.Schema
 	Params collections.Item[types.Params]
 
-	FileTree collections.Map[collections.Triple[string, string, string], types.FileNode]
+	FileTree collections.Map[collections.Triple[string, string, string], types.TreeNode]
 
 	authKeeper types.AuthKeeper
 }
@@ -53,7 +53,7 @@ func NewKeeper(
 		FileTree: collections.NewMap(sb,
 			collections.NewPrefix(0), "files",
 			collections.TripleKeyCodec(collections.StringKey, collections.StringKey, collections.StringKey),
-			codec.CollValue[types.FileNode](cdc)),
+			codec.CollValue[types.TreeNode](cdc)),
 	}
 
 	schema, err := sb.Build()
