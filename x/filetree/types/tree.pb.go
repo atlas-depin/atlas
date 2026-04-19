@@ -22,23 +22,23 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type FileNode struct {
-	NodeType string `protobuf:"bytes,1,opt,name=node_type,json=nodeType,proto3" json:"node_type,omitempty"`
-	Contents string `protobuf:"bytes,2,opt,name=contents,proto3" json:"contents,omitempty"`
+type AuthorityBundle struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Secret  string `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`
 }
 
-func (m *FileNode) Reset()         { *m = FileNode{} }
-func (m *FileNode) String() string { return proto.CompactTextString(m) }
-func (*FileNode) ProtoMessage()    {}
-func (*FileNode) Descriptor() ([]byte, []int) {
+func (m *AuthorityBundle) Reset()         { *m = AuthorityBundle{} }
+func (m *AuthorityBundle) String() string { return proto.CompactTextString(m) }
+func (*AuthorityBundle) ProtoMessage()    {}
+func (*AuthorityBundle) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4a3dbd3d3185160b, []int{0}
 }
-func (m *FileNode) XXX_Unmarshal(b []byte) error {
+func (m *AuthorityBundle) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *FileNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AuthorityBundle) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_FileNode.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AuthorityBundle.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -48,54 +48,128 @@ func (m *FileNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *FileNode) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_FileNode.Merge(m, src)
+func (m *AuthorityBundle) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthorityBundle.Merge(m, src)
 }
-func (m *FileNode) XXX_Size() int {
+func (m *AuthorityBundle) XXX_Size() int {
 	return m.Size()
 }
-func (m *FileNode) XXX_DiscardUnknown() {
-	xxx_messageInfo_FileNode.DiscardUnknown(m)
+func (m *AuthorityBundle) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthorityBundle.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_FileNode proto.InternalMessageInfo
+var xxx_messageInfo_AuthorityBundle proto.InternalMessageInfo
 
-func (m *FileNode) GetNodeType() string {
+func (m *AuthorityBundle) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *AuthorityBundle) GetSecret() string {
+	if m != nil {
+		return m.Secret
+	}
+	return ""
+}
+
+type TreeNode struct {
+	NodeType string             `protobuf:"bytes,1,opt,name=node_type,json=nodeType,proto3" json:"node_type,omitempty"`
+	Contents string             `protobuf:"bytes,2,opt,name=contents,proto3" json:"contents,omitempty"`
+	Readers  []*AuthorityBundle `protobuf:"bytes,3,rep,name=readers,proto3" json:"readers,omitempty"`
+	Editors  []*AuthorityBundle `protobuf:"bytes,4,rep,name=editors,proto3" json:"editors,omitempty"`
+}
+
+func (m *TreeNode) Reset()         { *m = TreeNode{} }
+func (m *TreeNode) String() string { return proto.CompactTextString(m) }
+func (*TreeNode) ProtoMessage()    {}
+func (*TreeNode) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a3dbd3d3185160b, []int{1}
+}
+func (m *TreeNode) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TreeNode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TreeNode.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TreeNode) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TreeNode.Merge(m, src)
+}
+func (m *TreeNode) XXX_Size() int {
+	return m.Size()
+}
+func (m *TreeNode) XXX_DiscardUnknown() {
+	xxx_messageInfo_TreeNode.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TreeNode proto.InternalMessageInfo
+
+func (m *TreeNode) GetNodeType() string {
 	if m != nil {
 		return m.NodeType
 	}
 	return ""
 }
 
-func (m *FileNode) GetContents() string {
+func (m *TreeNode) GetContents() string {
 	if m != nil {
 		return m.Contents
 	}
 	return ""
 }
 
+func (m *TreeNode) GetReaders() []*AuthorityBundle {
+	if m != nil {
+		return m.Readers
+	}
+	return nil
+}
+
+func (m *TreeNode) GetEditors() []*AuthorityBundle {
+	if m != nil {
+		return m.Editors
+	}
+	return nil
+}
+
 func init() {
-	proto.RegisterType((*FileNode)(nil), "nebulix.filetree.v1.FileNode")
+	proto.RegisterType((*AuthorityBundle)(nil), "nebulix.filetree.v1.AuthorityBundle")
+	proto.RegisterType((*TreeNode)(nil), "nebulix.filetree.v1.TreeNode")
 }
 
 func init() { proto.RegisterFile("nebulix/filetree/v1/tree.proto", fileDescriptor_4a3dbd3d3185160b) }
 
 var fileDescriptor_4a3dbd3d3185160b = []byte{
-	// 162 bytes of a gzipped FileDescriptorProto
+	// 256 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0xcb, 0x4b, 0x4d, 0x2a,
 	0xcd, 0xc9, 0xac, 0xd0, 0x4f, 0xcb, 0xcc, 0x49, 0x2d, 0x29, 0x4a, 0x4d, 0xd5, 0x2f, 0x33, 0xd4,
 	0x07, 0xd1, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0xc2, 0x50, 0x79, 0x3d, 0x98, 0xbc, 0x5e,
-	0x99, 0xa1, 0x92, 0x33, 0x17, 0x87, 0x5b, 0x66, 0x4e, 0xaa, 0x5f, 0x7e, 0x4a, 0xaa, 0x90, 0x34,
-	0x17, 0x67, 0x5e, 0x7e, 0x4a, 0x6a, 0x7c, 0x49, 0x65, 0x41, 0xaa, 0x04, 0xa3, 0x02, 0xa3, 0x06,
-	0x67, 0x10, 0x07, 0x48, 0x20, 0xa4, 0xb2, 0x20, 0x55, 0x48, 0x8a, 0x8b, 0x23, 0x39, 0x3f, 0xaf,
-	0x24, 0x35, 0xaf, 0xa4, 0x58, 0x82, 0x09, 0x22, 0x07, 0xe3, 0x3b, 0x19, 0x9d, 0x78, 0x24, 0xc7,
-	0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x13, 0x1e, 0xcb, 0x31, 0x5c, 0x78, 0x2c,
-	0xc7, 0x70, 0xe3, 0xb1, 0x1c, 0x43, 0x94, 0x04, 0xcc, 0x4d, 0x48, 0xae, 0x02, 0x19, 0x5f, 0x9c,
-	0xc4, 0x06, 0x76, 0x94, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x8b, 0x13, 0x89, 0xac, 0xb6, 0x00,
-	0x00, 0x00,
+	0x99, 0xa1, 0x92, 0x33, 0x17, 0xbf, 0x63, 0x69, 0x49, 0x46, 0x7e, 0x51, 0x66, 0x49, 0xa5, 0x53,
+	0x69, 0x5e, 0x4a, 0x4e, 0xaa, 0x90, 0x04, 0x17, 0x7b, 0x62, 0x4a, 0x4a, 0x51, 0x6a, 0x71, 0xb1,
+	0x04, 0xa3, 0x02, 0xa3, 0x06, 0x67, 0x10, 0x8c, 0x2b, 0x24, 0xc6, 0xc5, 0x56, 0x9c, 0x9a, 0x5c,
+	0x94, 0x5a, 0x22, 0xc1, 0x04, 0x96, 0x80, 0xf2, 0x94, 0x0e, 0x33, 0x72, 0x71, 0x84, 0x14, 0xa5,
+	0xa6, 0xfa, 0xe5, 0xa7, 0xa4, 0x0a, 0x49, 0x73, 0x71, 0xe6, 0xe5, 0xa7, 0xa4, 0xc6, 0x97, 0x54,
+	0x16, 0xa4, 0x42, 0x0d, 0xe0, 0x00, 0x09, 0x84, 0x54, 0x16, 0xa4, 0x0a, 0x49, 0x71, 0x71, 0x24,
+	0xe7, 0xe7, 0x95, 0xa4, 0xe6, 0x95, 0x14, 0x43, 0xcd, 0x80, 0xf3, 0x85, 0xec, 0xb8, 0xd8, 0x8b,
+	0x52, 0x13, 0x53, 0x52, 0x8b, 0x8a, 0x25, 0x98, 0x15, 0x98, 0x35, 0xb8, 0x8d, 0x54, 0xf4, 0xb0,
+	0xb8, 0x58, 0x0f, 0xcd, 0xb9, 0x41, 0x30, 0x4d, 0x20, 0xfd, 0xa9, 0x29, 0x99, 0x25, 0xf9, 0x45,
+	0xc5, 0x12, 0x2c, 0xa4, 0xe8, 0x87, 0x6a, 0x72, 0x32, 0x3a, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23,
+	0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x27, 0x3c, 0x96, 0x63, 0xb8, 0xf0, 0x58, 0x8e, 0xe1, 0xc6,
+	0x63, 0x39, 0x86, 0x28, 0x09, 0x58, 0xc8, 0x22, 0x85, 0x2d, 0xc8, 0x7b, 0xc5, 0x49, 0x6c, 0xe0,
+	0xa0, 0x35, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0xab, 0x02, 0x9c, 0x9a, 0x7c, 0x01, 0x00, 0x00,
 }
 
-func (m *FileNode) Marshal() (dAtA []byte, err error) {
+func (m *AuthorityBundle) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -105,16 +179,81 @@ func (m *FileNode) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *FileNode) MarshalTo(dAtA []byte) (int, error) {
+func (m *AuthorityBundle) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *FileNode) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AuthorityBundle) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if len(m.Secret) > 0 {
+		i -= len(m.Secret)
+		copy(dAtA[i:], m.Secret)
+		i = encodeVarintTree(dAtA, i, uint64(len(m.Secret)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTree(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TreeNode) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TreeNode) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TreeNode) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Editors) > 0 {
+		for iNdEx := len(m.Editors) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Editors[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTree(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Readers) > 0 {
+		for iNdEx := len(m.Readers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Readers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTree(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
 	if len(m.Contents) > 0 {
 		i -= len(m.Contents)
 		copy(dAtA[i:], m.Contents)
@@ -143,7 +282,24 @@ func encodeVarintTree(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *FileNode) Size() (n int) {
+func (m *AuthorityBundle) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTree(uint64(l))
+	}
+	l = len(m.Secret)
+	if l > 0 {
+		n += 1 + l + sovTree(uint64(l))
+	}
+	return n
+}
+
+func (m *TreeNode) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -157,6 +313,18 @@ func (m *FileNode) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTree(uint64(l))
 	}
+	if len(m.Readers) > 0 {
+		for _, e := range m.Readers {
+			l = e.Size()
+			n += 1 + l + sovTree(uint64(l))
+		}
+	}
+	if len(m.Editors) > 0 {
+		for _, e := range m.Editors {
+			l = e.Size()
+			n += 1 + l + sovTree(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -166,7 +334,7 @@ func sovTree(x uint64) (n int) {
 func sozTree(x uint64) (n int) {
 	return sovTree(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *FileNode) Unmarshal(dAtA []byte) error {
+func (m *AuthorityBundle) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -189,10 +357,124 @@ func (m *FileNode) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: FileNode: wiretype end group for non-group")
+			return fmt.Errorf("proto: AuthorityBundle: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: FileNode: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AuthorityBundle: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTree
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTree
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTree
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Secret", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTree
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTree
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTree
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Secret = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTree(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTree
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TreeNode) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTree
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TreeNode: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TreeNode: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -258,6 +540,74 @@ func (m *FileNode) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Contents = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Readers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTree
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTree
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTree
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Readers = append(m.Readers, &AuthorityBundle{})
+			if err := m.Readers[len(m.Readers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Editors", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTree
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTree
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTree
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Editors = append(m.Editors, &AuthorityBundle{})
+			if err := m.Editors[len(m.Editors)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
