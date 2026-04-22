@@ -1,0 +1,28 @@
+syntax = "proto3";
+package atlas.storage.v1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "nebulix/x/storage/types";
+
+// File defines the File message.
+message StorageSubscription {
+  string id = 1;
+  google.protobuf.Timestamp start = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false
+  ];
+  google.protobuf.Timestamp end = 3 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false
+  ];
+  string status = 4;
+  int64 spaceAvailable = 5;
+  int64 spaceUsed = 6;
+  int64 replicaSpaceUsed = 7;
+  string credits = 8 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
