@@ -6,7 +6,7 @@ import (
 
 	"errors"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 
 	"cosmossdk.io/collections"
 )

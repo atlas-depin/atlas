@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

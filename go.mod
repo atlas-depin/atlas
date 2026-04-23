@@ -1,4 +1,4 @@
-module nebulix
+module atlas
 
 go 1.24.0
 

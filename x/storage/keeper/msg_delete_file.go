@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -1,12 +1,12 @@
 package app
 
 import (
-	_ "nebulix/x/filetree/module"
-	filetreemoduletypes "nebulix/x/filetree/types"
-	_ "nebulix/x/nebulix/module"
-	nebulixmoduletypes "nebulix/x/nebulix/types"
-	_ "nebulix/x/storage/module"
-	storagemoduletypes "nebulix/x/storage/types"
+	_ "atlas/x/filetree/module"
+	filetreemoduletypes "atlas/x/filetree/types"
+	_ "atlas/x/atlas/module"
+	atlasmoduletypes "atlas/x/atlas/types"
+	_ "atlas/x/storage/module"
+	storagemoduletypes "atlas/x/storage/types"
 	"time"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
@@ -132,7 +132,7 @@ var (
 						// ibc modules
 						ibcexported.ModuleName,
 						// chain modules
-						nebulixmoduletypes.ModuleName,
+						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
@@ -143,7 +143,7 @@ var (
 						feegrant.ModuleName,
 						group.ModuleName,
 						// chain modules
-						nebulixmoduletypes.ModuleName,
+						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
@@ -182,7 +182,7 @@ var (
 						ibctransfertypes.ModuleName,
 						icatypes.ModuleName,
 						// chain modules
-						nebulixmoduletypes.ModuleName,
+						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
@@ -282,8 +282,8 @@ var (
 				Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
 			},
 			{
-				Name:   nebulixmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&nebulixmoduletypes.Module{}),
+				Name:   atlasmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&atlasmoduletypes.Module{}),
 			},
 			{
 				Name:   storagemoduletypes.ModuleName,

@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/math"
 )

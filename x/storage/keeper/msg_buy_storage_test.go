@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {

@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"context"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

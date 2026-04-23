@@ -18,10 +18,10 @@ import (
 
 	modtestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
-	"nebulix/testutils"
-	"nebulix/x/filetree/keeper"
-	module "nebulix/x/filetree/module"
-	"nebulix/x/filetree/types"
+	"atlas/testutils"
+	"atlas/x/filetree/keeper"
+	module "atlas/x/filetree/module"
+	"atlas/x/filetree/types"
 )
 
 type KeeperTestSuite struct {

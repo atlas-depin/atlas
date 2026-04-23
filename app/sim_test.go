@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	SimAppChainID = "nebulix-simapp"
+	SimAppChainID = "atlas-simapp"
 )
 
 var FlagEnableStreamingValue bool
@@ -132,7 +132,7 @@ func TestFullAppSimulation(t *testing.T) {
 	if !simcli.FlagSigverifyTxValue {
 		app.SetNotSigverifyTx()
 	}
-	require.Equal(t, "nebulix", app.Name())
+	require.Equal(t, "atlas", app.Name())
 
 	// run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(

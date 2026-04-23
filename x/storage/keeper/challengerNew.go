@@ -4,7 +4,7 @@ package keeper
 // 	"context"
 // 	"fmt"
 
-// 	"nebulix/x/storage/types"
+// 	"atlas/x/storage/types"
 
 // 	sdk "github.com/cosmos/cosmos-sdk/types"
 // )

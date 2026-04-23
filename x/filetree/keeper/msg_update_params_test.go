@@ -5,8 +5,8 @@ package keeper_test
 
 // 	"github.com/stretchr/testify/require"
 
-// 	"nebulix/x/filetree/keeper"
-// 	"nebulix/x/filetree/types"
+// 	"atlas/x/filetree/keeper"
+// 	"atlas/x/filetree/types"
 // )
 
 // func TestMsgUpdateParams(t *testing.T) {

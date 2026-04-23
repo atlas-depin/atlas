@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"github.com/stretchr/testify/require"
 )

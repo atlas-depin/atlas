@@ -14,8 +14,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
-	"nebulix/x/filetree/keeper"
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/keeper"
+	"atlas/x/filetree/types"
 )
 
 var (

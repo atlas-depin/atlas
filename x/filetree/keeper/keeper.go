@@ -8,7 +8,7 @@ import (
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 )
 
 type Keeper struct {

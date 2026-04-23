@@ -1,7 +1,7 @@
 syntax = "proto3";
 package atlas.storage.v1;
 
-option go_package = "nebulix/x/storage/types";
+option go_package = "atlas/x/storage/types";
 
 // File defines the File message.
 message File {

@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
-	"nebulix/x/storage/keeper"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/keeper"
+	"atlas/x/storage/types"
 )
 
 func (suite *KeeperTestSuite) TestParamsQuery() {

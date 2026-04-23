@@ -1,0 +1,13 @@
+syntax = "proto3";
+package atlas.atlas.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "atlas/x/atlas/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "atlas/x/atlas/Params";
+  option (gogoproto.equal) = true;
+}

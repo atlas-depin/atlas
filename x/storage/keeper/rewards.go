@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"fmt"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 	"time"
 
 	"cosmossdk.io/math"

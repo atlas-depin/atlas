@@ -3,7 +3,7 @@ package storage
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

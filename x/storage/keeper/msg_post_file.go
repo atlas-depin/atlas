@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/errors"
 

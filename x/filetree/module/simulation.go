@@ -7,8 +7,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	filetreesimulation "nebulix/x/filetree/simulation"
-	"nebulix/x/filetree/types"
+	filetreesimulation "atlas/x/filetree/simulation"
+	"atlas/x/filetree/types"
 )
 
 // GenerateGenesisState creates a randomized GenState of the module.

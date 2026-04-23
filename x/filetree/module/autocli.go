@@ -3,7 +3,7 @@ package filetree
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

@@ -6,7 +6,7 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 func (suite *KeeperTestSuite) TestMsgExpandStorage_Success_ExtendDurationOnly() {

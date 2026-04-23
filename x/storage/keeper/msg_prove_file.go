@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -7,8 +7,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	storagesimulation "nebulix/x/storage/simulation"
-	"nebulix/x/storage/types"
+	storagesimulation "atlas/x/storage/simulation"
+	"atlas/x/storage/types"
 )
 
 // GenerateGenesisState creates a randomized GenState of the module.

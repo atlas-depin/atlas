@@ -1,7 +1,7 @@
 package keeper_test
 
 import (
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {

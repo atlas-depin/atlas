@@ -8,8 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 
-	"nebulix/x/filetree/keeper"
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/keeper"
+	"atlas/x/filetree/types"
 )
 
 func SimulateMsgDeleteNode(

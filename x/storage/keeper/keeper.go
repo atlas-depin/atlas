@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 // [NOTE]: I know I'm gonna forget why I did this, so the BIN_DEPTH is 65,536 leaves per bin and the MAX_BINS is set to support 100 million files  (100000000/65536)

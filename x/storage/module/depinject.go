@@ -9,8 +9,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"nebulix/x/storage/keeper"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/keeper"
+	"atlas/x/storage/types"
 )
 
 // IsOnePerModuleType implements the depinject.OnePerModuleType interface.

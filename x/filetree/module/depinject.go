@@ -9,8 +9,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"nebulix/x/filetree/keeper"
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/keeper"
+	"atlas/x/filetree/types"
 )
 
 var _ depinject.OnePerModuleType = AppModule{}

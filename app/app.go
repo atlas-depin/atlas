@@ -45,15 +45,15 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
-	"nebulix/docs"
-	filetreemodulekeeper "nebulix/x/filetree/keeper"
-	nebulixmodulekeeper "nebulix/x/nebulix/keeper"
-	storagemodulekeeper "nebulix/x/storage/keeper"
+	"atlas/docs"
+	filetreemodulekeeper "atlas/x/filetree/keeper"
+	atlasmodulekeeper "atlas/x/atlas/keeper"
+	storagemodulekeeper "atlas/x/storage/keeper"
 )
 
 const (
 	// Name is the name of the application.
-	Name = "nebulix"
+	Name = "atlas"
 	// AccountAddressPrefix is the prefix for accounts addresses.
 	AccountAddressPrefix = "atl"
 	// ChainCoinType is the coin type of the chain.
@@ -102,7 +102,7 @@ type App struct {
 
 	// simulation manager
 	sm             *module.SimulationManager
-	NebulixKeeper  nebulixmodulekeeper.Keeper
+	atlasKeeper  atlasmodulekeeper.Keeper
 	StorageKeeper  storagemodulekeeper.Keeper
 	FiletreeKeeper filetreemodulekeeper.Keeper
 }
@@ -177,7 +177,7 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.NebulixKeeper,
+		&app.atlasKeeper,
 		&app.StorageKeeper,
 		&app.FiletreeKeeper,
 	); err != nil {

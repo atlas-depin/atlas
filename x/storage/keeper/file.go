@@ -5,7 +5,7 @@ import (
 	"context"
 	"slices"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"

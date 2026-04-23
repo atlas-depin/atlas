@@ -8,8 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 
-	"nebulix/x/storage/keeper"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/keeper"
+	"atlas/x/storage/types"
 )
 
 func SimulateMsgExpandStorage(

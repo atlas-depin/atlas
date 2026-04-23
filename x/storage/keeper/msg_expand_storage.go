@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/errors"
 	errorsmod "cosmossdk.io/errors"

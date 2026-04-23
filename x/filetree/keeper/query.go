@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 )
 
 var _ types.QueryServer = queryServer{}

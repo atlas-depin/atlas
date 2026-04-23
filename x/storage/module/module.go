@@ -13,8 +13,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
-	"nebulix/x/storage/keeper"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/keeper"
+	"atlas/x/storage/types"
 )
 
 var (

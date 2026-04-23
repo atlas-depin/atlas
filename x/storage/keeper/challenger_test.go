@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 )
 
 func (suite *KeeperTestSuite) TestEndBlocker_WindowStart_ResetsCursor() {

@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 
-	storage "nebulix/x/storage/module"
+	storage "atlas/x/storage/module"
 )
 
 // MakeEncodingConfig creates encoding config for your specific blockchain

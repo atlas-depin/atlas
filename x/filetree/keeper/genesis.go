@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

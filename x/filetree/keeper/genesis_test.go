@@ -3,7 +3,7 @@ package keeper_test
 // import (
 // 	"testing"
 
-// 	"nebulix/x/filetree/types"
+// 	"atlas/x/filetree/types"
 
 // 	"github.com/stretchr/testify/require"
 // )

@@ -2,7 +2,7 @@ package keeper_test
 
 import (
 	"encoding/hex"
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 	"strconv"
 	"time"
 

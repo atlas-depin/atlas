@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"nebulix/x/storage/types"
+	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/collections/indexes"

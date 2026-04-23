@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 
 	"cosmossdk.io/collections"
 	"google.golang.org/grpc/codes"

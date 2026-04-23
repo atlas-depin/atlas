@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 
 	errorsmod "cosmossdk.io/errors"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"nebulix/x/filetree/types"
+	"atlas/x/filetree/types"
 
 	errorsmod "cosmossdk.io/errors"
 )
