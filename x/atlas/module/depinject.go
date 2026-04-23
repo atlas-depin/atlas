@@ -40,7 +40,7 @@ type ModuleInputs struct {
 type ModuleOutputs struct {
 	depinject.Out
 
-	atlasKeeper keeper.Keeper
+	AtlasKeeper keeper.Keeper
 	Module        appmodule.AppModule
 }
 
@@ -58,5 +58,5 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 
-	return ModuleOutputs{atlasKeeper: k, Module: m}
+	return ModuleOutputs{AtlasKeeper: k, Module: m}
 }

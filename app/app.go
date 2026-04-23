@@ -102,7 +102,7 @@ type App struct {
 
 	// simulation manager
 	sm             *module.SimulationManager
-	atlasKeeper  atlasmodulekeeper.Keeper
+	AtlasKeeper    atlasmodulekeeper.Keeper
 	StorageKeeper  storagemodulekeeper.Keeper
 	FiletreeKeeper filetreemodulekeeper.Keeper
 }
@@ -177,7 +177,7 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.atlasKeeper,
+		&app.AtlasKeeper,
 		&app.StorageKeeper,
 		&app.FiletreeKeeper,
 	); err != nil {
