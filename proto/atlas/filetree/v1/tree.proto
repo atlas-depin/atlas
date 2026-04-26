@@ -1,6 +1,8 @@
 syntax = "proto3";
 package atlas.filetree.v1;
 
+import "gogoproto/gogo.proto";
+
 option go_package = "atlas/x/filetree/types";
 
 message AuthorityBundle {
@@ -11,6 +13,6 @@ message AuthorityBundle {
 message TreeNode {
   string node_type = 1;
   string contents = 2;
-  repeated AuthorityBundle viewers = 3;
-  repeated AuthorityBundle editors = 4;
+  repeated AuthorityBundle viewers = 3 [(gogoproto.nullable) = false];
+  repeated AuthorityBundle editors = 4 [(gogoproto.nullable) = false];
 }
