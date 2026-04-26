@@ -19,6 +19,8 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 	ftn := types.TreeNode{
 		NodeType: msg.NodeType,
 		Contents: msg.Contents,
+		Viewers:  msg.Viewers,
+		Editors:  msg.Editors,
 	}
 
 	var err error

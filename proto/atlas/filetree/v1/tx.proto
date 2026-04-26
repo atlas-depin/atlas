@@ -7,6 +7,7 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "atlas/filetree/v1/params.proto";
+import "atlas/filetree/v1/tree.proto";
 
 option go_package = "atlas/x/filetree/types";
 
@@ -53,6 +54,8 @@ message MsgPostNode {
   string path = 2;
   string node_type = 3;
   string contents = 4;
+  repeated AuthorityBundle viewers = 5 [(gogoproto.nullable) = false];
+  repeated AuthorityBundle editors = 6 [(gogoproto.nullable) = false];
 }
 
 // MsgPostNodeResponse defines the MsgPostNodeResponse message.

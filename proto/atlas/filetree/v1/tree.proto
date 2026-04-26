@@ -11,6 +11,6 @@ message AuthorityBundle {
 message TreeNode {
   string node_type = 1;
   string contents = 2;
-  repeated AuthorityBundle readers = 3;
+  repeated AuthorityBundle viewers = 3;
   repeated AuthorityBundle editors = 4;
 }
