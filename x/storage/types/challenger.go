@@ -18,8 +18,8 @@ func ComputeChunkCount(fileSize int64) uint64 {
 		return 0
 	}
 
-	chunks := fileSize / 1000
-	if fileSize%1000 != 0 {
+	chunks := fileSize / 1024
+	if fileSize%1024 != 0 {
 		chunks++
 	}
 	return uint64(chunks)
