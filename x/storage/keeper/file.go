@@ -95,7 +95,7 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 }
 
 func (k Keeper) IncrementFileCount(ctx context.Context) error {
-	if currentCount, err := k.FileCount.Get(ctx); err != nil {
+	if currentCount, err := k.FileCount.Get(ctx); err == nil {
 		return k.FileCount.Set(ctx, currentCount+1)
 	} else {
 		return err
@@ -103,7 +103,7 @@ func (k Keeper) IncrementFileCount(ctx context.Context) error {
 }
 
 func (k Keeper) DecrementFileCount(ctx context.Context) error {
-	if currentCount, err := k.FileCount.Get(ctx); err != nil {
+	if currentCount, err := k.FileCount.Get(ctx); err == nil {
 		return k.FileCount.Set(ctx, currentCount-1)
 	} else {
 		return err
