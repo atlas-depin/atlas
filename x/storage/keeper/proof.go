@@ -1,9 +1,9 @@
 package keeper
 
 import (
+	"atlas/x/storage/types"
 	"context"
 	"encoding/hex"
-	"atlas/x/storage/types"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -31,11 +31,7 @@ func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address
 		if err := k.SetFile(ctx, file); err != nil {
 			return errors.Wrap(err, "failed to update the file's provider list")
 		}
-		oldCount, err := k.FileCount.Get(ctx)
-		if err != nil {
-			return errors.Wrap(err, "failed to get total file count")
-		}
-		if err := k.FileCount.Set(ctx, oldCount+1); err != nil {
+		if err := k.IncrementFileCount(ctx); err != nil {
 			return errors.Wrap(err, "failed to increment total file count")
 		}
 	} else {

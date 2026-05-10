@@ -28,7 +28,7 @@ func (q queryServer) FileStats(ctx context.Context, req *types.QueryFileStatsReq
 	}
 
 	return &types.QueryFileStatsResponse{
-		TotalFiles: int64(totalFiles),
+		TotalFiles: int64(totalFiles) + deadFiles,
 		StrayFiles: strayFiles,
 		DeadFiles:  deadFiles,
 	}, nil

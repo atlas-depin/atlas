@@ -1,10 +1,10 @@
 package keeper
 
 import (
+	"atlas/x/storage/types"
 	"context"
 	"encoding/binary"
 	"fmt"
-	"atlas/x/storage/types"
 	"slices"
 	"strconv"
 
@@ -307,6 +307,7 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 				file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
 				if len(file.Providers) == 0 {
 					file.Status = "DEAD"
+					k.DecrementFileCount(ctx)
 				}
 				k.StabilizeProvider(ctx, challenge.Provider, file)
 			} else {

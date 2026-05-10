@@ -63,7 +63,11 @@ func (k Keeper) RemoveFile(ctx context.Context, fileId string) error {
 		return err
 	}
 
-	return k.FileStore.Remove(ctx, key)
+	err = k.FileStore.Remove(ctx, key)
+	if err != nil {
+		return err
+	}
+	return k.DecrementFileCount(ctx)
 }
 
 /*
@@ -88,6 +92,22 @@ func (k Keeper) IterateAllFiles(ctx context.Context, fn func(file types.File) (s
 	}
 
 	return nil
+}
+
+func (k Keeper) IncrementFileCount(ctx context.Context) error {
+	if currentCount, err := k.FileCount.Get(ctx); err != nil {
+		return k.FileCount.Set(ctx, currentCount+1)
+	} else {
+		return err
+	}
+}
+
+func (k Keeper) DecrementFileCount(ctx context.Context) error {
+	if currentCount, err := k.FileCount.Get(ctx); err != nil {
+		return k.FileCount.Set(ctx, currentCount-1)
+	} else {
+		return err
+	}
 }
 
 /*
