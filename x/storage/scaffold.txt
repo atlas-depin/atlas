@@ -5,6 +5,7 @@ ignite scaffold message buy-storage receiver:string duration:int64 bytes:int64 i
 ignite scaffold message expand-storage receiver:string duration:int64 bytes:int64 is-default:bool --module storage
 ignite scaffold message prove-file challengeId:string fileId:string data:bytes hashes:array.bytes chunk:uint64 --module storage
 ignite scaffold message delete-file fileId:string --module storage
+ignite scaffold message update-provider hostname:string capacity:int64 --module storage
 
 ignite scaffold query get-subscription-info subscriberAddress:string subscriptionId:string --module storage
 ignite scaffold query provider address:string --response provider:string --module storage
@@ -18,6 +19,7 @@ ignite scaffold query files --response files:string --module storage --paginated
 ignite scaffold query subscription --response subscription:string --module storage
 ignite scaffold query subscriptions --response subscriptions:array.string --module storage --paginated
 ignite scaffold query challenges --response challenges:array.string --module storage --paginated
+ignite scaffold query strays --response files:array.string --module storage --paginated
 
 ignite scaffold message post-node path:string --module filetree
 ignite scaffold message delete-node path:string --module filetree
