@@ -1,10 +1,10 @@
 package app
 
 import (
-	_ "atlas/x/filetree/module"
-	filetreemoduletypes "atlas/x/filetree/types"
 	_ "atlas/x/atlas/module"
 	atlasmoduletypes "atlas/x/atlas/types"
+	_ "atlas/x/filetree/module"
+	filetreemoduletypes "atlas/x/filetree/types"
 	_ "atlas/x/storage/module"
 	storagemoduletypes "atlas/x/storage/types"
 	"time"

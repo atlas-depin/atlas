@@ -81,6 +81,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
 				},
 
+				{
+					RpcMethod:      "Strays",
+					Use:            "strays ",
+					Short:          "Query strays",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -127,6 +134,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:            "expand-storage [subscription-id] [duration] [bytes]",
 					Short:          "Send a expand-storage tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subscription_id"}, {ProtoField: "duration"}, {ProtoField: "bytes"}},
+				},
+				{
+					RpcMethod:      "UpdateProvider",
+					Use:            "update-provider [hostname] [capacity]",
+					Short:          "Send a update-provider tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "hostname"}, {ProtoField: "capacity"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

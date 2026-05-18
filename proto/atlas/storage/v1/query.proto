@@ -3,14 +3,14 @@ syntax = "proto3";
 package atlas.storage.v1;
 
 import "amino/amino.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
-import "gogoproto/gogo.proto";
-import "google/api/annotations.proto";
 import "atlas/storage/v1/file.proto";
 import "atlas/storage/v1/params.proto";
 import "atlas/storage/v1/proof.proto";
 import "atlas/storage/v1/provider.proto";
 import "atlas/storage/v1/subscription.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
 option go_package = "atlas/x/storage/types";
 
@@ -64,6 +64,11 @@ service Query {
   // FileStats Queries a list of FileStats items.
   rpc FileStats(QueryFileStatsRequest) returns (QueryFileStatsResponse) {
     option (google.api.http).get = "/atlas/storage/v1/file_stats";
+  }
+
+  // Strays Queries a list of Strays items.
+  rpc Strays(QueryStraysRequest) returns (QueryStraysResponse) {
+    option (google.api.http).get = "/atlas/storage/v1/strays";
   }
 }
 
@@ -176,4 +181,15 @@ message QueryFileStatsResponse {
   int64 total_files = 1;
   int64 stray_files = 2;
   int64 dead_files = 3;
+}
+
+// QueryStraysRequest defines the QueryStraysRequest message.
+message QueryStraysRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryStraysResponse defines the QueryStraysResponse message.
+message QueryStraysResponse {
+  repeated File files = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

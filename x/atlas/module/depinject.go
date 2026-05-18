@@ -41,7 +41,7 @@ type ModuleOutputs struct {
 	depinject.Out
 
 	AtlasKeeper keeper.Keeper
-	Module        appmodule.AppModule
+	Module      appmodule.AppModule
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {

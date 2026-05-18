@@ -3,11 +3,11 @@ syntax = "proto3";
 package atlas.filetree.v1;
 
 import "amino/amino.proto";
+import "atlas/filetree/v1/params.proto";
+import "atlas/filetree/v1/tree.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "atlas/filetree/v1/params.proto";
-import "atlas/filetree/v1/tree.proto";
 
 option go_package = "atlas/x/filetree/types";
 

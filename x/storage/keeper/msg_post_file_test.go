@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
-	"encoding/hex"
 	"atlas/x/storage/types"
+	"encoding/hex"
 	"strconv"
 	"time"
 

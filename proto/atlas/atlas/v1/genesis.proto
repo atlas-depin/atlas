@@ -2,8 +2,8 @@ syntax = "proto3";
 package atlas.atlas.v1;
 
 import "amino/amino.proto";
-import "gogoproto/gogo.proto";
 import "atlas/atlas/v1/params.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "atlas/x/atlas/types";
 

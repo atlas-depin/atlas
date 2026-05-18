@@ -3,10 +3,10 @@ syntax = "proto3";
 package atlas.storage.v1;
 
 import "amino/amino.proto";
+import "atlas/storage/v1/params.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "atlas/storage/v1/params.proto";
 
 option go_package = "atlas/x/storage/types";
 
@@ -31,6 +31,9 @@ service Msg {
 
   // ExpandStorage defines the ExpandStorage RPC.
   rpc ExpandStorage(MsgExpandStorage) returns (MsgExpandStorageResponse);
+
+  // UpdateProvider defines the UpdateProvider RPC.
+  rpc UpdateProvider(MsgUpdateProvider) returns (MsgUpdateProviderResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -136,3 +139,14 @@ message MsgExpandStorageResponse {
   int64 new_expiration = 2;
   int64 new_space_available = 3;
 }
+
+// MsgUpdateProvider defines the MsgUpdateProvider message.
+message MsgUpdateProvider {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string hostname = 2;
+  int64 capacity = 3;
+}
+
+// MsgUpdateProviderResponse defines the MsgUpdateProviderResponse message.
+message MsgUpdateProviderResponse {}

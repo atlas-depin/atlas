@@ -46,8 +46,8 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"atlas/docs"
-	filetreemodulekeeper "atlas/x/filetree/keeper"
 	atlasmodulekeeper "atlas/x/atlas/keeper"
+	filetreemodulekeeper "atlas/x/filetree/keeper"
 	storagemodulekeeper "atlas/x/storage/keeper"
 )
 

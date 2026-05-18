@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	"fmt"
 	"atlas/x/storage/types"
+	"fmt"
 	"time"
 
 	"cosmossdk.io/math"
