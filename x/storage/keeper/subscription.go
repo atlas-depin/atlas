@@ -44,8 +44,18 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 	if subscriptionId == "" {
 		subscriptionId, err = k.GetDefaultStorageSubscriptionId(ctx, address)
 		if err != nil {
-			return
+			ranger := collections.NewPrefixedPairRange[string, string](address)
+			iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
+			if err != nil {
+				return subscription, err
+			}
+			defer iter.Close()
+			if !iter.Valid() {
+				return subscription, collections.ErrNotFound
+			}
+			return iter.Value()
 		}
+
 	}
 
 	key := collections.Join(address, subscriptionId)
@@ -60,7 +70,7 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 Iterate over all subscriptions and run the provided function argument for each record.
 The provided function must have a `types.StorageSubscription` argument.
 */
-func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], file types.StorageSubscription) (stop bool)) error {
+func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
 	iter, err := k.SubscriptionStore.Iterate(ctx, nil)
 	if err != nil {
 		return err
