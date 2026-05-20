@@ -2,10 +2,12 @@ package keeper
 
 import (
 	"context"
+	"time"
 
 	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
+	"cosmossdk.io/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -23,7 +25,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	var spaceAvailable int64 = 0
 
 	if err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
-		if subscription.Status == "ACTIVE" {
+		if time.Now().Before(subscription.End) {
 			active++
 			spacePurchased += subscription.SpaceAvailable
 			spaceUsed += subscription.SpaceUsed
@@ -31,7 +33,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 		}
 		return false
 	}); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "subscription iteration fail")
 	}
 
 	if err := q.k.IterateAllProviders(ctx, func(_ string, provider types.Provider) bool {
@@ -39,7 +41,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 		spaceAvailable += provider.SpaceAvailable
 		return false
 	}); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "provider iteration fail")
 	}
 
 	return &types.QueryStorageStatsResponse{
