@@ -71,17 +71,20 @@ Iterate over all subscriptions and run the provided function argument for each r
 The provided function must have a `types.StorageSubscription` argument.
 */
 func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
+	fmt.Println("[STORAGE STATS] iterator called")
 	iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
 	if err != nil {
 		return err
 	}
 	defer iter.Close()
 
+	fmt.Println("[STORAGE STATS] iterating subs")
 	for ; iter.Valid(); iter.Next() {
 		kv, err := iter.KeyValue()
 		if err != nil {
 			return err
 		}
+		fmt.Println("[STORAGE STATS] KV KEY", kv.Key.K1(), kv.Key.K2())
 		if fn(kv.Key, kv.Value) {
 			break
 		}
