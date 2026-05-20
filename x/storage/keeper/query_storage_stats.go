@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"atlas/x/storage/types"
 
@@ -28,12 +27,6 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	fmt.Println("[STORAGE STATS] initialized vars")
 
 	if err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
-		if time.Now().Before(subscription.End) {
-			active++
-			spacePurchased += subscription.SpaceAvailable
-			spaceUsed += subscription.SpaceUsed
-			spaceReplicas += subscription.ReplicaSpaceUsed
-		}
 		return false
 	}); err != nil {
 		return nil, errors.Wrap(err, "subscription iteration fail")
