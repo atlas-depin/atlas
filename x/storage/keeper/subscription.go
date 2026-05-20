@@ -49,13 +49,19 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 				subscription = value
 				return time.Now().Before(value.End)
 			})
+
+			if subscription.Id == "" {
+				return subscription, types.ErrSubscriptionNotFound
+			} else {
+				return
+			}
 		}
-	} else {
-		key := collections.Join(address, subscriptionId)
-		subscription, err = k.SubscriptionStore.Get(ctx, key)
-		if err == collections.ErrNotFound {
-			err = types.ErrSubscriptionNotFound
-		}
+	}
+
+	key := collections.Join(address, subscriptionId)
+	subscription, err = k.SubscriptionStore.Get(ctx, key)
+	if err == collections.ErrNotFound {
+		err = types.ErrSubscriptionNotFound
 	}
 	return
 }
