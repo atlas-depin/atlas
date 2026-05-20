@@ -21,6 +21,13 @@ func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address
 	if k.Prove(ctx, root, proof.Index, proof) {
 		/// --- Add provider to the file after a successful proof
 		file.Providers = append(file.Providers, address)
+
+		if file.Status == "STAGED" {
+			if err := k.IncrementFileCount(ctx); err != nil {
+				return errors.Wrap(err, "failed to increment total file count")
+			}
+		}
+
 		if int32(len(file.Providers)) >= file.Replicas {
 			file.Status = "ACTIVE"
 		} else {
@@ -30,9 +37,6 @@ func (k Keeper) AttemptAddProvider(ctx context.Context, file types.File, address
 		/// --- Commit file update with new list of providers & increment total file count
 		if err := k.SetFile(ctx, file); err != nil {
 			return errors.Wrap(err, "failed to update the file's provider list")
-		}
-		if err := k.IncrementFileCount(ctx); err != nil {
-			return errors.Wrap(err, "failed to increment total file count")
 		}
 	} else {
 		return types.ErrProofInvalid
