@@ -26,9 +26,11 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 
 	fmt.Println("[STORAGE STATS] initialized vars")
 
-	if err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
+	err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(key collections.Pair[string, string], subscription types.StorageSubscription) bool {
 		return false
-	}); err != nil {
+	})
+
+	if err != nil {
 		return nil, errors.Wrap(err, "subscription iteration fail")
 	}
 
