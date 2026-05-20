@@ -44,11 +44,13 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 	if subscriptionId == "" {
 		subscriptionId, err = k.GetDefaultStorageSubscriptionId(ctx, address)
 		if err != nil {
+			var sub types.StorageSubscription
 			ranger := collections.NewPrefixedPairRange[string, string](address)
-			k.IterateAllStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) (stop bool) {
-				subscription = value
-				return time.Now().Before(subscription.End)
+			err = k.IterateAllStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) bool {
+				sub = value
+				return time.Now().Before(value.End)
 			})
+			return sub, err
 		}
 	} else {
 		key := collections.Join(address, subscriptionId)
