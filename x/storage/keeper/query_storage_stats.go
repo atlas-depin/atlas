@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"atlas/x/storage/types"
@@ -24,6 +25,8 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	var spaceReplicas int64 = 0
 	var spaceAvailable int64 = 0
 
+	fmt.Println("[STORAGE STATS] initialized vars")
+
 	if err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
 		if time.Now().Before(subscription.End) {
 			active++
@@ -36,6 +39,8 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 		return nil, errors.Wrap(err, "subscription iteration fail")
 	}
 
+	fmt.Println("[STORAGE STATS] subscription iteration complete")
+
 	if err := q.k.IterateAllProviders(ctx, func(_ string, provider types.Provider) bool {
 		providers++
 		spaceAvailable += provider.SpaceAvailable
@@ -43,6 +48,8 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	}); err != nil {
 		return nil, errors.Wrap(err, "provider iteration fail")
 	}
+
+	fmt.Println("[STORAGE STATS] provider iteration complete")
 
 	return &types.QueryStorageStatsResponse{
 		SubscriptionCount: active,
