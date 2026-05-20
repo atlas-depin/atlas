@@ -72,7 +72,7 @@ The provided function must have a `types.StorageSubscription` argument.
 */
 func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
 	fmt.Println("[STORAGE STATS] iterator called")
-	iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
+	iter, err := k.SubscriptionStore.Iterate(ctx, nil)
 	fmt.Println("[STORAGE STATS] panic?", err)
 	if err != nil {
 		return err
