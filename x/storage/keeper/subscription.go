@@ -45,7 +45,7 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 		subscriptionId, err = k.GetDefaultStorageSubscriptionId(ctx, address)
 		if err != nil {
 			ranger := collections.NewPrefixedPairRange[string, string](address)
-			err = k.IterateAllStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) bool {
+			err = k.IterateStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) bool {
 				subscription = value
 				return time.Now().Before(value.End)
 			})
@@ -70,27 +70,26 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 Iterate over all subscriptions and run the provided function argument for each record.
 The provided function must have a `types.StorageSubscription` argument.
 */
-func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
-	fmt.Println("[STORAGE STATS] iterator called")
-	iter, err := k.SubscriptionStore.Iterate(ctx, nil)
-	fmt.Println("[STORAGE STATS] panic?", err)
+func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
+	return k.IterateStorageSubscriptions(ctx, &collections.PairRange[string, string]{}, fn)
+}
+
+func (k Keeper) IterateStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], sub types.StorageSubscription) bool) error {
+	iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
 	if err != nil {
 		return err
 	}
 	defer iter.Close()
 
-	fmt.Println("[STORAGE STATS] iterating subs")
 	for ; iter.Valid(); iter.Next() {
 		kv, err := iter.KeyValue()
 		if err != nil {
 			return err
 		}
-		fmt.Println("[STORAGE STATS] KV KEY", kv.Key.K1(), kv.Key.K2())
 		if fn(kv.Key, kv.Value) {
 			break
 		}
 	}
-
 	return nil
 }
 

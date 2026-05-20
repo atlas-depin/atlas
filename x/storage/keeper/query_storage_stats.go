@@ -2,12 +2,11 @@ package keeper
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
-	"cosmossdk.io/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,27 +23,25 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	var spaceReplicas int64 = 0
 	var spaceAvailable int64 = 0
 
-	fmt.Println("[STORAGE STATS] initialized vars")
-
-	err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(key collections.Pair[string, string], subscription types.StorageSubscription) bool {
+	if err := q.k.IterateAllStorageSubscriptions(ctx, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
+		if time.Now().Before(subscription.End) {
+			active++
+			spacePurchased += subscription.SpaceAvailable
+			spaceUsed += subscription.SpaceUsed
+			spaceReplicas += subscription.ReplicaSpaceUsed
+		}
 		return false
-	})
-
-	if err != nil {
-		return nil, errors.Wrap(err, "subscription iteration fail")
+	}); err != nil {
+		return nil, err
 	}
-
-	fmt.Println("[STORAGE STATS] subscription iteration complete")
 
 	if err := q.k.IterateAllProviders(ctx, func(_ string, provider types.Provider) bool {
 		providers++
 		spaceAvailable += provider.SpaceAvailable
 		return false
 	}); err != nil {
-		return nil, errors.Wrap(err, "provider iteration fail")
+		return nil, err
 	}
-
-	fmt.Println("[STORAGE STATS] provider iteration complete")
 
 	return &types.QueryStorageStatsResponse{
 		SubscriptionCount: active,
