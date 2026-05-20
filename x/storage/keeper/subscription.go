@@ -45,24 +45,19 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 		subscriptionId, err = k.GetDefaultStorageSubscriptionId(ctx, address)
 		if err != nil {
 			ranger := collections.NewPrefixedPairRange[string, string](address)
-			iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
-			if err != nil {
-				return subscription, err
-			}
-			defer iter.Close()
-			if !iter.Valid() {
-				return subscription, collections.ErrNotFound
-			}
-			return iter.Value()
+			k.IterateAllStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) (stop bool) {
+				subscription = value
+				return time.Now().Before(subscription.End)
+			})
 		}
-
+	} else {
+		key := collections.Join(address, subscriptionId)
+		subscription, err = k.SubscriptionStore.Get(ctx, key)
+		if err == collections.ErrNotFound {
+			err = types.ErrSubscriptionNotFound
+		}
 	}
 
-	key := collections.Join(address, subscriptionId)
-	subscription, err = k.SubscriptionStore.Get(ctx, key)
-	if err == collections.ErrNotFound {
-		err = types.ErrSubscriptionNotFound
-	}
 	return
 }
 
@@ -70,7 +65,7 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 Iterate over all subscriptions and run the provided function argument for each record.
 The provided function must have a `types.StorageSubscription` argument.
 */
-func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
+func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
 	iter, err := k.SubscriptionStore.Iterate(ctx, nil)
 	if err != nil {
 		return err

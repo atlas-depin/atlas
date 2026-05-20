@@ -22,7 +22,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	var spaceReplicas int64 = 0
 	var spaceAvailable int64 = 0
 
-	if err := q.k.IterateAllStorageSubscriptions(ctx, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
+	if err := q.k.IterateAllStorageSubscriptions(ctx, nil, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
 		if subscription.Status == "ACTIVE" {
 			active++
 			spacePurchased += subscription.SpaceAvailable
