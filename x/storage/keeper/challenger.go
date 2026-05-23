@@ -319,17 +319,13 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 	return true
 }
 
-func (k Keeper) computeProofsThisRound(ctx sdk.Context, n uint64, roundIdx uint64) uint64 {
+func (k Keeper) computeProofsThisRound(ctx sdk.Context, N uint64, roundIdx uint64) uint64 {
 	params, _ := k.Params.Get(ctx)
-	kBlocks := params.ProofRoundBlocks
-	gBlocks := params.ProofWindowBlocks
+	R := params.ProofRoundBlocks
+	W := params.ProofWindowBlocks
 
-	block := roundIdx * kBlocks
+	term1 := (N*R*(roundIdx+1) + W - 1) / W
+	term2 := (N*R*roundIdx + W - 1) / W
 
-	// g(x) = ceil((n * roundIdx + kBlocks) / gBlocks) - ceil((roundIdx * n) / gBlocks)
-	// ceil(a/b) = (a + b - 1) / b
-	// THIS EXPRESSION IS SIMPLIFIED:
-	term1 := (n*(block+kBlocks) + gBlocks - 1) / gBlocks
-	term2 := (block*n + gBlocks - 1) / gBlocks
 	return term1 - term2
 }
