@@ -63,11 +63,7 @@ func (k Keeper) RemoveFile(ctx context.Context, fileId string) error {
 		return err
 	}
 
-	err = k.FileStore.Remove(ctx, key)
-	if err != nil {
-		return err
-	}
-	return k.DecrementFileCount(ctx)
+	return k.FileStore.Remove(ctx, key)
 }
 
 /*

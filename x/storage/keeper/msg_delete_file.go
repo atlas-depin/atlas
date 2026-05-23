@@ -50,6 +50,11 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 	if err != nil {
 		return nil, err
 	}
+	if file.Status != "STAGED" {
+		if err = k.DecrementFileCount(ctx); err != nil {
+			return nil, err
+		}
+	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
