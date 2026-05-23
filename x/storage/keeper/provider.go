@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/collections"
+	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -40,7 +41,7 @@ Get a provider record for a given provider address.
 */
 func (k Keeper) GetProvider(ctx context.Context, address string) (provider types.Provider, err error) {
 	provider, err = k.ProviderStore.Get(ctx, address)
-	if err == collections.ErrNotFound {
+	if errorsmod.IsOf(err, collections.ErrNotFound) {
 		err = types.ErrProviderNotFound
 	}
 	return

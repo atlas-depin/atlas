@@ -16,7 +16,13 @@ func (q queryServer) Provider(ctx context.Context, req *types.QueryProviderReque
 
 	provider, err := q.k.GetProvider(ctx, req.Address)
 
-	return &types.QueryProviderResponse{
-		Provider: &provider,
-	}, err
+	if err == types.ErrProviderNotFound {
+		return &types.QueryProviderResponse{
+			Provider: nil,
+		}, nil
+	} else {
+		return &types.QueryProviderResponse{
+			Provider: &provider,
+		}, err
+	}
 }
