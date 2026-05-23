@@ -24,6 +24,8 @@ var (
 	ErrSubscriptionNotFound           = errors.Register(ModuleName, 2304, "subscription not found")
 	ErrSubscriptionInvalid            = errors.Register(ModuleName, 2305, "duration and/or bytes cannot be negative")
 
+	ErrInsufficientStorage = errors.Register(ModuleName, 2310, "insufficient storage on the storage network")
+
 	ErrProofInvalid         = errors.Register(ModuleName, 2401, "invalid file proof")
 	ErrProofFileBadProvider = errors.Register(ModuleName, 2402, "proof rejected because this file does not belong to you")
 

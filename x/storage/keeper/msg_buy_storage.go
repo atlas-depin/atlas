@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"cosmossdk.io/collections"
 	"cosmossdk.io/errors"
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
@@ -70,6 +71,14 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	duration, gbs, err := validateStorageBuy(msg.Duration, msg.Bytes, "uatl")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate buy request")
+	}
+
+	valid, err := k.validateSufficientStorage(ctx, msg.Bytes)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to validate buy request")
+	}
+	if !valid {
+		return nil, types.ErrInsufficientStorage
 	}
 
 	/// --- compute storage cost --- ///
@@ -142,4 +151,27 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	)
 
 	return &types.MsgBuyStorageResponse{SubscriptionId: subscriptionId}, nil
+}
+
+func (k Keeper) validateSufficientStorage(ctx context.Context, bytes int64) (bool, error) {
+	var spacePurchased int64 = 0
+	var spaceAvailable int64 = 0
+
+	if err := k.IterateAllStorageSubscriptions(ctx, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
+		if time.Now().Before(subscription.End) {
+			spacePurchased += subscription.SpaceAvailable
+		}
+		return false
+	}); err != nil {
+		return false, err
+	}
+
+	if err := k.IterateAllProviders(ctx, func(_ string, provider types.Provider) bool {
+		spaceAvailable += provider.SpaceAvailable
+		return false
+	}); err != nil {
+		return false, err
+	}
+
+	return spacePurchased+bytes < spaceAvailable, nil
 }
