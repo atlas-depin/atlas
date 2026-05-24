@@ -79,17 +79,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# ── resolve gov module address ──────────────────────────────────────────────
-GOV_ADDR=$($BIN q auth module-account gov \
-  --node "$NODE" --chain-id "$CHAIN_ID" --home "$HOME_DIR" \
-  -o json 2>/dev/null \
-  | jq -r '.account.value.address // .account.address' 2>/dev/null || true)
-
-if [[ -z "$GOV_ADDR" || "$GOV_ADDR" == "null" ]]; then
-  echo "ERROR: Could not resolve gov module account address."
-  echo "Run: $BIN q auth module-account gov --node $NODE --home $HOME_DIR"
-  exit 1
-fi
+# ── gov module address ──────────────────────────────────────────────────────
+# Default for the atlas-1 devnet (derived from module name "gov" with prefix "atl").
+# Override with GOV_ADDR env var.
+DEFAULT_GOV_ADDR="atl10d07y265gmmuvt4z0w9aw880jnsr700jltv948"
+GOV_ADDR="${GOV_ADDR:-$DEFAULT_GOV_ADDR}"
 echo "Using gov module address: $GOV_ADDR"
 
 # ── fetch current gov params ────────────────────────────────────────────────
