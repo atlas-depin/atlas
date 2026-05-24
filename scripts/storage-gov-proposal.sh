@@ -20,7 +20,7 @@ set -euo pipefail
 #   --node        <rpc-addr>         (default: http://localhost:26667)
 #
 # Examples:
-#   ./governance-proposal.sh --proof-round-blocks 20 --from alice \
+#   ./storage-governance-proposal.sh --proof-round-blocks 20 --from alice \
 #     --title "Speed up proof rounds" --description "Reduce round blocks from 10 to 20"
 #
 #   ./governance-proposal.sh --price-per-gb-day 500 --provider-deposit 20000
@@ -66,7 +66,7 @@ GOV_ADDR=$($BIN q auth module-account gov \
   --chain-id "$CHAIN_ID" \
   --home "$HOME_DIR" \
   -o json 2>/dev/null \
-  | jq -r '.account.base_account.address // .account.address' 2>/dev/null || true)
+  | jq -r '.account.value.address // .account.address' 2>/dev/null || true)
 
 if [[ -z "$GOV_ADDR" || "$GOV_ADDR" == "null" ]]; then
   # fallback: derive from prefix "atl" (default cosmos gov address with prefix atl)
