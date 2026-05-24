@@ -75,28 +75,26 @@ GOV_ADDR="${GOV_ADDR:-$DEFAULT_GOV_ADDR}"
 echo "Using gov module address: $GOV_ADDR"
 
 # ── build params JSON ──────────────────────────────────────────────────────
-# Start with current on-chain params so omitted fields keep their values.
+# Fetch current on-chain params. Omitted flags keep their current value.
 CURRENT_PARAMS=$($BIN q storage params \
   --node "$NODE" \
   --chain-id "$CHAIN_ID" \
   --keyring-dir "$KEYRING_DIR" \
   --keyring-backend "$KEYRING_BACKEND" \
-  -o json 2>/dev/null | jq -r '.params // .' 2>/dev/null || echo "{}")
+  -o json 2>/dev/null)
 
-# Helper: use override if given, otherwise keep current value.
-pick() {
-  local key="$1" override="$2"
-  if [[ -n "$override" ]]; then
-    echo "$override"
-  else
-    echo "$CURRENT_PARAMS" | jq -r ".${key}" 2>/dev/null || echo "0"
-  fi
-}
+if [[ -z "$CURRENT_PARAMS" || "$CURRENT_PARAMS" == "{}" ]]; then
+  echo "ERROR: Could not query current storage params. Is the node running?"
+  exit 1
+fi
 
-PRICE_PER_GB=$(  pick "price_per_gb_day"     "$PRICE_PER_GB")
-PROVIDER_DEPOSIT=$(pick "provider_deposit"   "$PROVIDER_DEPOSIT")
-PROOF_WINDOW=$(  pick "proof_window_blocks"  "$PROOF_WINDOW")
-PROOF_ROUND=$(   pick "proof_round_blocks"   "$PROOF_ROUND")
+# Read current values (jq handles both {params:{...}} and flat {...} responses)
+cur() { echo "$CURRENT_PARAMS" | jq -r ".params.$1 // .$1 // \"$2\"" 2>/dev/null; }
+
+PRICE_PER_GB="${PRICE_PER_GB:-$(cur price_per_gb_day 400)}"
+PROVIDER_DEPOSIT="${PROVIDER_DEPOSIT:-$(cur provider_deposit 10000)}"
+PROOF_WINDOW="${PROOF_WINDOW:-$(cur proof_window_blocks 50)}"
+PROOF_ROUND="${PROOF_ROUND:-$(cur proof_round_blocks 10)}"
 
 PARAMS_JSON=$(cat <<EOF
 {
@@ -136,7 +134,7 @@ trap 'rm -f "$PROPOSAL_FILE"' EXIT
 cat > "$PROPOSAL_FILE" <<EOF
 {
   "title": "$TITLE",
-  "description": $(echo "$DESC" | jq -R -c .),
+  "summary": $(echo "$DESC" | jq -R -c .),
   "deposit": "$DEPOSIT",
   "messages": [$MSG]
 }

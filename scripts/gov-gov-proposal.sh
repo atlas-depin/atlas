@@ -94,36 +94,33 @@ echo "Using gov module address: $GOV_ADDR"
 CUR=$($BIN q gov params \
   --node "$NODE" --chain-id "$CHAIN_ID" \
   --keyring-dir "$KEYRING_DIR" --keyring-backend "$KEYRING_BACKEND" \
-  -o json 2>/dev/null || echo "{}")
+  -o json 2>/dev/null)
 
-pick_val() {
-  local key="$1" override="$2"
-  if [[ -n "$override" ]]; then
-    echo "$override"
-  else
-    echo "$CUR" | jq -r ".${key} // empty" 2>/dev/null || echo ""
-  fi
-}
+if [[ -z "$CUR" || "$CUR" == "{}" ]]; then
+  echo "ERROR: Could not query current gov params. Is the node running?"
+  exit 1
+fi
 
-VOTING_PERIOD=$(   pick_val "voting_period"              "$VOTING_PERIOD")
-MAX_DEPOSIT_PERIOD=$(pick_val "max_deposit_period"       "$MAX_DEPOSIT_PERIOD")
-EXPEDITED_VOTING=$(pick_val "expedited_voting_period"    "$EXPEDITED_VOTING")
-MIN_INITIAL_RATIO=$(pick_val "min_initial_deposit_ratio" "$MIN_INITIAL_RATIO")
-QUORUM=$(          pick_val "quorum"                     "$QUORUM")
-THRESHOLD=$(       pick_val "threshold"                  "$THRESHOLD")
-VETO_THRESHOLD=$(  pick_val "veto_threshold"             "$VETO_THRESHOLD")
+# Read current value; fallback if jq returns null.
+cur() { echo "$CUR" | jq -r ".$1 // empty" 2>/dev/null; }
 
-# booleans — need careful handling since jq outputs "true"/"false" string
-BURN_VOTE_QUORUM_NEW=$(pick_val "burn_vote_quorum" "$BURN_VOTE_QUORUM")
-[[ "$BURN_VOTE_QUORUM_NEW" == "" ]] && BURN_VOTE_QUORUM_NEW="false"
+VOTING_PERIOD="${VOTING_PERIOD:-$(cur voting_period)}"
+MAX_DEPOSIT_PERIOD="${MAX_DEPOSIT_PERIOD:-$(cur max_deposit_period)}"
+EXPEDITED_VOTING="${EXPEDITED_VOTING:-$(cur expedited_voting_period)}"
+MIN_INITIAL_RATIO="${MIN_INITIAL_RATIO:-$(cur min_initial_deposit_ratio)}"
+QUORUM="${QUORUM:-$(cur quorum)}"
+THRESHOLD="${THRESHOLD:-$(cur threshold)}"
+VETO_THRESHOLD="${VETO_THRESHOLD:-$(cur veto_threshold)}"
 
-BURN_PROPOSAL_DEPOSIT_NEW=$(pick_val "burn_proposal_deposit" "$BURN_PROPOSAL_DEPOSIT")
-[[ "$BURN_PROPOSAL_DEPOSIT_NEW" == "" ]] && BURN_PROPOSAL_DEPOSIT_NEW="false"
+# booleans
+BURN_VOTE_QUORUM_NEW="${BURN_VOTE_QUORUM:-$(cur burn_vote_quorum)}"
+BURN_VOTE_QUORUM_NEW="${BURN_VOTE_QUORUM_NEW:-false}"
+BURN_PROPOSAL_DEPOSIT_NEW="${BURN_PROPOSAL_DEPOSIT:-$(cur burn_proposal_deposit)}"
+BURN_PROPOSAL_DEPOSIT_NEW="${BURN_PROPOSAL_DEPOSIT_NEW:-false}"
+BURN_VOTE_VETO_NEW="${BURN_VOTE_VETO:-$(cur burn_vote_veto)}"
+BURN_VOTE_VETO_NEW="${BURN_VOTE_VETO_NEW:-false}"
 
-BURN_VOTE_VETO_NEW=$(pick_val "burn_vote_veto" "$BURN_VOTE_VETO")
-[[ "$BURN_VOTE_VETO_NEW" == "" ]] && BURN_VOTE_VETO_NEW="false"
-
-# min_deposit — handle coin list
+# min_deposit — coin list
 if [[ -n "$MIN_DEPOSIT_AMOUNT" ]]; then
   MIN_DEPOSIT_JSON=$(cat <<COINEOF
 [{"denom": "uatl", "amount": "$MIN_DEPOSIT_AMOUNT"}]
@@ -191,7 +188,7 @@ trap 'rm -f "$PROPOSAL_FILE"' EXIT
 cat > "$PROPOSAL_FILE" <<EOF
 {
   "title": "$TITLE",
-  "description": $(echo "$DESC" | jq -R -c .),
+  "summary": $(echo "$DESC" | jq -R -c .),
   "deposit": "$DEPOSIT",
   "messages": [$MSG]
 }
