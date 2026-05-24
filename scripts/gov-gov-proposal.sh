@@ -91,13 +91,19 @@ GOV_ADDR="${GOV_ADDR:-$DEFAULT_GOV_ADDR}"
 echo "Using gov module address: $GOV_ADDR"
 
 # ── fetch current gov params ────────────────────────────────────────────────
+echo "Fetching current gov params..."
 CUR=$($BIN q gov params \
   --node "$NODE" --chain-id "$CHAIN_ID" \
-  --keyring-dir "$KEYRING_DIR" --keyring-backend "$KEYRING_BACKEND" \
-  -o json 2>/dev/null)
+  -o json 2>&1)
 
 if [[ -z "$CUR" || "$CUR" == "{}" ]]; then
   echo "ERROR: Could not query current gov params. Is the node running?"
+  exit 1
+fi
+
+if ! echo "$CUR" | jq . >/dev/null 2>&1; then
+  echo "ERROR: Non-JSON response from gov params query:"
+  echo "$CUR" | head -5
   exit 1
 fi
 
