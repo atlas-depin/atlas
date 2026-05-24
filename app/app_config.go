@@ -220,7 +220,9 @@ var (
 			},
 			{
 				Name:   "tx",
-				Config: appconfig.WrapAny(&txconfigv1.Config{}),
+				Config: appconfig.WrapAny(&txconfigv1.Config{
+					SkipAnteHandler: true,
+				}),
 			},
 			{
 				Name:   genutiltypes.ModuleName,

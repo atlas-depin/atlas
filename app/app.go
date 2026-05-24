@@ -48,6 +48,7 @@ import (
 	"atlas/docs"
 	atlasmodulekeeper "atlas/x/atlas/keeper"
 	filetreemodulekeeper "atlas/x/filetree/keeper"
+	storageante "atlas/x/storage/ante"
 	storagemodulekeeper "atlas/x/storage/keeper"
 )
 
@@ -195,6 +196,20 @@ func New(
 	if err := app.registerIBCModules(appOpts); err != nil {
 		panic(err)
 	}
+
+	// Set custom ante handler with provider ProveFile gas exemption.
+	// The default SDK ante handler is skipped in app_config.go
+	// (txconfigv1.Config.SkipAnteHandler = true) because we need a custom
+	// TxFeeChecker that exempts registered storage providers from fees
+	// when submitting only MsgProveFile transactions.
+	anteHandler := storageante.BuildAnteHandler(
+		app.AuthKeeper,
+		app.BankKeeper,
+		&app.StorageKeeper,
+		app.txConfig.SignModeHandler(),
+		100,
+	)
+	app.App.SetAnteHandler(anteHandler)
 
 	/****  Module Options ****/
 
