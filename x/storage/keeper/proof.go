@@ -65,6 +65,16 @@ func (k Keeper) AttemptChallenge(ctx sdk.Context, provider string, proofInput ty
 		return nil
 	}
 
+	/// --- Check subscription expiry before proceeding
+	sub, subErr := k.GetStorageSubscription(ctx, file.Creator, file.Subscription)
+	if subErr == nil && sub.End.Before(ctx.BlockTime()) {
+		if expireErr := k.ExpireFile(ctx, file); expireErr != nil {
+			ctx.Logger().Error("Failed to expire file on challenge", "fid", file.Fid, "err", expireErr)
+		}
+		_ = k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
+		return types.ErrSubscriptionExpired
+	}
+
 	if slices.Contains(file.Providers, provider) {
 		root, _ := hex.DecodeString(file.Merkle)
 		if k.Prove(ctx, root, challenge.ChunkIndex, proofInput) {

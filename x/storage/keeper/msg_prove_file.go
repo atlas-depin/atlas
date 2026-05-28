@@ -42,6 +42,16 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 		if err != nil {
 			return nil, err
 		}
+
+		/// --- Check subscription expiry before proceeding
+		sub, subErr := k.GetStorageSubscription(ctx, file.Creator, file.Subscription)
+		if subErr == nil && sub.End.Before(ctx.BlockTime()) {
+			if expireErr := k.ExpireFile(ctx, file); expireErr != nil {
+				ctx.Logger().Error("Failed to expire file", "fid", file.Fid, "err", expireErr)
+			}
+			return nil, errors.Wrap(types.ErrSubscriptionExpired, "file's subscription has expired")
+		}
+
 		if file.Status == "ACTIVE" {
 			return nil, errors.Wrap(sdkerrors.ErrInvalidRequest, "this file is not a stray")
 		}

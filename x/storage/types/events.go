@@ -5,7 +5,8 @@ const (
 	EventTypeBuyStorage = "buy_storage"
 
 	EventTypeNewFile    = "new_file"
-	EventTypeDeleteFile = "delete_file"
+	EventTypeDeleteFile         = "delete_file"
+	EventTypeExpireFile         = "expire_file"
 
 	EventTypeNewProvider        = "new_provider"
 	EventTypeExpandSubscription = "expand_subscription"
