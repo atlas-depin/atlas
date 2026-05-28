@@ -49,7 +49,8 @@ message QueryParamsResponse {
 // QueryTreeNodeRequest defines the QueryTreeNodeRequest message.
 message QueryTreeNodeRequest {
   string owner = 1;
-  string path = 2;
+  string subscription = 2;
+  string path = 3;
 }
 
 // QueryTreeNodeResponse defines the QueryTreeNodeResponse message.
@@ -60,7 +61,8 @@ message QueryTreeNodeResponse {
 // QueryFileTreePathsRequest defines the QueryFileTreePathsRequest message.
 message QueryFileTreePathsRequest {
   string owner = 1;
-  string basepath = 2;
+  string subscription = 2;
+  string basepath = 3;
 }
 
 // QueryFileTreePathsResponse defines the QueryFileTreePathsResponse message.
@@ -71,7 +73,8 @@ message QueryFileTreePathsResponse {
 // QueryTreeNodeChildrenRequest defines the QueryTreeNodeChildrenRequest message.
 message QueryTreeNodeChildrenRequest {
   string owner = 1;
-  string path = 2;
+  string subscription = 2;
+  string path = 3;
 }
 
 // QueryTreeNodeChildrenResponse defines the QueryTreeNodeChildrenResponse message.

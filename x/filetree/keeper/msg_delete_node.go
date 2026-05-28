@@ -13,7 +13,7 @@ func (k msgServer) DeleteNode(ctx context.Context, msg *types.MsgDeleteNode) (*t
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
-	err := k.RemoveNode(ctx, msg.Creator, msg.Path, true)
+	err := k.RemoveNode(ctx, msg.Creator+"_"+msg.Subscription, msg.Path, true)
 
 	return &types.MsgDeleteNodeResponse{}, err
 }
