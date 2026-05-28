@@ -27,7 +27,6 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 		if time.Now().Before(subscription.End) {
 			active++
 			spacePurchased += subscription.SpaceAvailable
-			spaceUsed += subscription.SpaceUsed
 			spaceReplicas += subscription.ReplicaSpaceUsed
 		}
 		return false
@@ -38,6 +37,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	if err := q.k.IterateAllProviders(ctx, func(_ string, provider types.Provider) bool {
 		providers++
 		spaceAvailable += provider.SpaceAvailable
+		spaceUsed += provider.SpaceUsed
 		return false
 	}); err != nil {
 		return nil, err
