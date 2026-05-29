@@ -49,7 +49,7 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 			if expireErr := k.ExpireFile(ctx, file); expireErr != nil {
 				ctx.Logger().Error("Failed to expire file", "fid", file.Fid, "err", expireErr)
 			}
-			return nil, errors.Wrap(types.ErrSubscriptionExpired, "file's subscription has expired")
+			return &types.MsgProveFileResponse{}, nil
 		}
 
 		if file.Status == "ACTIVE" {

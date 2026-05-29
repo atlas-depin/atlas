@@ -72,7 +72,7 @@ func (k Keeper) AttemptChallenge(ctx sdk.Context, provider string, proofInput ty
 			ctx.Logger().Error("Failed to expire file on challenge", "fid", file.Fid, "err", expireErr)
 		}
 		_ = k.RemoveChallenge(ctx, provider, proofInput.ChallengeId)
-		return types.ErrSubscriptionExpired
+		return nil
 	}
 
 	if slices.Contains(file.Providers, provider) {
