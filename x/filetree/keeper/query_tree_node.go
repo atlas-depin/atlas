@@ -16,7 +16,7 @@ func (q queryServer) TreeNode(ctx context.Context, req *types.QueryTreeNodeReque
 	}
 
 	path := strings.ToLower(strings.Trim(req.Path, "/"))
-	node, err := q.k.GetNode(ctx, req.Owner+"_"+req.Subscription, path)
+	node, err := q.k.GetNode(ctx, req.Owner, path)
 
 	return &types.QueryTreeNodeResponse{Node: &node}, err
 }

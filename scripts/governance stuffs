@@ -1,0 +1,14 @@
+./storage-governance-proposal.sh --proof-window-blocks 14400 --proof-round-blocks 300 --from alice \
+  --title "Speed up proof rounds" \
+  --description "Reduce round blocks from 10 to 20"
+
+atlasd tx gov submit-proposal change_params.json \
+--from providers \
+--chain-id atlas-1 \
+--gas auto \
+--gas-adjustment 1.5 \
+--node http://localhost:26667 \
+--keyring-dir ~/.atlas-devnet/keys
+
+
+atl10d07y265gmmuvt4z0w9aw880jnsr700jltv948

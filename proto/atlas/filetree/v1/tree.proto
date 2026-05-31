@@ -5,11 +5,6 @@ import "gogoproto/gogo.proto";
 
 option go_package = "atlas/x/filetree/types";
 
-message AuthorityBundle {
-  string address = 1;
-  string secret = 2;
-}
-
 message TreeNode {
   string node_type = 1;
   string contents = 2;

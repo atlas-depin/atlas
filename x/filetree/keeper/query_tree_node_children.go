@@ -22,7 +22,7 @@ func (q queryServer) TreeNodeChildren(ctx context.Context, req *types.QueryTreeN
 	var rng *collections.Range[collections.Triple[string, string, string]]
 
 	rng = new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-		collections.TripleSuperPrefix[string, string, string](req.Owner+"_"+req.Subscription, basepath),
+		collections.TripleSuperPrefix[string, string, string](req.Owner, basepath),
 	)
 
 	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.TreeNode) (_ bool, _ error) {

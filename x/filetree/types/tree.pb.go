@@ -23,58 +23,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type AuthorityBundle struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Secret  string `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`
-}
-
-func (m *AuthorityBundle) Reset()         { *m = AuthorityBundle{} }
-func (m *AuthorityBundle) String() string { return proto.CompactTextString(m) }
-func (*AuthorityBundle) ProtoMessage()    {}
-func (*AuthorityBundle) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4bb11fc72c82cba0, []int{0}
-}
-func (m *AuthorityBundle) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *AuthorityBundle) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_AuthorityBundle.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *AuthorityBundle) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AuthorityBundle.Merge(m, src)
-}
-func (m *AuthorityBundle) XXX_Size() int {
-	return m.Size()
-}
-func (m *AuthorityBundle) XXX_DiscardUnknown() {
-	xxx_messageInfo_AuthorityBundle.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AuthorityBundle proto.InternalMessageInfo
-
-func (m *AuthorityBundle) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *AuthorityBundle) GetSecret() string {
-	if m != nil {
-		return m.Secret
-	}
-	return ""
-}
-
 type TreeNode struct {
 	NodeType string `protobuf:"bytes,1,opt,name=node_type,json=nodeType,proto3" json:"node_type,omitempty"`
 	Contents string `protobuf:"bytes,2,opt,name=contents,proto3" json:"contents,omitempty"`
@@ -86,7 +34,7 @@ func (m *TreeNode) Reset()         { *m = TreeNode{} }
 func (m *TreeNode) String() string { return proto.CompactTextString(m) }
 func (*TreeNode) ProtoMessage()    {}
 func (*TreeNode) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4bb11fc72c82cba0, []int{1}
+	return fileDescriptor_4bb11fc72c82cba0, []int{0}
 }
 func (m *TreeNode) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -144,67 +92,26 @@ func (m *TreeNode) GetEditors() string {
 }
 
 func init() {
-	proto.RegisterType((*AuthorityBundle)(nil), "atlas.filetree.v1.AuthorityBundle")
 	proto.RegisterType((*TreeNode)(nil), "atlas.filetree.v1.TreeNode")
 }
 
 func init() { proto.RegisterFile("atlas/filetree/v1/tree.proto", fileDescriptor_4bb11fc72c82cba0) }
 
 var fileDescriptor_4bb11fc72c82cba0 = []byte{
-	// 248 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x44, 0x90, 0x31, 0x4e, 0xc3, 0x30,
-	0x18, 0x85, 0x63, 0x40, 0x25, 0xf5, 0x82, 0xb0, 0x50, 0x65, 0x15, 0x64, 0xa1, 0x4e, 0x4c, 0x09,
-	0x15, 0x27, 0xa0, 0xec, 0x0c, 0xa8, 0x13, 0x0b, 0x0a, 0xf5, 0xa3, 0x44, 0x8a, 0xe2, 0xc8, 0xfe,
-	0x9b, 0x92, 0x5b, 0x70, 0x2c, 0xc6, 0x8e, 0x8c, 0x28, 0xb9, 0x08, 0x72, 0xe2, 0xc0, 0x64, 0x7f,
-	0xfe, 0x6c, 0x3f, 0xfb, 0xf1, 0xab, 0x8c, 0x8a, 0xcc, 0xa5, 0x6f, 0x79, 0x01, 0xb2, 0x40, 0x5a,
-	0x2f, 0x53, 0x3f, 0x26, 0x95, 0x35, 0x64, 0xc4, 0x79, 0x6f, 0x93, 0xd1, 0x26, 0xf5, 0x72, 0x7e,
-	0xb1, 0x35, 0x5b, 0xd3, 0xdb, 0xd4, 0xcf, 0x86, 0x8d, 0x8b, 0x07, 0x7e, 0x76, 0xbf, 0xa3, 0x77,
-	0x63, 0x73, 0x6a, 0x56, 0xbb, 0x52, 0x17, 0x10, 0x92, 0x9f, 0x66, 0x5a, 0x5b, 0x38, 0x27, 0xd9,
-	0x35, 0xbb, 0x99, 0x3e, 0x8d, 0x28, 0x66, 0x7c, 0xe2, 0xb0, 0xb1, 0x20, 0x79, 0xd4, 0x8b, 0x40,
-	0x8b, 0x3d, 0x8f, 0xd7, 0x16, 0x78, 0x34, 0x1a, 0xe2, 0x92, 0x4f, 0x4b, 0xa3, 0xf1, 0x42, 0x4d,
-	0x85, 0x70, 0x3e, 0xf6, 0x0b, 0xeb, 0xa6, 0x82, 0x98, 0xf3, 0x78, 0x63, 0x4a, 0x42, 0x49, 0x2e,
-	0x5c, 0xf1, 0xc7, 0x3e, 0xb6, 0xce, 0xb1, 0x87, 0x75, 0xf2, 0x78, 0x88, 0x0d, 0xe8, 0x0d, 0x74,
-	0x4e, 0xc6, 0x3a, 0x79, 0x32, 0x98, 0x80, 0xab, 0xdb, 0xaf, 0x56, 0xb1, 0x43, 0xab, 0xd8, 0x4f,
-	0xab, 0xd8, 0x67, 0xa7, 0xa2, 0x43, 0xa7, 0xa2, 0xef, 0x4e, 0x45, 0xcf, 0xb3, 0xa1, 0x9e, 0x8f,
-	0xff, 0x82, 0xfc, 0x83, 0xdc, 0xeb, 0xa4, 0xff, 0xf6, 0xdd, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0x4c, 0xf5, 0x35, 0x31, 0x3f, 0x01, 0x00, 0x00,
-}
-
-func (m *AuthorityBundle) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *AuthorityBundle) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *AuthorityBundle) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Secret) > 0 {
-		i -= len(m.Secret)
-		copy(dAtA[i:], m.Secret)
-		i = encodeVarintTree(dAtA, i, uint64(len(m.Secret)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintTree(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
+	// 205 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x49, 0x2c, 0xc9, 0x49,
+	0x2c, 0xd6, 0x4f, 0xcb, 0xcc, 0x49, 0x2d, 0x29, 0x4a, 0x4d, 0xd5, 0x2f, 0x33, 0xd4, 0x07, 0xd1,
+	0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0x82, 0x60, 0x59, 0x3d, 0x98, 0xac, 0x5e, 0x99, 0xa1,
+	0x94, 0x48, 0x7a, 0x7e, 0x7a, 0x3e, 0x58, 0x56, 0x1f, 0xc4, 0x82, 0x28, 0x54, 0x2a, 0xe7, 0xe2,
+	0x08, 0x29, 0x4a, 0x4d, 0xf5, 0xcb, 0x4f, 0x49, 0x15, 0x92, 0xe6, 0xe2, 0xcc, 0xcb, 0x4f, 0x49,
+	0x8d, 0x2f, 0xa9, 0x2c, 0x48, 0x95, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0xe2, 0x00, 0x09, 0x84,
+	0x54, 0x16, 0xa4, 0x0a, 0x49, 0x71, 0x71, 0x24, 0xe7, 0xe7, 0x95, 0xa4, 0xe6, 0x95, 0x14, 0x4b,
+	0x30, 0x41, 0xe4, 0x60, 0x7c, 0x21, 0x09, 0x2e, 0xf6, 0xb2, 0xcc, 0xd4, 0xf2, 0xd4, 0xa2, 0x62,
+	0x09, 0x66, 0xb0, 0x14, 0x8c, 0x0b, 0x92, 0x49, 0x4d, 0xc9, 0x2c, 0xc9, 0x2f, 0x2a, 0x96, 0x60,
+	0x81, 0xc8, 0x40, 0xb9, 0x4e, 0x06, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0,
+	0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10,
+	0x25, 0x06, 0xf1, 0x59, 0x05, 0xc2, 0x6f, 0x20, 0x07, 0x15, 0x27, 0xb1, 0x81, 0x5d, 0x6c, 0x0c,
+	0x08, 0x00, 0x00, 0xff, 0xff, 0x30, 0x75, 0x5f, 0x29, 0xfa, 0x00, 0x00, 0x00,
 }
 
 func (m *TreeNode) Marshal() (dAtA []byte, err error) {
@@ -269,23 +176,6 @@ func encodeVarintTree(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *AuthorityBundle) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovTree(uint64(l))
-	}
-	l = len(m.Secret)
-	if l > 0 {
-		n += 1 + l + sovTree(uint64(l))
-	}
-	return n
-}
-
 func (m *TreeNode) Size() (n int) {
 	if m == nil {
 		return 0
@@ -316,120 +206,6 @@ func sovTree(x uint64) (n int) {
 }
 func sozTree(x uint64) (n int) {
 	return sovTree(uint64((x << 1) ^ uint64((int64(x) >> 63))))
-}
-func (m *AuthorityBundle) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTree
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: AuthorityBundle: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AuthorityBundle: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTree
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTree
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTree
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Secret", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTree
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTree
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTree
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Secret = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTree(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTree
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
 }
 func (m *TreeNode) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)

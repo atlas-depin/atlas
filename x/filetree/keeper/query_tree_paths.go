@@ -20,7 +20,7 @@ func (q queryServer) FileTreePaths(ctx context.Context, req *types.QueryFileTree
 	basepath := strings.ToLower(strings.Trim(req.Basepath, "/"))
 
 	rng := new(collections.Range[collections.Triple[string, string, string]]).Prefix(
-		collections.Join3(req.Owner+"_"+req.Subscription, basepath, ""),
+		collections.Join3(req.Owner, basepath, ""),
 	)
 
 	err := q.k.IterateNodes(ctx, rng, func(key collections.Triple[string, string, string], node types.TreeNode) (_ bool, _ error) {

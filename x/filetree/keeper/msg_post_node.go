@@ -25,9 +25,9 @@ func (k msgServer) PostNode(ctx context.Context, msg *types.MsgPostNode) (*types
 
 	var err error
 	if strings.Contains(path, "/") {
-		err = k.SetNode(ctx, msg.Creator+"_"+msg.Subscription, path, ftn)
+		err = k.SetNode(ctx, msg.Creator, path, ftn)
 	} else {
-		err = k.SetRootNode(ctx, msg.Creator+"_"+msg.Subscription, path, ftn)
+		err = k.SetRootNode(ctx, msg.Creator, path, ftn)
 	}
 
 	return &types.MsgPostNodeResponse{}, err
