@@ -30,6 +30,9 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 	/// --- Update subscription & provider storage used
 	_, err = k.UpdateStorageSubscriptionUsage(ctx, msg.Creator, file.Subscription, -file.FileSize, file.Replicas)
 	if err != nil {
+		if err == types.ErrSubscriptionExpired {
+			return nil, nil
+		}
 		return nil, err
 	}
 
