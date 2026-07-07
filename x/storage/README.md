@@ -33,7 +33,7 @@ A user can purchase a subscription that reserves as little as 1GB of storage for
 message StorageSubscription {
   Timestamp start;        // start timestamp
   Timestamp end;          // end timestamp
-  string status;          // subscription status: ACTIVE (default), PENDING, EXPIRED
+  string status;          // subscription status: ACTIVE (default), EXPIRED
   int64 spaceAvailable;   // total space reserved by the subscription
   int64 spaceUsed;        // total space actively used by the subscription
   int64 extraSpaceUsed;   // space used by extra replicas after standard replicas (mainly useful for UI/UX)
@@ -47,7 +47,7 @@ Storage subscriptions are priced in USD, and they are purchased with the equival
 Similarily to purchasing a new storage subscription, existing ones may be expanded in both quantity and time. The flexibility of scaling in accross dimensions is enabled by the multi-dimensional nature of storage credits (byte-seconds). Upon expansion, new storage credits are minted in the storage subscription, and the `end` or `spaceAvailable` parameters are updated accordingly. There is no storage subscription shrinking or refund policy.
 
 ### Subscription Statuses
-There are three subscription statuses: `Active`, `Expired`, and `Pending`. An `Active` status is the default status, and is hopefully self-explanatory. An `Expired` status indicates that the subscription has expired (obviously). An expired subscription is persists in the kvstore for historical indexing purposes. The `Pending` status indicates that a user has purchased a storage subscription on the behalf of another user, and the recipient has yet to accept it. This part of the status mechanism exists to prevent spam.
+There are three subscription statuses: `Active` and `Expired`. An `Active` status is the default status, and is hopefully self-explanatory. An `Expired` status indicates that the subscription has expired (obviously). An expired subscription is persists in the kvstore for historical indexing purposes.
 
 ### Subscription Expiry
 A subscription expiry is detected when [TODO].
