@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"cosmossdk.io/collections"
@@ -22,37 +21,13 @@ const (
 	gb_bytes int64 = 1_000_000_000
 )
 
-func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
-	if denom != "uatl" {
-		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than ujkl")
-		return
-	}
-	if duration < 0 || bytes < 0 {
-		return time.Duration(0), 0, types.ErrSubscriptionInvalid
-	}
-
-	duration = time.Duration(days) * time.Hour * 24
-	if duration < time.Hour*24 {
-		err = fmt.Errorf("duration can't be less than 1 day")
-		return
-	}
-
-	gb = bytes / gb_bytes
-	if gb <= 0 {
-		err = fmt.Errorf("cannot buy less than a gb")
-		return
-	}
-
-	return
-}
-
 func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (*types.MsgBuyStorageResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
-	/// --- Validate request
+	// === validate request =====
 	if msg.Receiver == "" {
 		msg.Receiver = msg.Creator
 	}
@@ -81,38 +56,19 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, types.ErrInsufficientStorage
 	}
 
-	/// --- compute storage cost --- ///
+	// === compute storage cost =====
 	storageCost := k.GetStorageCost(ctx, gbs, msg.Duration)
 	toPay := sdk.NewCoin("uatl", storageCost)
 
-	/// --- create new storage subscription --- ///
-	// create recipient account if it doesn't exist
-	if !k.authKeeper.HasAccount(ctx, recipient) {
-		defer telemetry.IncrCounter(1, "new", "account") // [TBD]: do I want/need this?
-		k.authKeeper.SetAccount(ctx, k.authKeeper.NewAccountWithAddress(ctx, recipient))
-	}
-
-	// create subscription object
-	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(24 * 60 * 60))
-	credits := math.NewInt(msg.Bytes * 3).Mul(seconds)
-	subscription := types.StorageSubscription{
-		Start:            ctx.BlockTime().Truncate(time.Second),
-		End:              ctx.BlockTime().Truncate(time.Second).Add(duration),
-		SpaceAvailable:   msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
-		SpaceUsed:        0,
-		ReplicaSpaceUsed: 0,
-		Credits:          credits,
-		// [TBD]: StandardReplicas field for front-end calcs?
-	}
-
-	// transfer tokens to pay
-	test := toPay.Amount.Int64()
-	log.Println(test)
+	// === transfer payment to storage module =====
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spender, types.ModuleName, sdk.NewCoins(toPay))
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot send tokens from %s", msg.Creator)
 	}
 
+	// === mint storage credits into rewards pool =====
+	seconds := math.NewInt(msg.Duration).Mul(math.NewInt(24 * 60 * 60))
+	credits := math.NewInt(msg.Bytes * 3).Mul(seconds)
 	cpool, err := k.StorageCreditPool.Get(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to update storage credit pool")
@@ -122,7 +78,22 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		return nil, errors.Wrapf(err, "failed to update storage credit pool")
 	}
 
-	// commit subscription to kvstore
+	// === create & commit storage subscription (with expiry record) =====
+	// create recipient account if it doesn't exist
+	if !k.authKeeper.HasAccount(ctx, recipient) {
+		defer telemetry.IncrCounter(1, "new", "account") // [TBD]: do I want/need this?
+		k.authKeeper.SetAccount(ctx, k.authKeeper.NewAccountWithAddress(ctx, recipient))
+	}
+
+	subscription := types.StorageSubscription{
+		Start:            ctx.BlockTime().Truncate(time.Second),
+		End:              ctx.BlockTime().Truncate(time.Second).Add(duration),
+		SpaceAvailable:   msg.Bytes * 3, // [TODO]: defaultReplicas keeper parameter?
+		SpaceUsed:        0,
+		ReplicaSpaceUsed: 0,
+		Credits:          credits,
+	}
+
 	subscriptionId, err := k.SetNewStorageSubscription(ctx, msg.Receiver, subscription)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to commit new storage subscription")
@@ -132,7 +103,7 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		k.SetDefaultStorageSubscriptionId(ctx, msg.Receiver, subscriptionId)
 	}
 
-	/// --- Emit events --- ///
+	// === Emit events =====
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -153,12 +124,36 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	return &types.MsgBuyStorageResponse{SubscriptionId: subscriptionId}, nil
 }
 
-func (k Keeper) validateSufficientStorage(ctx context.Context, bytes int64) (bool, error) {
+func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
+	if denom != "uatl" {
+		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than uatl")
+		return
+	}
+	if days < 0 || bytes < 0 {
+		return time.Duration(0), 0, types.ErrSubscriptionInvalid
+	}
+
+	duration = time.Duration(days) * time.Hour * 24
+	if duration < time.Hour*24 {
+		err = fmt.Errorf("duration can't be less than 1 day")
+		return
+	}
+
+	gb = bytes / gb_bytes
+	if gb <= 0 {
+		err = fmt.Errorf("cannot buy less than a gb")
+		return
+	}
+
+	return
+}
+
+func (k Keeper) validateSufficientStorage(ctx sdk.Context, bytes int64) (bool, error) {
 	var spacePurchased int64 = 0
 	var spaceAvailable int64 = 0
 
 	if err := k.IterateAllStorageSubscriptions(ctx, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
-		if time.Now().Before(subscription.End) {
+		if ctx.BlockTime().Before(subscription.End) {
 			spacePurchased += subscription.SpaceAvailable
 		}
 		return false

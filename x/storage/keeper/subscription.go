@@ -26,10 +26,6 @@ func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subsc
 	}
 	subscription.Id = fmt.Sprintf("sub_%d", seq)
 
-	// TODO: verify that there is enough provider capacity to accomodate the new subscription
-
-	// Register in the expiry index so the EndBlocker can detect
-	// when this subscription expires.
 	if err := k.AddExpiryIndexEntry(ctx, subscription.Id, address, subscription.End.Unix()); err != nil {
 		return "", err
 	}
