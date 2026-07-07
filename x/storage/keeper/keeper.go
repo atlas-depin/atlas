@@ -53,8 +53,11 @@ type Keeper struct {
 	ChallengeFilesCount  collections.Item[uint64]
 	ChallengeFilesCursor collections.Item[[]byte]
 
+	SubscriptionProviderBytes collections.Map[collections.Pair[string, string], int64] // subId|provider -> bytes
+
 	// Indicies
-	FilesByProvider collections.KeySet[string] // provider_address|file_id -> {}
+	FilesByProvider   collections.KeySet[string] // provider_address|file_id -> {}
+	SubscriptionExpiryIndex    collections.KeySet[collections.Triple[int64, string, string]] // EndUnix|subId|owner -> {}
 
 	bankKeeper types.BankKeeper
 	authKeeper types.AuthKeeper
@@ -132,6 +135,17 @@ func NewKeeper(
 		),
 		ChallengeFilesCount:  collections.NewItem(sb, collections.NewPrefix(81), "challenge_files_count", collections.Uint64Value),
 		ChallengeFilesCursor: collections.NewItem(sb, collections.NewPrefix(82), "challenge_files_cursor", collections.BytesValue),
+
+		SubscriptionProviderBytes: collections.NewMap(
+			sb, collections.NewPrefix(9), "sub_provider_bytes",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			collections.Int64Value,
+		),
+
+		SubscriptionExpiryIndex: collections.NewKeySet(
+			sb, collections.NewPrefix(5), "sub_expiry_index",
+			collections.TripleKeyCodec(collections.Int64Key, collections.StringKey, collections.StringKey),
+		),
 
 		// FilesByProvider: collections.NewKeySet(
 		// 	sb, collections.NewPrefix(3), "files_by_provider",

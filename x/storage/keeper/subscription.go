@@ -11,7 +11,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-/// ---- CRUD Methods ----
+//
+// === Subscription CRUD =====
+//
 
 /*
 Set a new storage subscription record for the specified address.
@@ -25,6 +27,13 @@ func (k Keeper) SetNewStorageSubscription(ctx sdk.Context, address string, subsc
 	subscription.Id = fmt.Sprintf("sub_%d", seq)
 
 	// TODO: verify that there is enough provider capacity to accomodate the new subscription
+
+	// Register in the expiry index so the EndBlocker can detect
+	// when this subscription expires.
+	if err := k.AddExpiryIndexEntry(ctx, subscription.Id, address, subscription.End.Unix()); err != nil {
+		return "", err
+	}
+
 	return subscription.Id, k.SetStorageSubscription(ctx, address, subscription)
 }
 
@@ -72,12 +81,14 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 
 /*
 Iterate over all subscriptions and run the provided function argument for each record.
-The provided function must have a `types.StorageSubscription` argument.
 */
 func (k Keeper) IterateAllStorageSubscriptions(ctx context.Context, fn func(key collections.Pair[string, string], subscription types.StorageSubscription) (stop bool)) error {
 	return k.IterateStorageSubscriptions(ctx, &collections.PairRange[string, string]{}, fn)
 }
 
+/*
+Iterate over a range of subscriptions and run the provided function argument for each record.
+*/
 func (k Keeper) IterateStorageSubscriptions(ctx context.Context, ranger *collections.PairRange[string, string], fn func(key collections.Pair[string, string], sub types.StorageSubscription) bool) error {
 	iter, err := k.SubscriptionStore.Iterate(ctx, ranger)
 	if err != nil {
@@ -104,6 +115,12 @@ If the subscription is the address's default subscription, the default subscript
 func (k Keeper) ExpireStorageSubscription(ctx context.Context, address string, subscriptionId string) error {
 	key := collections.Join(address, subscriptionId)
 
+	// Fetch the sub to get its End and owner for removing the expiry index entry.
+	sub, err := k.SubscriptionStore.Get(ctx, key)
+	if err == nil {
+		_ = k.RemoveExpiryIndexEntry(ctx, subscriptionId, address, sub.End.Unix())
+	}
+
 	defaultId, _ := k.GetDefaultStorageSubscriptionId(ctx, address)
 	if defaultId == subscriptionId {
 		_ = k.ClearDefaultStorageSubscriptionId(ctx, address)
@@ -112,28 +129,9 @@ func (k Keeper) ExpireStorageSubscription(ctx context.Context, address string, s
 	return k.SubscriptionStore.Remove(ctx, key)
 }
 
-/*
-Get the subscription id of the specified address' default subscription.
-*/
-func (k Keeper) GetDefaultStorageSubscriptionId(ctx context.Context, address string) (string, error) {
-	return k.DefaultSubscriptionIndex.Get(ctx, address)
-}
-
-/*
-Set the subscription id of the specified address' default subscription.
-*/
-func (k Keeper) SetDefaultStorageSubscriptionId(ctx context.Context, address string, subscriptionId string) error {
-	return k.DefaultSubscriptionIndex.Set(ctx, address, subscriptionId)
-}
-
-/*
-Remove the default subscription id of the specified address.
-*/
-func (k Keeper) ClearDefaultStorageSubscriptionId(ctx context.Context, address string) error {
-	return k.DefaultSubscriptionIndex.Remove(ctx, address)
-}
-
-/// ---- Utility Methods ----
+//
+// === Subscription Utility Methods =====
+//
 
 /*
 Update the usage of a storage subscription, incremented by the amount of bytes multiplied by the number of replicas.
@@ -173,4 +171,49 @@ func (k Keeper) ExpandStorageSubscription(ctx context.Context, address string, s
 	// TODO: implement storage susbcription expansion
 	// TODO: verify that there is enough provider capacity to accomodate the new subscription
 	return nil
+}
+
+//
+// === Default Subscription Index CRUD =====
+//
+
+/*
+Get the subscription id of the specified address' default subscription.
+*/
+func (k Keeper) GetDefaultStorageSubscriptionId(ctx context.Context, address string) (string, error) {
+	return k.DefaultSubscriptionIndex.Get(ctx, address)
+}
+
+/*
+Set the subscription id of the specified address' default subscription.
+*/
+func (k Keeper) SetDefaultStorageSubscriptionId(ctx context.Context, address string, subscriptionId string) error {
+	return k.DefaultSubscriptionIndex.Set(ctx, address, subscriptionId)
+}
+
+/*
+Remove the default subscription id of the specified address.
+*/
+func (k Keeper) ClearDefaultStorageSubscriptionId(ctx context.Context, address string) error {
+	return k.DefaultSubscriptionIndex.Remove(ctx, address)
+}
+
+//
+// === Subscription Expiry Index CRUD =====
+//
+
+/*
+AddExpiryIndexEntry writes the subscription's expiry time and owner into
+the expiry index so the EndBlocker can discover it without scanning
+all subscriptions.
+*/
+func (k Keeper) AddExpiryIndexEntry(ctx context.Context, subId string, owner string, endUnix int64) error {
+	return k.SubscriptionExpiryIndex.Set(ctx, collections.Join3(endUnix, subId, owner))
+}
+
+/*
+RemoveExpiryIndexEntry deletes a subscription from the expiry index.
+*/
+func (k Keeper) RemoveExpiryIndexEntry(ctx context.Context, subId string, owner string, endUnix int64) error {
+	return k.SubscriptionExpiryIndex.Remove(ctx, collections.Join3(endUnix, subId, owner))
 }

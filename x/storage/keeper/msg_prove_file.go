@@ -5,9 +5,11 @@ import (
 	"slices"
 	"strconv"
 
+	"cosmossdk.io/collections"
+	"cosmossdk.io/errors"
+
 	"atlas/x/storage/types"
 
-	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -75,6 +77,16 @@ func (k msgServer) ProveFile(goCtx context.Context, msg *types.MsgProveFile) (*t
 		if err := k.AttemptAddProvider(ctx, file, msg.Creator, proofInput); err != nil {
 			return nil, err
 		}
+
+		// Track per-subscription provider commitment for reward pool protection.
+		// This enables the EndBlocker to exclude expired bytes from SpaceUsed
+		// immediately, without iterating all files.
+		subProvKey := collections.Join(file.Subscription, msg.Creator)
+		currentBytes, subGetErr := k.SubscriptionProviderBytes.Get(ctx, subProvKey)
+		if subGetErr != nil {
+			currentBytes = 0
+		}
+		_ = k.SubscriptionProviderBytes.Set(ctx, subProvKey, currentBytes+file.FileSize)
 
 	} else if err := k.AttemptChallenge(ctx, msg.Creator, proofInput); err != nil { // else: this is a response to a challenge
 		ctx.Logger().Warn("Challenge Failed", err)

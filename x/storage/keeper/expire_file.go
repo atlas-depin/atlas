@@ -52,6 +52,20 @@ func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 					return err
 				}
 			}
+
+			// Remove this provider's bytes from the per-subscription tracker.
+			// If the EndBlocker already freed these bytes via the expiry sweep,
+			// the entry may already be gone — that's fine.
+			subProvKey := collections.Join(file.Subscription, provider)
+			currentBytes, getErr := k.SubscriptionProviderBytes.Get(ctx, subProvKey)
+			if getErr == nil {
+				newBytes := currentBytes - file.FileSize
+				if newBytes <= 0 {
+					_ = k.SubscriptionProviderBytes.Remove(ctx, subProvKey)
+				} else {
+					_ = k.SubscriptionProviderBytes.Set(ctx, subProvKey, newBytes)
+				}
+			}
 		}
 	}
 
@@ -74,6 +88,68 @@ func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 			sdk.NewAttribute(types.AttributeKeySubscriptionId, file.Subscription),
 		),
 	)
+
+	return nil
+}
+
+// ExpireSubscriptions scans the expiry index for subscriptions whose
+// End time has passed and expires them. Called from EndBlocker every block.
+// Uses the index so the scan is bounded to actually-expiring subs only.
+// The Triple key (EndUnix, subID, owner) encodes everything needed to
+// remove the subscription — no additional scans required.
+func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
+	now := ctx.BlockTime().Unix()
+
+	rng := collections.NewPrefixUntilTripleRange[int64, string, string](now)
+	iter, err := k.SubscriptionExpiryIndex.Iterate(ctx, rng)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		triple, err := iter.Key()
+		if err != nil {
+			ctx.Logger().Error("Failed to decode expiry index key", "err", err)
+			continue
+		}
+
+		owner := triple.K3()
+		subID := triple.K2()
+
+		// Free provider space immediately using the per-subscription
+		// byte tracker — O(providers_per_sub), not O(files).
+		subProvRange := collections.NewPrefixedPairRange[string, string](subID)
+		spIter, spErr := k.SubscriptionProviderBytes.Iterate(ctx, subProvRange)
+		if spErr == nil {
+			for ; spIter.Valid(); spIter.Next() {
+				kv, kvErr := spIter.KeyValue()
+				if kvErr != nil {
+					continue
+				}
+				provider := kv.Key.K2()
+				bytes := kv.Value
+				prov, provErr := k.GetProvider(ctx, provider)
+				if provErr == nil {
+					prov.SpaceUsed -= bytes
+					if prov.SpaceUsed < 0 {
+						prov.SpaceUsed = 0
+					}
+					_ = k.SetProvider(ctx, prov)
+				}
+				_ = k.SubscriptionProviderBytes.Remove(ctx, kv.Key)
+			}
+			spIter.Close()
+		}
+
+		// ExpireStorageSubscription removes the subscription record and
+		// cleans up the expiry index entry.
+		if err := k.ExpireStorageSubscription(ctx, owner, subID); err != nil {
+			ctx.Logger().Error("Failed to expire subscription", "owner", owner, "sub_id", subID, "err", err)
+			continue
+		}
+		ctx.Logger().Info("Subscription expired", "owner", owner, "sub_id", subID)
+	}
 
 	return nil
 }
