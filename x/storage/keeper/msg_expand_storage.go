@@ -32,7 +32,7 @@ func validateStorageExpand(days int64, bytes int64, denom string) (duration time
 	}
 
 	if bytes > 0 {
-		gb = bytes / gb_bytes
+		gb = bytes / 1_000_000_000
 		if gb <= 0 {
 			err = fmt.Errorf("cannot buy less than a gb")
 			return

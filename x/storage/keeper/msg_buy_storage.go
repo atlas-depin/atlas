@@ -16,10 +16,10 @@ import (
 	"atlas/x/storage/types"
 )
 
-const (
-	gb_bytes int64 = 1_000_000_000
-)
-
+// BuyStorage creates a new storage subscription for the sender.
+// Tokens are transferred from the sender to the module account and
+// storage credits are minted into the rewards pool proportional to
+// the purchased bytes * duration * 3 replicas.
 func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (*types.MsgBuyStorageResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
@@ -106,6 +106,8 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	return &types.MsgBuyStorageResponse{SubscriptionId: subscriptionId}, nil
 }
 
+// validateStorageBuy validates the duration (≥1 day), size (≥1 GB),
+// and denom before computing a storage purchase.
 func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
 	if denom != "uatl" {
 		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than uatl")
@@ -121,7 +123,7 @@ func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Du
 		return
 	}
 
-	gb = bytes / gb_bytes
+	gb = bytes / 1_000_000_000
 	if gb <= 0 {
 		err = fmt.Errorf("cannot buy less than a gb")
 		return
@@ -130,6 +132,8 @@ func validateStorageBuy(days int64, bytes int64, denom string) (duration time.Du
 	return
 }
 
+// validateSufficientStorage checks that the network has enough
+// total provider capacity to accommodate the requested bytes.
 func (k Keeper) validateSufficientStorage(ctx sdk.Context, bytes int64) (bool, error) {
 	var spacePurchased int64 = 0
 	var spaceAvailable int64 = 0
