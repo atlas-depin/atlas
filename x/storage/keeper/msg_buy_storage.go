@@ -10,7 +10,6 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -28,21 +27,11 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// === validate request =====
-	if msg.Receiver == "" {
-		msg.Receiver = msg.Creator
-	}
-
 	spender, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot parse creator address %s", msg.Creator)
 	}
 
-	recipient, err := sdk.AccAddressFromBech32(msg.Receiver)
-	if err != nil {
-		return nil, errors.Wrapf(err, "for address is not a proper bech32")
-	}
-
-	// [TBD]: do I need to return duration?
 	duration, gbs, err := validateStorageBuy(msg.Duration, msg.Bytes, "uatl")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate buy request")
@@ -79,12 +68,6 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 	}
 
 	// === create & commit storage subscription (with expiry record) =====
-	// create recipient account if it doesn't exist
-	if !k.authKeeper.HasAccount(ctx, recipient) {
-		defer telemetry.IncrCounter(1, "new", "account") // [TBD]: do I want/need this?
-		k.authKeeper.SetAccount(ctx, k.authKeeper.NewAccountWithAddress(ctx, recipient))
-	}
-
 	subscription := types.StorageSubscription{
 		Start:            ctx.BlockTime().Truncate(time.Second),
 		End:              ctx.BlockTime().Truncate(time.Second).Add(duration),
@@ -94,13 +77,13 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		Credits:          credits,
 	}
 
-	subscriptionId, err := k.SetNewStorageSubscription(ctx, msg.Receiver, subscription)
+	subscriptionId, err := k.SetNewStorageSubscription(ctx, msg.Creator, subscription)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to commit new storage subscription")
 	}
 
 	if msg.IsDefault {
-		k.SetDefaultStorageSubscriptionId(ctx, msg.Receiver, subscriptionId)
+		k.SetDefaultStorageSubscriptionId(ctx, msg.Creator, subscriptionId)
 	}
 
 	// === Emit events =====
@@ -115,7 +98,6 @@ func (k msgServer) BuyStorage(goCtx context.Context, msg *types.MsgBuyStorage) (
 		sdk.NewEvent(
 			types.EventTypeBuyStorage,
 			sdk.NewAttribute(types.AttributeKeyBuyer, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyReceiver, msg.Receiver),
 			sdk.NewAttribute(types.AttributeKeyBytesBought, fmt.Sprintf("%d", msg.Bytes)),
 			sdk.NewAttribute(types.AttributeKeyTimeBought, fmt.Sprintf("%d", msg.Duration)),
 		),

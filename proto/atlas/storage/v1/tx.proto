@@ -88,10 +88,9 @@ message MsgPostFileResponse {
 message MsgBuyStorage {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string receiver = 2;
-  int64 duration = 3;
-  int64 bytes = 4;
-  bool is_default = 5;
+  int64 duration = 2;
+  int64 bytes = 3;
+  bool is_default = 4;
 }
 
 // MsgBuyStorageResponse defines the MsgBuyStorageResponse message.
