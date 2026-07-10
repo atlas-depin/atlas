@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"cosmossdk.io/collections"
+
 	"atlas/x/storage/types"
 
 	errorsmod "cosmossdk.io/errors"
@@ -45,6 +47,18 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 		err = k.DecrementProviderSpaceUsed(ctx, address, file.FileSize, rewardsTimeDelta)
 		if err != nil && err != types.ErrProviderNotFound {
 			return nil, err
+		}
+
+		// Remove this provider's bytes from the per-subscription tracker.
+		subProvKey := collections.Join(file.Subscription, address)
+		currentBytes, getErr := k.SubscriptionProviderBytes.Get(ctx, subProvKey)
+		if getErr == nil {
+			newBytes := currentBytes - file.FileSize
+			if newBytes <= 0 {
+				_ = k.SubscriptionProviderBytes.Remove(ctx, subProvKey)
+			} else {
+				_ = k.SubscriptionProviderBytes.Set(ctx, subProvKey, newBytes)
+			}
 		}
 	}
 

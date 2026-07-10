@@ -278,6 +278,19 @@ func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageCh
 		if v == challenge.Provider {
 			if slices.Contains(file.UnstableProviders, challenge.Provider) {
 				file.Providers = append(file.Providers[:i], file.Providers[i+1:]...)
+
+				// Remove this provider's bytes from the per-subscription tracker.
+				subProvKey := collections.Join(file.Subscription, challenge.Provider)
+				currentBytes, getErr := k.SubscriptionProviderBytes.Get(ctx, subProvKey)
+				if getErr == nil {
+					newBytes := currentBytes - file.FileSize
+					if newBytes <= 0 {
+						_ = k.SubscriptionProviderBytes.Remove(ctx, subProvKey)
+					} else {
+						_ = k.SubscriptionProviderBytes.Set(ctx, subProvKey, newBytes)
+					}
+				}
+
 				if len(file.Providers) == 0 {
 					file.Status = "DEAD"
 					k.DecrementFileCount(ctx)
