@@ -48,7 +48,9 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 	}
 
 	/// --- Commit provider
-	k.SetNewProvider(ctx, provider)
+	if err := k.SetNewProvider(ctx, provider); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to register provider")
+	}
 
 	/// --- Emit events
 	ctx.EventManager().EmitEvent(
