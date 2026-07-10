@@ -117,6 +117,9 @@ func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int6
 	err := suite.keeper.SetNewFile(suite.ctx, file)
 	suite.Require().NoError(err)
 
+	err = suite.keeper.IncrementFileCount(suite.ctx)
+	suite.Require().NoError(err)
+
 	return file
 }
 

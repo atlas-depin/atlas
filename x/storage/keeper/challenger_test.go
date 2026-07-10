@@ -39,6 +39,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_Ascending_FirstRound() {
 		fileId := fmt.Sprintf("file-%03d", i)
 		suite.createTestFile(fileId, owner, 1024*1024, 3, []string{suite.CreateTestAddress(1)})
 	}
+	suite.keeper.StartChallengeWindow(suite.ctx)
 
 	// Run round 1 (should challenge first few)
 	suite.keeper.StartChallengeRound(suite.ctx, 0)
@@ -63,9 +64,10 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_Descending_FirstRound_Sent
 
 	// Create files with varying K3
 	owner := suite.CreateTestAddress(0)
-	suite.createTestFile("file-low-a", owner, 1024*1024, 3, []string{suite.CreateTestAddress(1)})
-	suite.createTestFile("file-mid-m", owner, 1024*1024, 3, []string{suite.CreateTestAddress(1)})
-	suite.createTestFile("file-high-z", owner, 1024*1024, 3, []string{suite.CreateTestAddress(1)})
+	for _, id := range []string{"file-low-a", "file-mid-m", "file-high-z"} {
+		suite.createTestFile(id, owner, 1024*1024, 3, []string{suite.CreateTestAddress(1)})
+	}
+	suite.keeper.StartChallengeWindow(suite.ctx)
 
 	// Run round
 	suite.keeper.StartChallengeRound(suite.ctx, 0)
@@ -87,7 +89,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_CursorResume_SameWindow() 
 
 	suite.ctx = suite.ctx.WithBlockHeight(150) // ascending
 
-	// Create 10 ordered files
+	// Create 100 ordered files
 	owner := suite.CreateTestAddress(0)
 	for i := 1; i <= 100; i++ {
 		fileID := fmt.Sprintf("file-%03d", i)
@@ -214,7 +216,9 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkewedFileCount_NoFilesLef
 	suite.keeper.StartChallengeRound(suite.ctx, 2)
 	cursorBz, err = suite.keeper.ChallengeFilesCursor.Get(suite.ctx)
 	suite.Require().NoError(err)
-	suite.Empty(cursorBz, "cursor should be empty")
+	// All files exhausted — cursor should not have advanced past the last file.
+	_, tripleLast, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz)
+	suite.Equal("file-008", tripleLast.K3(), "cursor should be at last file (no more to process)")
 }
 
 func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_AdvancesCursor() {
