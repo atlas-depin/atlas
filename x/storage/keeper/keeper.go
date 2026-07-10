@@ -56,8 +56,8 @@ type Keeper struct {
 	SubscriptionProviderBytes collections.Map[collections.Pair[string, string], int64] // subId|provider -> bytes
 
 	// Indicies
-	FilesByProvider   collections.KeySet[string] // provider_address|file_id -> {}
-	SubscriptionExpiryIndex    collections.KeySet[collections.Triple[int64, string, string]] // EndUnix|subId|owner -> {}
+	FilesByProvider         collections.KeySet[string]                                    // provider_address|file_id -> {}
+	SubscriptionExpiryIndex collections.KeySet[collections.Triple[int64, string, string]] // EndUnix|subId|owner -> {}
 
 	bankKeeper types.BankKeeper
 	authKeeper types.AuthKeeper

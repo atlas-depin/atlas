@@ -135,6 +135,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgUpdateProvider,
 		storagesimulation.SimulateMsgUpdateProvider(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
+	const (
+		opWeightMsgDeleteProvider          = "op_weight_msg_storage"
+		defaultWeightMsgDeleteProvider int = 100
+	)
+
+	var weightMsgDeleteProvider int
+	simState.AppParams.GetOrGenerate(opWeightMsgDeleteProvider, &weightMsgDeleteProvider, nil,
+		func(_ *rand.Rand) {
+			weightMsgDeleteProvider = defaultWeightMsgDeleteProvider
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgDeleteProvider,
+		storagesimulation.SimulateMsgDeleteProvider(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
 
 	return operations
 }

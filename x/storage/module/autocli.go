@@ -142,6 +142,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "hostname"}, {ProtoField: "capacity"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
+				{
+					RpcMethod:      "DeleteProvider",
+					Use:            "delete-provider ",
+					Short:          "Send a delete-provider tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
 			},
 		},
 	}

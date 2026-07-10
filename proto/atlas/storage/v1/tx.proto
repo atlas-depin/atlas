@@ -34,6 +34,9 @@ service Msg {
 
   // UpdateProvider defines the UpdateProvider RPC.
   rpc UpdateProvider(MsgUpdateProvider) returns (MsgUpdateProviderResponse);
+
+  // DeleteProvider defines the DeleteProvider RPC.
+  rpc DeleteProvider(MsgDeleteProvider) returns (MsgDeleteProviderResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -149,3 +152,12 @@ message MsgUpdateProvider {
 
 // MsgUpdateProviderResponse defines the MsgUpdateProviderResponse message.
 message MsgUpdateProviderResponse {}
+
+// MsgDeleteProvider defines the MsgDeleteProvider message.
+message MsgDeleteProvider {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgDeleteProviderResponse defines the MsgDeleteProviderResponse message.
+message MsgDeleteProviderResponse {}

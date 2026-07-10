@@ -6,6 +6,7 @@ ignite scaffold message expand-storage receiver:string duration:int64 bytes:int6
 ignite scaffold message prove-file challengeId:string fileId:string data:bytes hashes:array.bytes chunk:uint64 --module storage
 ignite scaffold message delete-file fileId:string --module storage
 ignite scaffold message update-provider hostname:string capacity:int64 --module storage
+ignite scaffold message delete-provider --module storage
 
 ignite scaffold query get-subscription-info subscriberAddress:string subscriptionId:string --module storage
 ignite scaffold query provider address:string --response provider:string --module storage
