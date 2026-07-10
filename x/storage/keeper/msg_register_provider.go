@@ -80,7 +80,7 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 
 // 	collateral, found := k.GetCollateral(ctx, msg.Creator)
 // 	if found {
-// 		coin := sdk.NewInt64Coin("ujkl", collateral.Amount)
+// 		coin := sdk.NewInt64Coin("uatl", collateral.Amount)
 // 		coins := sdk.NewCoins(coin)
 
 // 		account, err := sdk.AccAddressFromBech32(msg.Creator)

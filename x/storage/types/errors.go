@@ -30,4 +30,9 @@ var (
 	ErrProofFileBadProvider = errors.Register(ModuleName, 2402, "proof rejected because this file does not belong to you")
 
 	ErrRewardPoolEmpty = errors.Register(ModuleName, 2501, "storage credit reward pool is empty (this should not happen)")
+
+	ErrProofRoundBlocksZero  = errors.Register(ModuleName, 2601, "proof_round_blocks must be > 0")
+	ErrProofWindowBlocksZero = errors.Register(ModuleName, 2602, "proof_window_blocks must be > 0")
+	ErrProofRoundExceedsWindow = errors.Register(ModuleName, 2603, "proof_round_blocks must be <= proof_window_blocks")
+	ErrProofWindowUnaligned    = errors.Register(ModuleName, 2604, "proof_window_blocks must be divisible by proof_round_blocks")
 )

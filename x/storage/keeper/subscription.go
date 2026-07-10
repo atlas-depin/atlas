@@ -52,7 +52,7 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 		if err != nil {
 			ranger := collections.NewPrefixedPairRange[string, string](address)
 			err = k.IterateStorageSubscriptions(ctx, ranger, func(key collections.Pair[string, string], value types.StorageSubscription) bool {
-				if time.Now().Before(value.End) {
+				if sdk.UnwrapSDKContext(ctx).BlockTime().Before(value.End) {
 					subscription = value
 					return true
 				} else {

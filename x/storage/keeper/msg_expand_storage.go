@@ -16,7 +16,7 @@ import (
 
 func validateStorageExpand(days int64, bytes int64, denom string) (duration time.Duration, gb int64, err error) {
 	if denom != "uatl" {
-		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than ujkl")
+		err = errors.Wrapf(sdkerrors.ErrInvalidCoins, "cannot pay with anything other than uatl")
 		return
 	}
 	if days < 0 || bytes < 0 {
@@ -63,6 +63,16 @@ func (k msgServer) ExpandStorage(goCtx context.Context, msg *types.MsgExpandStor
 	duration, gbs, err := validateStorageExpand(msg.Duration, msg.Bytes, "uatl")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate expansion request")
+	}
+
+	if msg.Bytes > 0 {
+		valid, err := k.validateSufficientStorage(ctx, msg.Bytes)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to validate expansion request")
+		}
+		if !valid {
+			return nil, types.ErrInsufficientStorage
+		}
 	}
 
 	// Calculate cost for the additional resources

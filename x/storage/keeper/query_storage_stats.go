@@ -2,16 +2,17 @@ package keeper
 
 import (
 	"context"
-	"time"
 
 	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageStatsRequest) (*types.QueryStorageStatsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -24,7 +25,7 @@ func (q queryServer) StorageStats(ctx context.Context, req *types.QueryStorageSt
 	var spaceAvailable int64 = 0
 
 	if err := q.k.IterateAllStorageSubscriptions(ctx, func(_ collections.Pair[string, string], subscription types.StorageSubscription) bool {
-		if time.Now().Before(subscription.End) {
+		if sdkCtx.BlockTime().Before(subscription.End) {
 			active++
 			spacePurchased += subscription.SpaceAvailable
 			spaceReplicas += subscription.ReplicaSpaceUsed
