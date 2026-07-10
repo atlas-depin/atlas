@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"math/big"
 	"time"
 
 	"cosmossdk.io/math"
@@ -71,7 +72,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	suite.createTestProvider(creator, 10_000_000_000_000_000) // 10× more than the max purchase
+	suite.createTestProvider(creator, 10_000_000_000_000_000)   // 10× more than the max purchase
 	cost := suite.keeper.GetStorageCost(suite.ctx, 100000, 730) // 100TB for 2 years
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
@@ -86,6 +87,22 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 	suite.Require().NotNil(response)
 
 	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
+}
+
+func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientStorage() {
+	msgServer, ctx := suite.setupMsgServer()
+
+	// No provider created — pool capacity is 0
+	creator := suite.CreateTestAddress(0)
+
+	msg := &types.MsgBuyStorage{
+		Creator:  creator,
+		Duration: 30,
+		Bytes:    1_000_000_000_000,
+	}
+
+	_, err := msgServer.BuyStorage(ctx, msg)
+	suite.Require().ErrorIs(err, types.ErrInsufficientStorage)
 }
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
@@ -185,7 +202,7 @@ func (suite *KeeperTestSuite) createTestSubscription(address string, subscriptio
 		SpaceAvailable:   spaceAvailable,
 		SpaceUsed:        spaceUsed,
 		ReplicaSpaceUsed: 0,
-		Credits:          math.NewInt(100_000_000_000), // Large initial credits
+		Credits:          math.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(24), nil)), // 1e24 — enough for any test
 	}
 
 	// Store the subscription
@@ -194,6 +211,3 @@ func (suite *KeeperTestSuite) createTestSubscription(address string, subscriptio
 
 	return subscription
 }
-
-
-//////////////////////

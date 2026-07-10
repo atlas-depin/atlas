@@ -4,9 +4,6 @@ import (
 	"atlas/x/storage/types"
 	"encoding/hex"
 	"strconv"
-	"time"
-
-	"cosmossdk.io/math"
 )
 
 func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
@@ -20,7 +17,7 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 
 	// Create a valid subscription
 	endTime := suite.ctx.BlockTime().AddDate(0, 1, 0) // 1 year from now
-	suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime)
+	initialCredits := suite.createTestSubscription(creator, subscriptionId, 10_000_000_000, 0, endTime).Credits
 
 	fid := hex.EncodeToString(merkleHash) + creator + strconv.FormatInt(int64(nonce), 10)
 
@@ -43,10 +40,10 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	suite.Require().NoError(err)
 	suite.Require().Equal(creator, storedFile.Creator)
 	suite.Require().Equal(fileSize, storedFile.FileSize)
-	suite.Require().Equal(int64(3), storedFile.Replicas)
-	suite.Require().Equal([]string{}, storedFile.Providers)
+	suite.Require().Equal(int32(3), storedFile.Replicas)
+	suite.Require().Nil(storedFile.Providers, "STAGED files have no providers assigned")
 	suite.Require().Equal(subscriptionId, storedFile.Subscription)
-	suite.Require().Equal(ctx.BlockHeight(), storedFile.Start)
+	suite.Require().Equal(ctx.BlockTime().Unix(), storedFile.Start)
 
 	// Verify subscription was updated
 	updatedSub, err := suite.keeper.GetStorageSubscription(ctx, creator, subscriptionId)
@@ -54,12 +51,8 @@ func (suite *KeeperTestSuite) TestPostFile_Success_DefaultReplicas() {
 	suite.Require().Equal(fileSize*3, updatedSub.SpaceUsed)        // 1GB * 3 replicas
 	suite.Require().Equal(fileSize*2, updatedSub.ReplicaSpaceUsed) // 1GB * (3-1) replicas
 
-	// Verify credits were transferred to pool
-	poolBalance, err := suite.keeper.StorageCreditPool.Get(ctx)
-	expectedSpentCredits := math.NewInt(fileSize * 3).Mul(math.NewInt(int64(updatedSub.End.Sub(ctx.BlockTime()) / time.Second)))
-	suite.Require().NoError(err)
-	suite.Require().True(poolBalance.GT(math.NewInt(0)), "credits should be added to pool")
-	suite.Require().Equal(poolBalance, expectedSpentCredits)
+	// Verify subscription credits were deducted
+	suite.Require().True(updatedSub.Credits.LT(initialCredits), "credits should be deducted from subscription")
 }
 
 func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
@@ -91,10 +84,11 @@ func (suite *KeeperTestSuite) TestPostFile_Success_CustomReplicas() {
 	suite.Require().NoError(err)
 	suite.Require().NotNil(response)
 
-	// Verify file
-	storedFile, err := suite.keeper.GetFile(ctx, hex.EncodeToString(merkleHash))
+	// Verify file — lookup by the exact FID used in the message
+	storedFile, err := suite.keeper.GetFile(ctx, fid)
 	suite.Require().NoError(err)
 	suite.Require().Equal(replicas, storedFile.Replicas)
+	suite.Require().NotContains(storedFile.Providers, creator, "provider should not be assigned yet")
 
 	// Verify subscription update
 	updatedSub, err := suite.keeper.GetStorageSubscription(ctx, creator, subscriptionId)

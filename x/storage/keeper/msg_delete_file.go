@@ -10,6 +10,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 /*
@@ -27,6 +28,11 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 	file, err := k.GetFile(ctx, msg.FileId)
 	if err != nil {
 		return nil, err
+	}
+
+	/// --- Verify caller owns the file
+	if msg.Creator != file.Creator {
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "only the file creator can delete the file")
 	}
 
 	/// --- Update subscription & provider storage used

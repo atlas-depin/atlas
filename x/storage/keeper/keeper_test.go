@@ -123,6 +123,27 @@ func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int6
 	return file
 }
 
+func (suite *KeeperTestSuite) createTestFileWithSub(fileId, owner, subId string, fileSize int64, replicas int32, providers []string) types.File {
+	file := types.File{
+		Fid:          fileId,
+		Merkle:       hex.EncodeToString([]byte("merkle-root-" + fileId)),
+		Creator:      owner,
+		Subscription: subId,
+		Start:        suite.ctx.BlockHeight(),
+		Status:       "ACTIVE",
+		FileSize:     fileSize,
+		Providers:    providers,
+		Replicas:     replicas,
+	}
+
+	err := suite.keeper.SetNewFile(suite.ctx, file)
+	suite.Require().NoError(err)
+	err = suite.keeper.IncrementFileCount(suite.ctx)
+	suite.Require().NoError(err)
+
+	return file
+}
+
 func (suite *KeeperTestSuite) createTestProvider(address string, spaceAvailable int64) {
 	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
 		Address:        address,
