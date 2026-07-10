@@ -24,7 +24,7 @@ func (suite *KeeperTestSuite) TestEndBlocker_WindowStart_ResetsCursor() {
 	suite.Equal([]byte{}, cursor, "cursor should be reset on new proof window")
 }
 
-func (suite *KeeperTestSuite) TestStartChallengeRound_Ascending_FirstRound() {
+func (suite *KeeperTestSuite) TestStartChallengeRound_FirstRound_Ascending() {
 	params := types.DefaultParams()
 	params.ProofWindowBlocks = 1200
 	params.ProofRoundBlocks = 300
@@ -54,7 +54,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_Ascending_FirstRound() {
 	suite.Contains(triple.K3(), "file-00", "cursor should be past early files")
 }
 
-func (suite *KeeperTestSuite) TestStartChallengeRound_Descending_FirstRound_Sentinel() {
+func (suite *KeeperTestSuite) TestStartChallengeRound_FirstRound_Descending() {
 	params := types.DefaultParams()
 	params.ProofWindowBlocks = 1200
 	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
@@ -109,24 +109,6 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_CursorResume_SameWindow() 
 	cursorAfterSecond, _ := suite.keeper.ChallengeFilesCursor.Get(suite.ctx)
 	suite.NotEqual(cursorAfterFirst, cursorAfterSecond, "cursor must advance")
 }
-
-// func (suite *KeeperTestSuite) TestDirectionToggle_EvenOddWindows() {
-// 	params := types.DefaultParams()
-// 	params.ProofWindowBlocks = 1200
-// 	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
-
-// 	// Window 0 (even) → ascending
-// 	suite.ctx = suite.ctx.WithBlockHeight(500)
-// 	suite.keeper.StartChallengeRound(suite.ctx, 0)
-// 	// In test, you'd need to spy on ranger.Order or log to verify ascending
-
-// 	// Window 1 (odd) → descending
-// 	suite.ctx = suite.ctx.WithBlockHeight(1500)
-// 	suite.keeper.StartChallengeRound(suite.ctx, 0)
-// 	// Verify descending (e.g., sentinel used if no cursor)
-// 	cursor, _ := suite.keeper.ChallengeFilesCursor.Get(suite.ctx)
-// 	suite.NotEmpty(cursor) // sentinel should have been used
-// }
 
 func (suite *KeeperTestSuite) TestStartChallengeRound_SkipsDeletedFiles_CursorAdvances() {
 	params := types.DefaultParams()
@@ -219,6 +201,61 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkewedFileCount_NoFilesLef
 	// All files exhausted — cursor should not have advanced past the last file.
 	_, tripleLast, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz)
 	suite.Equal("file-008", tripleLast.K3(), "cursor should be at last file (no more to process)")
+}
+
+func (suite *KeeperTestSuite) TestStartChallengeRound_SkipsStagedAndDeadFiles() {
+	params := types.DefaultParams()
+	params.ProofWindowBlocks = 1200
+	params.ProofRoundBlocks = 300
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
+
+	suite.ctx = suite.ctx.WithBlockHeight(150) // ascending
+
+	owner := suite.CreateTestAddress(0)
+	provider := suite.CreateTestAddress(1)
+
+	// Create file-001 → ACTIVE (normal)
+	suite.createTestFile("file-001", owner, 1024*1024, 3, []string{provider})
+	// Create file-002 → STAGED
+	suite.createTestFile("file-002", owner, 1024*1024, 3, nil)
+	file2, _ := suite.keeper.GetFile(suite.ctx, "file-002")
+	file2.Status = "STAGED"
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file2))
+	// Create file-003 → DEAD
+	suite.createTestFile("file-003", owner, 1024*1024, 3, []string{provider})
+	file3, _ := suite.keeper.GetFile(suite.ctx, "file-003")
+	file3.Status = "DEAD"
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file3))
+	// Create file-004 → ACTIVE (normal)
+	suite.createTestFile("file-004", owner, 1024*1024, 3, []string{provider})
+	// Create file-005 → STAGED
+	suite.createTestFile("file-005", owner, 1024*1024, 3, nil)
+	file5, _ := suite.keeper.GetFile(suite.ctx, "file-005")
+	file5.Status = "STAGED"
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file5))
+	// Create file-006 → ACTIVE (normal)
+	suite.createTestFile("file-006", owner, 1024*1024, 3, []string{provider})
+	// Create file-007 → DEAD
+	suite.createTestFile("file-007", owner, 1024*1024, 3, []string{provider})
+	file7, _ := suite.keeper.GetFile(suite.ctx, "file-007")
+	file7.Status = "DEAD"
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file7))
+	// Create file-008 → ACTIVE (normal)
+	suite.createTestFile("file-008", owner, 1024*1024, 3, []string{provider})
+
+	suite.keeper.StartChallengeWindow(suite.ctx)
+	// Count snapshotted at 8. With R=300, W=1200, round 0: (8*300+899)/1200 = 2 files
+
+	suite.keeper.StartChallengeRound(suite.ctx, 0)
+	
+	// Should have challenged file-001 and file-004 (the only ACTIVE files in the first batch)
+	// file-002 (STAGED) and file-003 (DEAD) must be skipped.
+	// file-004 is challenged, cursor should be past it.
+	cursorBz, err := suite.keeper.ChallengeFilesCursor.Get(suite.ctx)
+	suite.Require().NoError(err)
+	suite.NotEmpty(cursorBz)
+	_, triple, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz)
+	suite.True(triple.K3() >= "file-004", "cursor should be past the first two ACTIVE files")
 }
 
 func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_AdvancesCursor() {
