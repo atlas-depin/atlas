@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"atlas/x/storage/types"
-	"context"
 	"encoding/binary"
 	"fmt"
 	"slices"
@@ -47,12 +46,8 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	numThisRound := k.computeProofsThisRound(ctx, fileCount, roundIdx)
 
-	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
-	ctx.Logger().Warn("<StartChallengeRound> ---------------")
-	ctx.Logger().Warn(fmt.Sprintf("<StartChallengeRound> challenge cursor: %x", cursorBz))
-	ctx.Logger().Warn(fmt.Sprintf("<StartChallengeRound> files this round: %d", numThisRound))
-
 	// compute iteration cursor
+	cursorBz, _ := k.ChallengeFilesCursor.Get(ctx)
 	var resume bool
 	var cursor collections.Triple[string, string, string]
 	if len(cursorBz) > 0 {
@@ -61,7 +56,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			cursor = decoded
 			resume = true
 		} else {
-			ctx.Logger().Error("Null cursor decode, starting from beginning", "err", err)
+			ctx.Logger().Error("Null challenge cursor decode, starting from beginning", "err", err)
 		}
 	} else if roundIdx > 0 {
 		ctx.Logger().Warn("No more files remainin for proof round")
@@ -97,14 +92,14 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 	for iter.Valid() && counter < numThisRound {
 		triple, keyErr := iter.Key()
 		if keyErr != nil {
-			ctx.Logger().Error("Failed to decode key", "err", keyErr)
+			ctx.Logger().Error("Challenge file key decode fail", "err", keyErr)
 			iter.Next()
 			continue
 		}
 
 		file, valErr := iter.Value()
 		if valErr != nil {
-			ctx.Logger().Error("Failed to decode value", "err", valErr)
+			ctx.Logger().Error("Challenge file value decode fail", "err", valErr)
 			iter.Next()
 			continue
 		}
@@ -114,14 +109,14 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 			continue
 		}
 
-		k.IssueChallengeForFile(ctx, file, roundIdx)
+		k.IssueChallengeForFile(ctx, file, roundIdx, params.ProofRoundBlocks)
 		counter++
 		if counter == numThisRound {
 			size := k.FileStore.KeyCodec().Size(triple)
 			keyBz := make([]byte, size)
 			written, encErr := k.FileStore.KeyCodec().Encode(keyBz, triple)
 			if encErr != nil {
-				ctx.Logger().Error("Encode failed", "err", encErr)
+				ctx.Logger().Error("Challenge cursor encode failed", "err", encErr)
 				iter.Next()
 				continue
 			}
@@ -133,16 +128,8 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 
 	// update cursor to last successfully processed key
 	if setErr := k.ChallengeFilesCursor.Set(ctx, lastKeyBz); setErr != nil {
-		ctx.Logger().Error("Failed to update challenge cursor", "err", setErr)
+		ctx.Logger().Error("Failed to set challenge cursor", "err", setErr)
 	}
-
-	ctx.Logger().Warn("Challenge round executed",
-		"round", roundIdx,
-		"window", windowIndex,
-		"direction_ascending", isAscending,
-		"challenged", counter,
-	)
-	ctx.Logger().Warn("<StartChallengeRound> ---------------")
 
 	// Emit event
 	ctx.EventManager().EmitEvent(
@@ -159,10 +146,7 @@ func (k Keeper) StartChallengeRound(ctx sdk.Context, roundIdx uint64) {
 /*
 Generate and issue proof challenges for a file.
 */
-func (k Keeper) IssueChallengeForFile(ctx context.Context, file types.File, round uint64) ([]types.StorageChallenge, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	params, _ := k.Params.Get(ctx)
-
+func (k Keeper) IssueChallengeForFile(ctx sdk.Context, file types.File, round uint64, blocks uint64) ([]types.StorageChallenge, error) {
 	// Validate file has providers
 	if len(file.Providers) == 0 {
 		return nil, fmt.Errorf("file has no providers: %s", file.Fid)
@@ -178,31 +162,20 @@ func (k Keeper) IssueChallengeForFile(ctx context.Context, file types.File, roun
 	}
 
 	// Get deterministic seed source: previous block hash
-	prevHash := sdkCtx.BlockHeader().LastBlockId.Hash
-	height := uint64(sdkCtx.BlockHeight())
+	prevHash := ctx.BlockHeader().LastBlockId.Hash
+	height := uint64(ctx.BlockHeight())
 
-	// Generate unique chunk indices for each provider
-	chunkIndices := make(map[string]uint64) // provider -> chunkIndex
-
-	// Global seed base (deterministic per file + round)
-	globalSeed := append([]byte{}, prevHash...) // copy
+	// Pre-allocate global seed base (deterministic per file + round)
+	globalSeed := make([]byte, 0, len(prevHash)+len(file.Fid)+8)
+	globalSeed = append(globalSeed, prevHash...)
 	globalSeed = append(globalSeed, []byte(file.Fid)...)
 	globalSeed = binary.BigEndian.AppendUint64(globalSeed, round)
 
 	for i, providerAddr := range file.Providers {
-		// Provider-specific seed: globalSeed + position + nonce
-		seed := append(globalSeed, byte(i)) // position as byte (assuming <256 providers)
-		// XXHash for randomness
-		hashVal := xxhash.Sum64(seed)
-		// Modulo to get chunk index
-		chunkIndices[providerAddr] = hashVal % chunkCount
-	}
+		// Provider-specific seed: globalSeed + position (assuming <256 providers)
+		seed := append(globalSeed, byte(i))
+		chunkIndex := xxhash.Sum64(seed) % chunkCount
 
-	// Now create challenges
-	for _, providerAddr := range file.Providers {
-		chunkIndex := chunkIndices[providerAddr]
-
-		// Create challenge
 		challengeID := types.GenerateChallengeID(height, file.Fid, providerAddr)
 		challenge := types.StorageChallenge{
 			ChallengeId:    challengeID,
@@ -211,11 +184,11 @@ func (k Keeper) IssueChallengeForFile(ctx context.Context, file types.File, roun
 			Provider:       providerAddr,
 			ChunkIndex:     chunkIndex,
 			CreatedHeight:  height,
-			DeadlineHeight: height + params.ProofRoundBlocks,
+			DeadlineHeight: height + blocks,
 		}
 
 		if err := k.SetChallenge(ctx, challenge); err != nil {
-			sdkCtx.Logger().Error("failed to store challenge", "err", err, "fid", file.Fid, "provider", providerAddr)
+			ctx.Logger().Error("failed to store challenge", "err", err, "fid", file.Fid, "provider", providerAddr)
 			continue
 		}
 	}
@@ -276,8 +249,8 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeMissedProofsDetected,
-				sdk.NewAttribute("missed_count", fmt.Sprintf("%d", missedCount)),
-				sdk.NewAttribute("height", fmt.Sprintf("%d", currentHeight)),
+				sdk.NewAttribute("missed_count", strconv.FormatUint(missedCount, 10)),
+				sdk.NewAttribute("height", strconv.FormatUint(currentHeight, 10)),
 			),
 		)
 	}

@@ -5,7 +5,6 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"atlas/x/storage/types"
 )
@@ -27,7 +26,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: 30,
 		Bytes:    1_000_000_000_000,
 	}
@@ -38,44 +36,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 
 	// Verify subscription
 	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
-}
-
-func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_NewAccount() {
-	msgServer, ctx := suite.setupMsgServer()
-
-	// Create test addresses
-	creator := suite.CreateTestAddress(0)
-	receiver := suite.CreateTestAddress(1)
-
-	creatorAddr, err := sdk.AccAddressFromBech32(creator)
-	suite.Require().NoError(err)
-	receiverAddr, err := sdk.AccAddressFromBech32(receiver)
-	suite.Require().NoError(err)
-
-	// Mock: Receiver doesn't exist, will be created
-	suite.helpers.Account.MockAccountDoesNotExist(suite.authKeeper, receiverAddr)
-
-	// Create a mock account object for NewAccountWithAddress
-	mockAccount := authtypes.NewBaseAccountWithAddress(receiverAddr)
-	suite.helpers.Account.MockNewAccount(suite.authKeeper, receiverAddr, mockAccount)
-
-	// Calculate and mock payment
-	cost := math.NewInt(12000000)
-	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
-
-	msg := &types.MsgBuyStorage{
-		Creator:  creator,
-		Receiver: receiver,
-		Duration: 30,
-		Bytes:    1_000_000_000_000,
-	}
-
-	response, err := msgServer.BuyStorage(ctx, msg)
-	suite.Require().NoError(err)
-	suite.Require().NotNil(response)
-
-	// Verify subscription
-	suite.assertSubscription(receiver, response.SubscriptionId, msg.Bytes, msg.Duration)
 }
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
@@ -95,7 +55,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
 
 	msg := &types.MsgBuyStorage{
 		Creator:   creator,
-		Receiver:  "",
 		Duration:  30,
 		Bytes:     1_000_000_000_000,
 		IsDefault: true,
@@ -128,7 +87,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: 730,                 // 2 years
 		Bytes:    100_000_000_000_000, // 100TB
 	}
@@ -145,7 +103,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
 
 	msg := &types.MsgBuyStorage{
 		Creator:  "invalid_bech32_address",
-		Receiver: "",
 		Duration: 30,
 		Bytes:    1_000_000_000_000,
 	}
@@ -153,23 +110,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
 	_, err := msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "cannot parse creator address")
-}
-
-func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidReceiverAddress() {
-	msgServer, ctx := suite.setupMsgServer()
-
-	creator := suite.CreateTestAddress(0)
-
-	msg := &types.MsgBuyStorage{
-		Creator:  creator,
-		Receiver: "invalid_bech32_address",
-		Duration: 30,
-		Bytes:    1_000_000_000_000,
-	}
-
-	_, err := msgServer.BuyStorage(ctx, msg)
-	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "for address is not a proper bech32")
 }
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
@@ -188,7 +128,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
 
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: 365,
 		Bytes:    10_000_000_000,
 	}
@@ -206,7 +145,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_DurationTooShor
 	// Test with invalid duration
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: 0, // Invalid: less than 1 day
 		Bytes:    1_000_000_000_000,
 	}
@@ -224,7 +162,6 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_ValidateBuyError_BytesTooSmall()
 	// Test with bytes less than 1GB
 	msg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: 30,
 		Bytes:    500_000_000, // 0.5GB
 	}

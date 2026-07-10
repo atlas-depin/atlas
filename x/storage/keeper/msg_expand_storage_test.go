@@ -28,7 +28,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Success_ExtendDurationOnly() 
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -94,7 +93,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Success_IncreaseSpaceOnly() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -157,7 +155,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Success_ExtendBothDurationAnd
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -292,7 +289,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Error_ZeroDurationBytes() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -345,7 +341,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Error_InvalidDuration() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -383,7 +378,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Error_InvalidBytes() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -421,7 +415,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Error_InsufficientFunds() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}
@@ -469,7 +462,6 @@ func (suite *KeeperTestSuite) TestMsgExpandStorage_Error_DifferentCreator() {
 
 	buyMsg := &types.MsgBuyStorage{
 		Creator:  creator,
-		Receiver: "",
 		Duration: initialDuration,
 		Bytes:    initialBytes,
 	}

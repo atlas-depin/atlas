@@ -3,14 +3,16 @@ package types
 import (
 	"crypto/sha256"
 	"encoding/binary"
-	fmt "fmt"
+	"fmt"
+	"strconv"
+
+	"github.com/cespare/xxhash"
 )
 
 func GenerateChallengeID(height uint64, fileID string, providerAddr string) string {
-	providerHash := sha256.Sum256([]byte(providerAddr))
-	providerShort := fmt.Sprintf("%x", providerHash[:4]) // First 4 bytes as hex
-
-	return fmt.Sprintf("%d-%s-%s", height, fileID, providerShort)
+	hStr := strconv.FormatUint(height, 10)
+	pStr := strconv.FormatUint(xxhash.Sum64String(providerAddr), 16)
+	return hStr + "-" + fileID + "-" + pStr
 }
 
 func ComputeChunkCount(fileSize int64) uint64 {
