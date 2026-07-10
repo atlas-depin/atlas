@@ -3,6 +3,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"slices"
 
 	"atlas/x/storage/types"
@@ -48,7 +49,7 @@ func (k Keeper) GetFile(ctx context.Context, fileId string) (file types.File, er
 	}
 
 	file, err = k.FileStore.Get(ctx, key)
-	if err == collections.ErrNotFound {
+	if errors.Is(err, collections.ErrNotFound) {
 		err = types.ErrFileNotFound
 	}
 	return

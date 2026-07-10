@@ -36,9 +36,9 @@ func (k Keeper) RemoveChallenge(ctx context.Context, provider string, challengeI
 
 /*
 Iterate over all challenges and run the provided function argument for each value record.
-The provided function must have a `types.File` argument.
+The provided function must have a `types.StorageChallenge` argument.
 */
-func (k Keeper) IterateChallenges(ctx context.Context, fn func(file types.StorageChallenge) (stop bool)) error {
+func (k Keeper) IterateChallenges(ctx context.Context, fn func(challenge types.StorageChallenge) (stop bool)) error {
 	iter, err := k.ChallengeStore.Iterate(ctx, nil)
 	if err != nil {
 		return err

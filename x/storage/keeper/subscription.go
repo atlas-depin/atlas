@@ -3,6 +3,7 @@ package keeper
 import (
 	"atlas/x/storage/types"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -69,7 +70,7 @@ func (k Keeper) GetStorageSubscription(ctx context.Context, address string, subs
 
 	key := collections.Join(address, subscriptionId)
 	subscription, err = k.SubscriptionStore.Get(ctx, key)
-	if err == collections.ErrNotFound {
+	if errors.Is(err, collections.ErrNotFound) {
 		err = types.ErrSubscriptionNotFound
 	}
 	return
