@@ -12,16 +12,14 @@ import (
 func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 	msgServer, ctx := suite.setupMsgServer()
 
-	// Create test address using helper
 	creator := suite.CreateTestAddress(0)
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	// Mock account exists using helper
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
+	// Add a provider with enough capacity
+	suite.createTestProvider(creator, 10_000_000_000_000_000) // 10× more than the max purchase
 
-	// Calculate cost and mock payment using helper
-	cost := math.NewInt(12000000)
+	cost := suite.keeper.GetStorageCost(suite.ctx, 1_000, 30) // 1TB / 1GB = 1000 GB
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
@@ -34,23 +32,18 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
 	suite.Require().NoError(err)
 	suite.Require().NotNil(response)
 
-	// Verify subscription
 	suite.assertSubscription(creator, response.SubscriptionId, msg.Bytes, msg.Duration)
 }
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_MakeDefault() {
 	msgServer, ctx := suite.setupMsgServer()
 
-	// Create test address using helper
 	creator := suite.CreateTestAddress(0)
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	// Mock account exists using helper
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
-
-	// Calculate cost and mock payment using helper
-	cost := math.NewInt(12000000)
+	suite.createTestProvider(creator, 10_000_000_000_000_000) // 10× more than the max purchase
+	cost := suite.keeper.GetStorageCost(suite.ctx, 1_000, 30)
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
 	msg := &types.MsgBuyStorage{
@@ -78,10 +71,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_LargeValues() {
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	// Mock account exists
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
-
-	// Calculate and mock payment for large storage
+	suite.createTestProvider(creator, 10_000_000_000_000_000) // 10× more than the max purchase
 	cost := suite.keeper.GetStorageCost(suite.ctx, 100000, 730) // 100TB for 2 years
 	suite.helpers.Bank.MockSuccessfulPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName)
 
@@ -109,7 +99,7 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InvalidCreatorAddress() {
 
 	_, err := msgServer.BuyStorage(ctx, msg)
 	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "cannot parse creator address")
+	suite.Require().Contains(err.Error(), "invalid authority address")
 }
 
 func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
@@ -119,10 +109,8 @@ func (suite *KeeperTestSuite) TestMsgBuyStorage_InsufficientFunds() {
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	suite.Require().NoError(err)
 
-	// Mock account exists
-	suite.helpers.Account.MockAccountExists(suite.authKeeper, creatorAddr)
-
-	// Mock failed payment
+	// Provider must exist so validation passes before payment
+	suite.createTestProvider(creator, 10_000_000_000_000_000) // 10× more than the max purchase
 	cost := suite.keeper.GetStorageCost(suite.ctx, 10, 365)
 	suite.helpers.Bank.MockFailedPayment(suite.bankKeeper, creatorAddr, "uatl", cost, types.ModuleName, "insufficient funds")
 
@@ -206,5 +194,6 @@ func (suite *KeeperTestSuite) createTestSubscription(address string, subscriptio
 
 	return subscription
 }
+
 
 //////////////////////

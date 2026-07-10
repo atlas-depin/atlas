@@ -123,6 +123,16 @@ func (suite *KeeperTestSuite) createTestFile(fileId, owner string, fileSize int6
 	return file
 }
 
+func (suite *KeeperTestSuite) createTestProvider(address string, spaceAvailable int64) {
+	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
+		Address:        address,
+		Hostname:       "test-provider",
+		SpaceAvailable: spaceAvailable,
+		SpaceUsed:      0,
+		CreatedAt:      suite.ctx.BlockTime().Unix(),
+	}))
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
