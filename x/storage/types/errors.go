@@ -14,6 +14,7 @@ var (
 	ErrProviderDepositInsufficient = errors.Register(ModuleName, 2102, "insufficient provider deposit")
 	ErrProviderNotFound            = errors.Register(ModuleName, 2104, "provider not found")
 	ErrProviderFull                = errors.Register(ModuleName, 2105, "insufficient provider storage. cannot exceed space available.")
+	ErrProviderCapacityTooLow      = errors.Register(ModuleName, 2106, "new capacity cannot be less than current space used")
 
 	ErrFileAlreadyExists = errors.Register(ModuleName, 2201, "file already exists")
 	ErrFileNotFound      = errors.Register(ModuleName, 2204, "file not found")

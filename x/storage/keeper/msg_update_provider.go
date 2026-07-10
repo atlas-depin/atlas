@@ -30,7 +30,7 @@ func (k msgServer) UpdateProvider(goCtx context.Context, msg *types.MsgUpdatePro
 	}
 	if msg.Capacity > 0 {
 		if msg.Capacity < provider.SpaceUsed {
-			return nil, types.ErrProviderFull
+			return nil, types.ErrProviderCapacityTooLow
 		}
 		provider.SpaceAvailable = msg.Capacity
 	}
