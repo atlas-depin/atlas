@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/collections"
+
 	"atlas/x/storage/types"
 )
 
@@ -247,7 +249,7 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkipsStagedAndDeadFiles() 
 	// Count snapshotted at 8. With R=300, W=1200, round 0: (8*300+899)/1200 = 2 files
 
 	suite.keeper.StartChallengeRound(suite.ctx, 0)
-	
+
 	// Should have challenged file-001 and file-004 (the only ACTIVE files in the first batch)
 	// file-002 (STAGED) and file-003 (DEAD) must be skipped.
 	// file-004 is challenged, cursor should be past it.
@@ -256,6 +258,319 @@ func (suite *KeeperTestSuite) TestStartChallengeRound_SkipsStagedAndDeadFiles() 
 	suite.NotEmpty(cursorBz)
 	_, triple, _ := suite.keeper.FileStore.KeyCodec().Decode(cursorBz)
 	suite.True(triple.K3() >= "file-004", "cursor should be past the first two ACTIVE files")
+}
+
+func (suite *KeeperTestSuite) TestIssueChallengeForFile_Pass() {
+	suite.ctx = suite.ctx.WithBlockHeight(1000)
+	params := types.DefaultParams()
+
+	owner := suite.CreateTestAddress(0)
+	provider1 := suite.CreateTestAddress(1)
+	provider2 := suite.CreateTestAddress(2)
+
+	file := types.File{
+		Fid:       "test-file-1",
+		Merkle:    "abcd1234",
+		Creator:   owner,
+		Status:    "ACTIVE",
+		FileSize:  5 * 1024 * 1024, // 5 MB → 5120 chunks
+		Providers: []string{provider1, provider2},
+		Replicas:  3,
+	}
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file))
+
+	challenges, err := suite.keeper.IssueChallengeForFile(suite.ctx, file, 0, params.ProofRoundBlocks)
+	suite.Require().NoError(err)
+	// Currently returns nil — read via store iteration
+	_ = challenges
+
+	// Verify 2 challenges created in store
+	count := 0
+	chunkIndices := map[string]uint64{}
+	suite.keeper.ChallengeStore.Walk(suite.ctx, nil, func(key collections.Pair[string, string], value types.StorageChallenge) (bool, error) {
+		count++
+		suite.Equal(file.Fid, value.FileId)
+		suite.Equal(file.Merkle, value.FileMerkle)
+		suite.Equal(uint64(1000), value.CreatedHeight)
+		suite.Equal(uint64(1000)+params.ProofRoundBlocks, value.DeadlineHeight)
+		suite.True(value.ChunkIndex < 5120, "chunk index within range")
+		chunkIndices[value.Provider] = value.ChunkIndex
+		return false, nil
+	})
+	suite.Equal(2, count, "one challenge per provider")
+	suite.NotEqual(chunkIndices[provider1], chunkIndices[provider2], "different providers get different chunks")
+}
+
+func (suite *KeeperTestSuite) TestIssueChallengeForFile_NoProviders() {
+	file := types.File{
+		Fid:      "no-providers",
+		FileSize: 1024 * 1024,
+	}
+	_, err := suite.keeper.IssueChallengeForFile(suite.ctx, file, 0, 10)
+	suite.Require().Error(err)
+	suite.Contains(err.Error(), "file has no providers")
+}
+
+func (suite *KeeperTestSuite) TestIssueChallengeForFile_ZeroSize() {
+	owner := suite.CreateTestAddress(0)
+	file := types.File{
+		Fid:       "zero-size",
+		Creator:   owner,
+		FileSize:  0,
+		Providers: []string{suite.CreateTestAddress(1)},
+	}
+	_, err := suite.keeper.IssueChallengeForFile(suite.ctx, file, 0, 10)
+	suite.Require().Error(err)
+	suite.Contains(err.Error(), "zero size")
+}
+
+func (suite *KeeperTestSuite) TestIssueChallengeForFile_Deterministic() {
+	suite.ctx = suite.ctx.WithBlockHeight(500)
+	owner := suite.CreateTestAddress(0)
+	providers := []string{suite.CreateTestAddress(1), suite.CreateTestAddress(2)}
+
+	file := types.File{
+		Fid:       "det-file",
+		Merkle:    "deadbeef",
+		Creator:   owner,
+		Status:    "ACTIVE",
+		FileSize:  1024 * 1024,
+		Providers: providers,
+		Replicas:  3,
+	}
+	suite.Require().NoError(suite.keeper.SetFile(suite.ctx, file))
+
+	// Clear any existing challenges from the basic test
+	suite.keeper.ChallengeStore.Walk(suite.ctx, nil, func(key collections.Pair[string, string], value types.StorageChallenge) (bool, error) {
+		_ = suite.keeper.RemoveChallenge(suite.ctx, value.Provider, value.ChallengeId)
+		return false, nil
+	})
+
+	// First invocation
+	_, err := suite.keeper.IssueChallengeForFile(suite.ctx, file, 1, 50)
+	suite.Require().NoError(err)
+
+	type challengeSnapshot struct {
+		ChallengeID string
+		ChunkIndex  uint64
+		Deadline    uint64
+	}
+	first := map[string]challengeSnapshot{}
+	suite.keeper.ChallengeStore.Walk(suite.ctx, nil, func(key collections.Pair[string, string], value types.StorageChallenge) (bool, error) {
+		first[value.Provider] = challengeSnapshot{
+			ChallengeID: value.ChallengeId,
+			ChunkIndex:  value.ChunkIndex,
+			Deadline:    value.DeadlineHeight,
+		}
+		return false, nil
+	})
+
+	// Clear and re-invoke with same inputs at same height
+	suite.keeper.ChallengeStore.Walk(suite.ctx, nil, func(key collections.Pair[string, string], value types.StorageChallenge) (bool, error) {
+		_ = suite.keeper.RemoveChallenge(suite.ctx, value.Provider, value.ChallengeId)
+		return false, nil
+	})
+
+	_, err = suite.keeper.IssueChallengeForFile(suite.ctx, file, 1, 50)
+	suite.Require().NoError(err)
+
+	second := map[string]challengeSnapshot{}
+	suite.keeper.ChallengeStore.Walk(suite.ctx, nil, func(key collections.Pair[string, string], value types.StorageChallenge) (bool, error) {
+		second[value.Provider] = challengeSnapshot{
+			ChallengeID: value.ChallengeId,
+			ChunkIndex:  value.ChunkIndex,
+			Deadline:    value.DeadlineHeight,
+		}
+		return false, nil
+	})
+
+	for _, provider := range providers {
+		suite.Equal(first[provider], second[provider], "challenge must be deterministic for %s", provider)
+	}
+}
+
+func (suite *KeeperTestSuite) TestHandleMissedChallenges_NoneExpired() {
+	suite.ctx = suite.ctx.WithBlockHeight(100)
+
+	owner := suite.CreateTestAddress(0)
+	provider := suite.CreateTestAddress(1)
+
+	// Create a provider
+	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
+		Address:        provider,
+		SpaceAvailable: 1_000_000_000,
+		SpaceUsed:      0,
+	}))
+
+	// Create a file with that provider
+	file := suite.createTestFile("challenge-file-1", owner, 1024*1024, 3, []string{provider})
+
+	// Create a challenge with future deadline (not yet expired)
+	challenge := types.StorageChallenge{
+		ChallengeId:    "future-challenge",
+		FileId:         file.Fid,
+		Provider:       provider,
+		FileMerkle:     file.Merkle,
+		CreatedHeight:  50,
+		DeadlineHeight: 200, // well in the future
+	}
+	suite.Require().NoError(suite.keeper.SetChallenge(suite.ctx, challenge))
+
+	// Set LastRewardsTime
+	suite.Require().NoError(suite.keeper.LastRewardsTime.Set(suite.ctx, 10))
+
+	// Run
+	suite.keeper.HandleMissedChallenges(suite.ctx)
+
+	// Verify: challenge still exists (not processed)
+	_, err := suite.keeper.GetChallenge(suite.ctx, provider, "future-challenge")
+	suite.Require().NoError(err, "future challenge should not be removed")
+
+	// Verify: provider not destabilized
+	updatedFile, err := suite.keeper.GetFile(suite.ctx, file.Fid)
+	suite.Require().NoError(err)
+	suite.Empty(updatedFile.UnstableProviders)
+}
+
+func (suite *KeeperTestSuite) TestHandleMissedChallenges_FirstMissDestabilizes() {
+	suite.ctx = suite.ctx.WithBlockHeight(200)
+
+	owner := suite.CreateTestAddress(0)
+	provider := suite.CreateTestAddress(1)
+
+	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
+		Address:        provider,
+		SpaceAvailable: 1_000_000_000,
+		SpaceUsed:      1024 * 1024,
+	}))
+
+	file := suite.createTestFile("miss-file-1", owner, 1024*1024, 3, []string{provider})
+
+	// Past deadline challenge
+	challenge := types.StorageChallenge{
+		ChallengeId:    "miss-1",
+		FileId:         file.Fid,
+		Provider:       provider,
+		FileMerkle:     file.Merkle,
+		CreatedHeight:  50,
+		DeadlineHeight: 100, // past deadline (200+1 >= 100)
+	}
+	suite.Require().NoError(suite.keeper.SetChallenge(suite.ctx, challenge))
+
+	suite.Require().NoError(suite.keeper.LastRewardsTime.Set(suite.ctx, 10))
+
+	suite.keeper.HandleMissedChallenges(suite.ctx)
+
+	// Verify: challenge removed
+	_, err := suite.keeper.GetChallenge(suite.ctx, provider, "miss-1")
+	suite.Require().Error(err)
+
+	// Verify: provider destabilized (added to UnstableProviders)
+	updatedFile, err := suite.keeper.GetFile(suite.ctx, file.Fid)
+	suite.Require().NoError(err)
+	suite.Contains(updatedFile.UnstableProviders, provider)
+	// Provider still in the file's provider list
+	suite.Contains(updatedFile.Providers, provider)
+}
+
+func (suite *KeeperTestSuite) TestHandleMissedChallenges_SecondMissRemovesProvider() {
+	suite.ctx = suite.ctx.WithBlockHeight(300)
+
+	owner := suite.CreateTestAddress(0)
+	provider := suite.CreateTestAddress(1)
+	otherProvider := suite.CreateTestAddress(2)
+
+	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
+		Address:        provider,
+		SpaceAvailable: 1_000_000_000,
+		SpaceUsed:      1024 * 1024,
+	}))
+
+	// Two providers so the file stays alive when one is removed
+	file := suite.createTestFile("miss-file-2", owner, 1024*1024, 3, []string{provider, otherProvider})
+
+	// Set provider as unstable (simulating first miss)
+	suite.Require().NoError(suite.keeper.DestabilizeProvider(suite.ctx, provider, file))
+	// Refresh file from store so it's up to date
+	file, _ = suite.keeper.GetFile(suite.ctx, file.Fid)
+
+	// Track in SubscriptionProviderBytes
+	subProvKey := collections.Join(file.Subscription, provider)
+	suite.Require().NoError(suite.keeper.SubscriptionProviderBytes.Set(suite.ctx, subProvKey, file.FileSize))
+
+	// Past deadline challenge — second miss
+	challenge := types.StorageChallenge{
+		ChallengeId:    "miss-2",
+		FileId:         file.Fid,
+		Provider:       provider,
+		FileMerkle:     file.Merkle,
+		CreatedHeight:  150,
+		DeadlineHeight: 200,
+	}
+	suite.Require().NoError(suite.keeper.SetChallenge(suite.ctx, challenge))
+
+	suite.Require().NoError(suite.keeper.LastRewardsTime.Set(suite.ctx, 20))
+
+	suite.keeper.HandleMissedChallenges(suite.ctx)
+
+	// Verify: challenge removed
+	_, err := suite.keeper.GetChallenge(suite.ctx, provider, "miss-2")
+	suite.Require().Error(err)
+
+	// Verify: provider removed from file
+	updatedFile, err := suite.keeper.GetFile(suite.ctx, file.Fid)
+	suite.Require().NoError(err)
+	suite.NotContains(updatedFile.Providers, provider)
+	suite.NotContains(updatedFile.UnstableProviders, provider)
+
+	// Verify: SubscriptionProviderBytes decremented
+	_, getErr := suite.keeper.SubscriptionProviderBytes.Get(suite.ctx, subProvKey)
+	suite.Require().Error(getErr, "entry should be removed")
+
+	// Verify: file still alive (has no other providers but wasn't the last)
+	suite.Equal("ACTIVE", updatedFile.Status)
+}
+
+func (suite *KeeperTestSuite) TestHandleMissedChallenges_LastProviderRemoved_FileDeath() {
+	suite.ctx = suite.ctx.WithBlockHeight(300)
+
+	owner := suite.CreateTestAddress(0)
+	provider := suite.CreateTestAddress(1)
+
+	suite.Require().NoError(suite.keeper.SetProvider(suite.ctx, types.Provider{
+		Address:        provider,
+		SpaceAvailable: 1_000_000_000,
+		SpaceUsed:      1024 * 1024,
+	}))
+
+	// File with only one provider
+	file := suite.createTestFile("last-provider", owner, 1024*1024, 3, []string{provider})
+	suite.Require().NoError(suite.keeper.DestabilizeProvider(suite.ctx, provider, file))
+	file, _ = suite.keeper.GetFile(suite.ctx, file.Fid)
+
+	subProvKey := collections.Join(file.Subscription, provider)
+	suite.Require().NoError(suite.keeper.SubscriptionProviderBytes.Set(suite.ctx, subProvKey, file.FileSize))
+
+	challenge := types.StorageChallenge{
+		ChallengeId:    "last-miss",
+		FileId:         file.Fid,
+		Provider:       provider,
+		FileMerkle:     file.Merkle,
+		CreatedHeight:  150,
+		DeadlineHeight: 200,
+	}
+	suite.Require().NoError(suite.keeper.SetChallenge(suite.ctx, challenge))
+
+	suite.Require().NoError(suite.keeper.LastRewardsTime.Set(suite.ctx, 20))
+	suite.Require().NoError(suite.keeper.IncrementFileCount(suite.ctx)) // Account for createTestFile's increment
+
+	suite.keeper.HandleMissedChallenges(suite.ctx)
+
+	// Verify: file DEAD
+	updatedFile, err := suite.keeper.GetFile(suite.ctx, file.Fid)
+	suite.Require().NoError(err)
+	suite.Equal("DEAD", updatedFile.Status)
+	suite.Empty(updatedFile.Providers)
 }
 
 func (suite *KeeperTestSuite) TestStartChallengeRound_LargeFileSet_NoCrash_AdvancesCursor() {

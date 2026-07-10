@@ -211,7 +211,6 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 	defer iter.Close()
 
 	var missedCount uint64
-
 	for iter.Valid() {
 		challenge, err := iter.Value()
 		if err != nil {
@@ -224,7 +223,7 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 		if currentHeight >= uint64(challenge.DeadlineHeight) {
 
 			// Missed proof - apply penalty
-			if k.HandleMissedChallenge(ctx, challenge) {
+			if k.handleMissedChallenge(ctx, challenge) {
 				missedCount++
 			}
 
@@ -259,7 +258,7 @@ func (k Keeper) HandleMissedChallenges(ctx sdk.Context) {
 /*
 Slash provider rewards and remove the provider from the file.
 */
-func (k Keeper) HandleMissedChallenge(ctx sdk.Context, challenge types.StorageChallenge) bool {
+func (k Keeper) handleMissedChallenge(ctx sdk.Context, challenge types.StorageChallenge) bool {
 	file, err := k.GetFile(ctx, challenge.FileId)
 	if err != nil {
 		return false
