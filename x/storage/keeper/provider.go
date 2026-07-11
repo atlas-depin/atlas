@@ -95,6 +95,13 @@ func (k Keeper) IterateAllProviders(ctx context.Context, fn func(key string, pro
 /// ---- Utility Methods ----
 
 /*
+Remove a provider record by address.
+*/
+func (k Keeper) RemoveProvider(ctx context.Context, address string) error {
+	return k.ProviderStore.Remove(ctx, address)
+}
+
+/*
 Increment the space used of a given provider.
 */
 func (k Keeper) IncrementProviderSpaceUsed(ctx context.Context, address string, bytes int64, d_r int64, d_s int64) error {

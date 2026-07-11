@@ -20,6 +20,10 @@ import (
 func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	if file.Status == "DEAD" {
+		return nil
+	}
+
 	// Skip staged & dead files
 	if file.Status == "STAGED" {
 		if err := k.RemoveFile(ctx, file.Fid); err != nil {
@@ -37,15 +41,14 @@ func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 	// Compute the time delta: the period from the last reward to the subscription expiry.
 	// All files under the same subscription use the same reference point (subscription.End)
 	// regardless of which block the batch processor happens to reach them in.
-	if file.Status != "DEAD" {
-		var delta int64
-		sub, _ := k.GetStorageSubscription(ctx, file.Creator, file.Subscription)
-
-		delta = sub.End.Unix() - lastRewardsTime
+	sub, err := k.GetStorageSubscription(ctx, file.Creator, file.Subscription)
+	if err == nil {
+		// Subscription still exists.. somehow
+		delta := sub.End.Unix() - lastRewardsTime
 		if delta < 0 {
 			delta = 0
 		}
-		// Free provider space and compensate for the period since last reward
+		// Free provider space and compensate for the period since last reward.
 		for _, provider := range file.Providers {
 			if err := k.DecrementProviderSpaceUsed(ctx, provider, file.FileSize, delta); err != nil {
 				if err != types.ErrProviderNotFound {
@@ -54,8 +57,6 @@ func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 			}
 
 			// Remove this provider's bytes from the per-subscription tracker.
-			// If the EndBlocker already freed these bytes via the expiry sweep,
-			// the entry may already be gone — that's fine.
 			subProvKey := collections.Join(file.Subscription, provider)
 			currentBytes, getErr := k.SubscriptionProviderBytes.Get(ctx, subProvKey)
 			if getErr == nil {
@@ -94,9 +95,6 @@ func (k Keeper) ExpireFile(ctx context.Context, file types.File) error {
 
 // ExpireSubscriptions scans the expiry index for subscriptions whose
 // End time has passed and expires them. Called from EndBlocker every block.
-// Uses the index so the scan is bounded to actually-expiring subs only.
-// The Triple key (EndUnix, subID, owner) encodes everything needed to
-// remove the subscription — no additional scans required.
 func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
 	now := ctx.BlockTime().Unix()
 
@@ -117,8 +115,8 @@ func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
 		owner := triple.K3()
 		subID := triple.K2()
 
-		// Free provider space immediately using the per-subscription
-		// byte tracker — O(providers_per_sub), not O(files).
+		// Free provider space immediately using the per-subscription byte tracker.
+		// O(providers_per_sub) instead of O(files).
 		subProvRange := collections.NewPrefixedPairRange[string, string](subID)
 		spIter, spErr := k.SubscriptionProviderBytes.Iterate(ctx, subProvRange)
 		if spErr == nil {
@@ -150,62 +148,6 @@ func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
 		}
 		ctx.Logger().Info("Subscription expired", "owner", owner, "sub_id", subID)
 	}
-
-	return nil
-}
-
-// ExpireSubscription removes all files under a subscription and cleans up
-// the subscription record itself.
-//
-// Because ExpireFile modifies the FileStore (RemoveFile), we first collect
-// all file IDs under the subscription, then expire them one by one.
-func (k Keeper) ExpireSubscription(ctx context.Context, creator, subscriptionID string) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	// 1. Collect all file IDs under this subscription
-	rng := collections.NewSuperPrefixedTripleRange[string, string, string](creator, subscriptionID)
-	iter, err := k.FileStore.Iterate(ctx, rng)
-	if err != nil {
-		return err
-	}
-	defer iter.Close()
-
-	var fileIDs []string
-	for ; iter.Valid(); iter.Next() {
-		kv, err := iter.KeyValue()
-		if err != nil {
-			return err
-		}
-		fileIDs = append(fileIDs, kv.Value.Fid)
-	}
-
-	// 2. Expire each file (safe because we're not iterating the store anymore)
-	for _, fid := range fileIDs {
-		file, err := k.GetFile(ctx, fid)
-		if err != nil {
-			continue // already removed by a concurrent ProveFile expiry
-		}
-		if err := k.ExpireFile(ctx, file); err != nil {
-			return err
-		}
-	}
-
-	// 3. Remove the subscription record
-	if err := k.ExpireStorageSubscription(ctx, creator, subscriptionID); err != nil {
-		// subscription might already be gone — that's fine
-		if err != collections.ErrNotFound {
-			return err
-		}
-	}
-
-	// 4. Emit event
-	sdkCtx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeExpireFile,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(types.AttributeKeySubscriptionId, subscriptionID),
-		),
-	)
 
 	return nil
 }
