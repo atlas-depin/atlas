@@ -46,7 +46,6 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 			return false
 		}
 
-		totalCreditsDeducted = totalCreditsDeducted.Add(credits)
 		tokens := sdk.NewCoin(
 			storageTokensInPool.Denom,
 			storageTokensInPool.Amount.Mul(credits).Quo(storageCreditsInPool),
@@ -59,8 +58,10 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		)
 		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("Failed to distribute rewards to %s.", provider.Address))
+			return false
 		}
 
+		totalCreditsDeducted = totalCreditsDeducted.Add(credits)
 		provider.CreditDelta = 0
 		if err := k.ProviderStore.Set(ctx, provider.Address, provider); err != nil {
 			ctx.Logger().Error(fmt.Sprintf("Failed to reset credit delta for %s.", provider.Address))
