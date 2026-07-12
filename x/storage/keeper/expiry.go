@@ -115,6 +115,14 @@ func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
 		owner := triple.K3()
 		subID := triple.K2()
 
+		// Compute the time window between the last reward and the subscription expiry
+		endUnix := triple.K1()
+		lastRewardTime, _ := k.LastRewardsTime.Get(ctx)
+		delta := endUnix - lastRewardTime
+		if delta < 0 {
+			delta = 0
+		}
+
 		// Free provider space immediately using the per-subscription byte tracker.
 		// O(providers_per_sub) instead of O(files).
 		subProvRange := collections.NewPrefixedPairRange[string, string](subID)
@@ -133,6 +141,7 @@ func (k Keeper) ExpireSubscriptions(ctx sdk.Context) error {
 					if prov.SpaceUsed < 0 {
 						prov.SpaceUsed = 0
 					}
+					prov.CreditDelta += bytes * delta
 					_ = k.SetProvider(ctx, prov)
 				}
 				_ = k.SubscriptionProviderBytes.Remove(ctx, kv.Key)
