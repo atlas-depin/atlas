@@ -46,6 +46,12 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 			return false
 		}
 
+		providerAddr, addrErr := sdk.AccAddressFromBech32(provider.Address)
+		if addrErr != nil {
+			ctx.Logger().Error(fmt.Sprintf("Failed to parse provider address %s.", provider.Address))
+			return false
+		}
+
 		tokens := sdk.NewCoin(
 			storageTokensInPool.Denom,
 			storageTokensInPool.Amount.Mul(credits).Quo(storageCreditsInPool),
@@ -53,7 +59,7 @@ func (k Keeper) RewardProviders(ctx sdk.Context) error {
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
 			types.ModuleName,
-			sdk.AccAddress(provider.Address),
+			providerAddr,
 			sdk.NewCoins(tokens),
 		)
 		if err != nil {

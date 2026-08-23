@@ -42,10 +42,14 @@ func (k Keeper) DistributeCreditReward(ctx context.Context, credits math.Int, re
 			return err
 		}
 	} else {
+		receiverAddr, addrErr := sdk.AccAddressFromBech32(receiver)
+		if addrErr != nil {
+			return addrErr
+		}
 		if err = k.bankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
 			types.ModuleName,
-			sdk.AccAddress(receiver),
+			receiverAddr,
 			sdk.NewCoins(tokens),
 		); err != nil {
 			// ctx.Logger().Error(fmt.Sprintf("Failed to distribute rewards to %s.", receiver))
