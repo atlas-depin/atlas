@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 
 	"atlas/x/storage/types"
 
@@ -15,6 +16,12 @@ func (q queryServer) File(ctx context.Context, req *types.QueryFileRequest) (*ty
 	}
 
 	file, err := q.k.GetFile(ctx, req.Fid)
+	if err != nil {
+		if errors.Is(err, types.ErrFileNotFound) {
+			return nil, status.Error(codes.NotFound, "file not found")
+		}
+		return nil, err
+	}
 
-	return &types.QueryFileResponse{File: &file}, err
+	return &types.QueryFileResponse{File: &file}, nil
 }

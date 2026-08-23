@@ -19,7 +19,7 @@ func (q queryServer) Subscriptions(ctx context.Context, req *types.QuerySubscrip
 	var queryOpts []func(opt *query.CollectionsPaginateOptions[collections.Pair[string, string]])
 	if req.SubscriberAddress != "" {
 		if _, err := q.k.addressCodec.StringToBytes(req.SubscriberAddress); err != nil {
-			return nil, status.Error(codes.InvalidArgument, "bad subscriber address")
+			return nil, status.Errorf(codes.InvalidArgument, "bad subscriber address: %v", err)
 		}
 		queryOpts = append(queryOpts, query.WithCollectionPaginationPairPrefix[string, string](req.SubscriberAddress))
 	}

@@ -44,6 +44,8 @@ func (q queryServer) Strays(ctx context.Context, req *types.QueryStraysRequest) 
 	var files []*types.File
 	var idx uint64
 
+	pageRes := &query.PageResponse{}
+
 	for ; iter.Valid(); iter.Next() {
 		if idx < offset {
 			idx++
@@ -64,15 +66,16 @@ func (q queryServer) Strays(ctx context.Context, req *types.QueryStraysRequest) 
 		idx++
 
 		if uint64(len(files)) >= limit {
+			// Only emit a cursor when more entries remain after this page,
+			// so clients stop fetching once the last page is returned.
+			iter.Next()
+			if iter.Valid() {
+				nextKey := make([]byte, 8)
+				binary.BigEndian.PutUint64(nextKey, offset+uint64(len(files)))
+				pageRes.NextKey = nextKey
+			}
 			break
 		}
-	}
-
-	pageRes := &query.PageResponse{}
-	if uint64(len(files)) >= limit {
-		nextKey := make([]byte, 8)
-		binary.BigEndian.PutUint64(nextKey, offset+uint64(len(files)))
-		pageRes.NextKey = nextKey
 	}
 
 	return &types.QueryStraysResponse{

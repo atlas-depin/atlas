@@ -73,7 +73,7 @@ func (k msgServer) DeleteFile(goCtx context.Context, msg *types.MsgDeleteFile) (
 	if err != nil {
 		return nil, err
 	}
-	if file.Status != "STAGED" {
+	if file.Status != "STAGED" && file.Status != "DEAD" {
 		if err = k.DecrementFileCount(ctx); err != nil {
 			return nil, err
 		}

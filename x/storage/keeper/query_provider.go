@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 
 	"atlas/x/storage/types"
 
@@ -15,14 +16,13 @@ func (q queryServer) Provider(ctx context.Context, req *types.QueryProviderReque
 	}
 
 	provider, err := q.k.GetProvider(ctx, req.Address)
-
-	if err == types.ErrProviderNotFound {
-		return &types.QueryProviderResponse{
-			Provider: nil,
-		}, nil
-	} else {
-		return &types.QueryProviderResponse{
-			Provider: &provider,
-		}, err
+	if errors.Is(err, types.ErrProviderNotFound) {
+		return nil, status.Error(codes.NotFound, "provider not found")
+	} else if err != nil {
+		return nil, err
 	}
+
+	return &types.QueryProviderResponse{
+		Provider: &provider,
+	}, nil
 }

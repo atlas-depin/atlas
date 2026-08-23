@@ -6,7 +6,6 @@ import (
 	"atlas/x/storage/types"
 
 	"cosmossdk.io/collections"
-	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,7 +24,7 @@ func (q queryServer) Files(ctx context.Context, req *types.QueryFilesRequest) (*
 	}
 	if req.Creator != "" {
 		if _, err := q.k.addressCodec.StringToBytes(req.Creator); err != nil {
-			return nil, errors.Wrap(err, "invalid creator address")
+			return nil, status.Errorf(codes.InvalidArgument, "invalid creator address: %v", err)
 		}
 	}
 
