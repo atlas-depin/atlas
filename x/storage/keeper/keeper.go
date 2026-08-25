@@ -55,6 +55,9 @@ type Keeper struct {
 
 	SubscriptionProviderBytes collections.Map[collections.Pair[string, string], int64] // subId|provider -> bytes
 
+	// Feeds are named price feeds keyed by name (e.g. "ATL").
+	Feeds collections.Map[string, types.Feed]
+
 	// Indicies
 	FilesByProvider         collections.KeySet[string]                                    // provider_address|file_id -> {}
 	SubscriptionExpiryIndex collections.KeySet[collections.Triple[int64, string, string]] // EndUnix|subId|owner -> {}
@@ -140,6 +143,12 @@ func NewKeeper(
 			sb, collections.NewPrefix(9), "sub_provider_bytes",
 			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
 			collections.Int64Value,
+		),
+
+		Feeds: collections.NewMap(
+			sb, types.FeedsKey, "feeds",
+			collections.StringKey,
+			codec.CollValue[types.Feed](cdc),
 		),
 
 		SubscriptionExpiryIndex: collections.NewKeySet(

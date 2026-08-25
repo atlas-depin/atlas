@@ -4,6 +4,7 @@ package atlas.storage.v1;
 
 import "amino/amino.proto";
 import "atlas/storage/v1/file.proto";
+import "atlas/storage/v1/feed.proto";
 import "atlas/storage/v1/params.proto";
 import "atlas/storage/v1/proof.proto";
 import "atlas/storage/v1/provider.proto";
@@ -69,6 +70,16 @@ service Query {
   // Strays Queries a list of Strays items.
   rpc Strays(QueryStraysRequest) returns (QueryStraysResponse) {
     option (google.api.http).get = "/atlas/storage/v1/strays";
+  }
+
+  // Feed queries a single feed by name.
+  rpc Feed(QueryFeedRequest) returns (QueryFeedResponse) {
+    option (google.api.http).get = "/atlas/storage/v1/feeds/{name}";
+  }
+
+  // AllFeeds queries all feeds.
+  rpc AllFeeds(QueryAllFeedsRequest) returns (QueryAllFeedsResponse) {
+    option (google.api.http).get = "/atlas/storage/v1/feeds";
   }
 }
 
@@ -191,5 +202,26 @@ message QueryStraysRequest {
 // QueryStraysResponse defines the QueryStraysResponse message.
 message QueryStraysResponse {
   repeated File files = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryFeedRequest defines the QueryFeedRequest message.
+message QueryFeedRequest {
+  string name = 1;
+}
+
+// QueryFeedResponse defines the QueryFeedResponse message.
+message QueryFeedResponse {
+  Feed feed = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAllFeedsRequest defines the QueryAllFeedsRequest message.
+message QueryAllFeedsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllFeedsResponse defines the QueryAllFeedsResponse message.
+message QueryAllFeedsResponse {
+  repeated Feed feeds = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

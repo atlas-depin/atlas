@@ -37,6 +37,9 @@ service Msg {
 
   // DeleteProvider defines the DeleteProvider RPC.
   rpc DeleteProvider(MsgDeleteProvider) returns (MsgDeleteProviderResponse);
+
+  // UpdateFeed updates the data of a feed. Only the feed owner may update it.
+  rpc UpdateFeed(MsgUpdateFeed) returns (MsgUpdateFeedResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -161,3 +164,21 @@ message MsgDeleteProvider {
 
 // MsgDeleteProviderResponse defines the MsgDeleteProviderResponse message.
 message MsgDeleteProviderResponse {}
+
+// MsgUpdateFeed defines the MsgUpdateFeed message.
+message MsgUpdateFeed {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "atlas/x/storage/MsgUpdateFeed";
+
+  // creator is the address updating the feed. Must be the feed owner.
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // name is the feed name, e.g. "ATL".
+  string name = 2;
+
+  // data is the new feed data, e.g. the latest $ATL price.
+  string data = 3;
+}
+
+// MsgUpdateFeedResponse defines the MsgUpdateFeedResponse message.
+message MsgUpdateFeedResponse {}

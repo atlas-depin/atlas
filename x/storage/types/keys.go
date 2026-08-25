@@ -23,6 +23,10 @@ const (
 
 // ParamsKey is the prefix to retrieve all Params
 var ParamsKey = collections.NewPrefix("p_storage")
+
+// FeedsKey is the prefix to retrieve all price feeds
+var FeedsKey = collections.NewPrefix("f_storage")
+
 var ModuleAddress = authtypes.NewModuleAddress(ModuleName)
 var ProtocolOwnedLiquidityAddress = authtypes.NewModuleAddress(ProtocolOwnedLiquidityAccountName)
 var ProviderDepositAddress = authtypes.NewModuleAddress(ProviderDepositAccountName)
