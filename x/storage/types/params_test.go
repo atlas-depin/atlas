@@ -53,6 +53,11 @@ func TestParams_Validate_Errors(t *testing.T) {
 			mutate: func(p *types.Params) { p.ProviderDeposit = -1 },
 			msg:    "provider_deposit cannot be negative",
 		},
+		{
+			name:   "invalid price updater address",
+			mutate: func(p *types.Params) { p.PriceUpdater = "not-an-address" },
+			msg:    "price_updater is not a valid address",
+		},
 	}
 
 	for _, tc := range cases {

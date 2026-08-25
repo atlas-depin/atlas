@@ -4,7 +4,6 @@ package atlas.storage.v1;
 
 import "amino/amino.proto";
 import "atlas/storage/v1/file.proto";
-import "atlas/storage/v1/feed.proto";
 import "atlas/storage/v1/params.proto";
 import "atlas/storage/v1/proof.proto";
 import "atlas/storage/v1/provider.proto";
@@ -72,14 +71,9 @@ service Query {
     option (google.api.http).get = "/atlas/storage/v1/strays";
   }
 
-  // Feed queries a single feed by name.
-  rpc Feed(QueryFeedRequest) returns (QueryFeedResponse) {
-    option (google.api.http).get = "/atlas/storage/v1/feeds/{name}";
-  }
-
-  // AllFeeds queries all feeds.
-  rpc AllFeeds(QueryAllFeedsRequest) returns (QueryAllFeedsResponse) {
-    option (google.api.http).get = "/atlas/storage/v1/feeds";
+  // Price queries the current $ATL price.
+  rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
+    option (google.api.http).get = "/atlas/storage/v1/price";
   }
 }
 
@@ -205,23 +199,10 @@ message QueryStraysResponse {
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// QueryFeedRequest defines the QueryFeedRequest message.
-message QueryFeedRequest {
-  string name = 1;
-}
+// QueryPriceRequest defines the QueryPriceRequest message.
+message QueryPriceRequest {}
 
-// QueryFeedResponse defines the QueryFeedResponse message.
-message QueryFeedResponse {
-  Feed feed = 1 [ (gogoproto.nullable) = false ];
-}
-
-// QueryAllFeedsRequest defines the QueryAllFeedsRequest message.
-message QueryAllFeedsRequest {
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
-}
-
-// QueryAllFeedsResponse defines the QueryAllFeedsResponse message.
-message QueryAllFeedsResponse {
-  repeated Feed feeds = 1 [ (gogoproto.nullable) = false ];
-  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+// QueryPriceResponse defines the QueryPriceResponse message.
+message QueryPriceResponse {
+  string price = 1;
 }

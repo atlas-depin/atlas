@@ -15,4 +15,8 @@ message Params {
   int64 provider_deposit = 2;
   uint64 proof_window_blocks = 3;
   uint64 proof_round_blocks = 4;
+
+  // price_updater is the only address allowed to update the $ATL price feed.
+  // Empty means no one can update it.
+  string price_updater = 5;
 }

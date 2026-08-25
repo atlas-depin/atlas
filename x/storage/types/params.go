@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewParams creates a new Params instance.
@@ -18,6 +19,7 @@ func DefaultParams() Params {
 		ProviderDeposit:   10000,
 		ProofWindowBlocks: 50,
 		ProofRoundBlocks:  10,
+		PriceUpdater:      "atl1234567890",
 	}
 }
 
@@ -46,6 +48,11 @@ func (p Params) Validate() error {
 	}
 	if p.ProviderDeposit < 0 {
 		return fmt.Errorf("provider_deposit cannot be negative: got %d", p.ProviderDeposit)
+	}
+	if p.PriceUpdater != "" {
+		if _, err := sdk.AccAddressFromBech32(p.PriceUpdater); err != nil {
+			return fmt.Errorf("price_updater is not a valid address: %w", err)
+		}
 	}
 
 	return nil

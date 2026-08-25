@@ -37,6 +37,5 @@ var (
 	ErrProofRoundExceedsWindow = errors.Register(ModuleName, 2603, "proof_round_blocks must be <= proof_window_blocks")
 	ErrProofWindowUnaligned    = errors.Register(ModuleName, 2604, "proof_window_blocks must be divisible by proof_round_blocks")
 
-	ErrFeedNotFound = errors.Register(ModuleName, 2700, "feed not found")
-	ErrFeedNotOwner = errors.Register(ModuleName, 2701, "you do not own this feed")
+	ErrInvalidPriceUpdater = errors.Register(ModuleName, 2700, "you are not the designated price updater")
 )
