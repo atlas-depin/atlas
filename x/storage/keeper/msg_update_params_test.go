@@ -33,12 +33,13 @@ func (suite *KeeperTestSuite) TestMsgUpdateParams() {
 			expErrMsg: "invalid authority",
 		},
 		{
-			name: "send enabled param",
+			name: "empty params are rejected",
 			input: &types.MsgUpdateParams{
 				Authority: authorityStr,
 				Params:    types.Params{},
 			},
-			expErr: false,
+			expErr:    true,
+			expErrMsg: "proof_round_blocks must be > 0",
 		},
 		{
 			name: "all good",

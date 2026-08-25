@@ -1,68 +1,54 @@
 package keeper_test
 
-// import (
-// 	"testing"
+import (
+	"atlas/x/filetree/keeper"
+	"atlas/x/filetree/types"
+)
 
-// 	"github.com/stretchr/testify/require"
+func (suite *KeeperTestSuite) TestMsgUpdateParams() {
+	ms := keeper.NewMsgServerImpl(suite.keeper)
 
-// 	"atlas/x/filetree/keeper"
-// 	"atlas/x/filetree/types"
-// )
+	params := types.DefaultParams()
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
 
-// func TestMsgUpdateParams(t *testing.T) {
-// 	f := initFixture(t)
-// 	ms := keeper.NewMsgServerImpl(f.keeper)
+	authorityStr, err := suite.addressCodec.BytesToString(suite.keeper.GetAuthority())
+	suite.Require().NoError(err)
 
-// 	params := types.DefaultParams()
-// 	require.NoError(t, f.keeper.Params.Set(f.ctx, params))
+	testCases := []struct {
+		name      string
+		input     *types.MsgUpdateParams
+		expErr    bool
+		expErrMsg string
+	}{
+		{
+			name: "invalid authority",
+			input: &types.MsgUpdateParams{
+				Authority: "invalid",
+				Params:    params,
+			},
+			expErr:    true,
+			expErrMsg: "invalid authority",
+		},
+		{
+			name: "all good",
+			input: &types.MsgUpdateParams{
+				Authority: authorityStr,
+				Params:    params,
+			},
+			expErr: false,
+		},
+	}
 
-// 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
-// 	require.NoError(t, err)
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			_, err := ms.UpdateParams(suite.ctx, tc.input)
 
-// 	// default params
-// 	testCases := []struct {
-// 		name      string
-// 		input     *types.MsgUpdateParams
-// 		expErr    bool
-// 		expErrMsg string
-// 	}{
-// 		{
-// 			name: "invalid authority",
-// 			input: &types.MsgUpdateParams{
-// 				Authority: "invalid",
-// 				Params:    params,
-// 			},
-// 			expErr:    true,
-// 			expErrMsg: "invalid authority",
-// 		},
-// 		{
-// 			name: "send enabled param",
-// 			input: &types.MsgUpdateParams{
-// 				Authority: authorityStr,
-// 				Params:    types.Params{},
-// 			},
-// 			expErr: false,
-// 		},
-// 		{
-// 			name: "all good",
-// 			input: &types.MsgUpdateParams{
-// 				Authority: authorityStr,
-// 				Params:    params,
-// 			},
-// 			expErr: false,
-// 		},
-// 	}
-
-// 	for _, tc := range testCases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			_, err := ms.UpdateParams(f.ctx, tc.input)
-
-// 			if tc.expErr {
-// 				require.Error(t, err)
-// 				require.Contains(t, err.Error(), tc.expErrMsg)
-// 			} else {
-// 				require.NoError(t, err)
-// 			}
-// 		})
-// 	}
-// }
+			if tc.expErr {
+				suite.Require().Error(err)
+				suite.Require().Contains(err.Error(), tc.expErrMsg)
+			} else {
+				suite.Require().NoError(err)
+			}
+		})
+	}
+}
