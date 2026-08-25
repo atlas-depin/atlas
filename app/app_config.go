@@ -1,8 +1,6 @@
 package app
 
 import (
-	_ "atlas/x/atlas/module"
-	atlasmoduletypes "atlas/x/atlas/types"
 	_ "atlas/x/filetree/module"
 	filetreemoduletypes "atlas/x/filetree/types"
 	_ "atlas/x/storage/module"
@@ -132,7 +130,6 @@ var (
 						// ibc modules
 						ibcexported.ModuleName,
 						// chain modules
-						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
@@ -143,7 +140,6 @@ var (
 						feegrant.ModuleName,
 						group.ModuleName,
 						// chain modules
-						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
@@ -182,7 +178,6 @@ var (
 						ibctransfertypes.ModuleName,
 						icatypes.ModuleName,
 						// chain modules
-						atlasmoduletypes.ModuleName,
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
@@ -282,10 +277,6 @@ var (
 			{
 				Name:   epochstypes.ModuleName,
 				Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
-			},
-			{
-				Name:   atlasmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&atlasmoduletypes.Module{}),
 			},
 			{
 				Name:   storagemoduletypes.ModuleName,

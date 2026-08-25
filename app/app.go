@@ -46,7 +46,6 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"atlas/docs"
-	atlasmodulekeeper "atlas/x/atlas/keeper"
 	filetreemodulekeeper "atlas/x/filetree/keeper"
 	storageante "atlas/x/storage/ante"
 	storagemodulekeeper "atlas/x/storage/keeper"
@@ -103,7 +102,6 @@ type App struct {
 
 	// simulation manager
 	sm             *module.SimulationManager
-	AtlasKeeper    atlasmodulekeeper.Keeper
 	StorageKeeper  storagemodulekeeper.Keeper
 	FiletreeKeeper filetreemodulekeeper.Keeper
 }
@@ -178,7 +176,6 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.AtlasKeeper,
 		&app.StorageKeeper,
 		&app.FiletreeKeeper,
 	); err != nil {
