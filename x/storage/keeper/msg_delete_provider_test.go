@@ -1,8 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
-
 	"atlas/x/storage/types"
 
 	"cosmossdk.io/math"
@@ -64,26 +62,15 @@ func (suite *KeeperTestSuite) TestDeleteProvider_InvalidCreator() {
 
 func (suite *KeeperTestSuite) TestDeleteProvider_NotFound() {
 	msgServer, ctx := suite.setupMsgServer()
-	params, _ := suite.keeper.Params.Get(ctx)
 
 	creator := suite.CreateTestAddress(0)
-	creatorAddr, err := sdk.AccAddressFromBech32(creator)
-	suite.Require().NoError(err)
 
-	// Mock refund but provider was never registered — bank send fails
-	deposit := math.NewInt(params.ProviderDeposit)
-	suite.bankKeeper.EXPECT().
-		SendCoinsFromModuleToAccount(
-			gomock.Any(),
-			types.ProviderDepositAccountName,
-			creatorAddr,
-			sdk.NewCoins(sdk.NewCoin("uatl", deposit)),
-		).
-		Return(fmt.Errorf("provider not registered"))
-
+	// No provider registered: the handler must reject before any refund is
+	// attempted. No bank mock is set up, so an unexpected SendCoins call
+	// would fail the test.
 	delMsg := &types.MsgDeleteProvider{
 		Creator: creator,
 	}
-	_, err = msgServer.DeleteProvider(ctx, delMsg)
-	suite.Require().Error(err)
+	_, err := msgServer.DeleteProvider(ctx, delMsg)
+	suite.Require().ErrorIs(err, types.ErrProviderNotFound)
 }

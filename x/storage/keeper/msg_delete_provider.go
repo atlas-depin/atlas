@@ -17,6 +17,11 @@ func (k msgServer) DeleteProvider(goCtx context.Context, msg *types.MsgDeletePro
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
+	// Only a registered provider may withdraw their own deposit.
+	if _, err := k.GetProvider(ctx, msg.Creator); err != nil {
+		return nil, err
+	}
+
 	// Refund the deposit from the module escrow account back to the provider.
 	params, err := k.Params.Get(ctx)
 	if err != nil {
