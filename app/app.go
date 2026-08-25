@@ -47,6 +47,7 @@ import (
 
 	"atlas/docs"
 	filetreemodulekeeper "atlas/x/filetree/keeper"
+	oraclemodulekeeper "atlas/x/oracle/keeper"
 	storageante "atlas/x/storage/ante"
 	storagemodulekeeper "atlas/x/storage/keeper"
 )
@@ -104,6 +105,7 @@ type App struct {
 	sm             *module.SimulationManager
 	StorageKeeper  storagemodulekeeper.Keeper
 	FiletreeKeeper filetreemodulekeeper.Keeper
+	OracleKeeper   oraclemodulekeeper.Keeper
 }
 
 func init() {
@@ -178,6 +180,7 @@ func New(
 		&app.ParamsKeeper,
 		&app.StorageKeeper,
 		&app.FiletreeKeeper,
+		&app.OracleKeeper,
 	); err != nil {
 		panic(err)
 	}

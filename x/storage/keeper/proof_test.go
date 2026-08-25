@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/math"
 
 	"atlas/x/storage/types"
+
 	merkletree "github.com/ahm23/go-merkletree-xxh"
 	"github.com/zeebo/blake3"
 )
