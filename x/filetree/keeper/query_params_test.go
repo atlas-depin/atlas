@@ -1,22 +1,24 @@
 package keeper_test
 
-// import (
-// 	"testing"
+import (
+	"atlas/x/filetree/keeper"
+	"atlas/x/filetree/types"
+)
 
-// 	"github.com/stretchr/testify/require"
+func (suite *KeeperTestSuite) TestParamsQuery() {
+	qs := keeper.NewQueryServerImpl(suite.keeper)
+	params := types.DefaultParams()
 
-// 	"atlas/x/filetree/keeper"
-// 	"atlas/x/filetree/types"
-// )
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
 
-// func TestParamsQuery(t *testing.T) {
-// 	f := initFixture(t)
+	response, err := qs.Params(suite.ctx, &types.QueryParamsRequest{})
+	suite.Require().NoError(err)
+	suite.Require().Equal(&types.QueryParamsResponse{Params: params}, response)
+}
 
-// 	qs := keeper.NewQueryServerImpl(f.keeper)
-// 	params := types.DefaultParams()
-// 	require.NoError(t, f.keeper.Params.Set(f.ctx, params))
+func (suite *KeeperTestSuite) TestParamsQuery_NilRequest() {
+	qs := keeper.NewQueryServerImpl(suite.keeper)
 
-// 	response, err := qs.Params(f.ctx, &types.QueryParamsRequest{})
-// 	require.NoError(t, err)
-// 	require.Equal(t, &types.QueryParamsResponse{Params: params}, response)
-// }
+	_, err := qs.Params(suite.ctx, nil)
+	suite.Require().ErrorContains(err, "invalid request")
+}
