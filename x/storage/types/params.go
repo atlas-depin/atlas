@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/bech32"
 )
 
 // NewParams creates a new Params instance.
@@ -19,7 +19,7 @@ func DefaultParams() Params {
 		ProviderDeposit:   10000,
 		ProofWindowBlocks: 50,
 		ProofRoundBlocks:  10,
-		PriceUpdater:      "atl1234567890",
+		PriceUpdater:      "atl1wwrfl6n5qfrhldpjngp7stshnd9tgcv0u2qzvu",
 	}
 }
 
@@ -50,7 +50,9 @@ func (p Params) Validate() error {
 		return fmt.Errorf("provider_deposit cannot be negative: got %d", p.ProviderDeposit)
 	}
 	if p.PriceUpdater != "" {
-		if _, err := sdk.AccAddressFromBech32(p.PriceUpdater); err != nil {
+		// Prefix-agnostic: works for any bech32 prefix ("atl", "cosmos", ...)
+		// without depending on the global sdk config.
+		if _, _, err := bech32.DecodeAndConvert(p.PriceUpdater); err != nil {
 			return fmt.Errorf("price_updater is not a valid address: %w", err)
 		}
 	}
