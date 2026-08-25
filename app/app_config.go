@@ -3,8 +3,6 @@ package app
 import (
 	_ "atlas/x/filetree/module"
 	filetreemoduletypes "atlas/x/filetree/types"
-	_ "atlas/x/oracle/module"
-	oraclemoduletypes "atlas/x/oracle/types"
 	_ "atlas/x/storage/module"
 	storagemoduletypes "atlas/x/storage/types"
 	"time"
@@ -90,7 +88,7 @@ var (
 		{Account: storagemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
 		{Account: storagemoduletypes.ProviderDepositAccountName, Permissions: []string{}},
 		{Account: storagemoduletypes.ProtocolOwnedLiquidityAccountName, Permissions: []string{}},
-		{Account: oraclemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}}
+	}
 
 	// blocked account addresses
 	blockAccAddrs = []string{
@@ -135,7 +133,7 @@ var (
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
-						oraclemoduletypes.ModuleName},
+					},
 					EndBlockers: []string{
 						govtypes.ModuleName,
 						stakingtypes.ModuleName,
@@ -145,7 +143,7 @@ var (
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
-						oraclemoduletypes.ModuleName},
+					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
 					OverrideStoreKeys: []*runtimev1alpha1.StoreKeyConfig{
 						{
@@ -183,7 +181,7 @@ var (
 						storagemoduletypes.ModuleName,
 						filetreemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
-						oraclemoduletypes.ModuleName},
+					},
 				}),
 			},
 			{
@@ -289,9 +287,6 @@ var (
 				Config: appconfig.WrapAny(&filetreemoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
-			{
-				Name:   oraclemoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&oraclemoduletypes.Module{}),
-			}},
+		},
 	})
 )
