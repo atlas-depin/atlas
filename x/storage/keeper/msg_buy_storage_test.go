@@ -10,7 +10,7 @@ import (
 	"atlas/x/storage/types"
 )
 
-func (suite *KeeperTestSuite) TestMsgBuyStorage_Success_SelfReceiver() {
+func (suite *KeeperTestSuite) TestMsgBuyStorage_Success() {
 	msgServer, ctx := suite.setupMsgServer()
 
 	creator := suite.CreateTestAddress(0)
