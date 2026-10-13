@@ -1,6 +1,24 @@
-BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-COMMIT := $(shell git log -1 --format='%H')
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
+COMMIT := $(shell git log -1 --format='%H' 2>/dev/null)
 APPNAME := atlas
+
+# Build output location
+BUILD_DIR := $(CURDIR)/build
+BUILD_TARGET := $(BUILD_DIR)/$(APPNAME)d
+
+# Go toolchain settings
+GO ?= go
+GOFLAGS ?= -mod=readonly
+CGO_ENABLED ?= 0
+BUILD_TAGS ?= ""
+
+# Fallbacks so the build works outside a git repo (e.g. a tarball or CI cache)
+ifeq (,$(BRANCH))
+  BRANCH := unknown
+endif
+ifeq (,$(COMMIT))
+  COMMIT := unknown
+endif
 
 # do not override user values
 ifeq (,$(VERSION))
@@ -17,11 +35,53 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=$(APPNAME) \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+BUILD_FLAGS := -tags $(BUILD_TAGS) -ldflags '$(ldflags)'
 
-##############
-###  Test  ###
-##############
+
+#####  Build #####
+
+# Build the chain binary into ./build for the host platform.
+build:
+	@echo "--> Building $(APPNAME)d ($(VERSION)) for $(shell $(GO) env GOOS)/$(shell $(GO) env GOARCH)"
+	@mkdir -p $(BUILD_DIR)
+	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(GOFLAGS) $(BUILD_FLAGS) -o $(BUILD_TARGET) ./cmd/$(APPNAME)d
+	@echo "--> Built: $(BUILD_TARGET)"
+
+# Cross-compile a static Linux (amd64) binary
+build-linux:
+	@echo "--> Building $(APPNAME)d for linux/amd64"
+	@mkdir -p $(BUILD_DIR)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO) build $(GOFLAGS) $(BUILD_FLAGS) -o $(BUILD_TARGET)-linux-amd64 ./cmd/$(APPNAME)d
+	@echo "--> Built: $(BUILD_TARGET)-linux-amd64"
+
+# Cross-compile a static Linux arm64 binary.
+build-linux-arm64:
+	@echo "--> Building $(APPNAME)d for linux/arm64"
+	@mkdir -p $(BUILD_DIR)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GO) build $(GOFLAGS) $(BUILD_FLAGS) -o $(BUILD_TARGET)-linux-arm64 ./cmd/$(APPNAME)d
+	@echo "--> Built: $(BUILD_TARGET)-linux-arm64"
+
+clean:
+	@echo "--> Cleaning build directory"
+	@rm -rf $(BUILD_DIR)
+
+.PHONY: build build-linux build-linux-arm64 clean
+
+
+#####  Install  #####
+
+all: build
+
+install:
+	@echo "--> ensure dependencies have not been modified"
+	$(GO) mod verify
+	@echo "--> installing $(APPNAME)d"
+	$(GO) install $(BUILD_FLAGS) $(GOFLAGS) ./cmd/$(APPNAME)d
+
+.PHONY: all install
+
+
+#####  Test  #####
 
 test-unit:
 	@echo Running unit tests...
@@ -45,39 +105,8 @@ test: govet govulncheck test-unit
 
 .PHONY: test test-unit test-race test-cover bench
 
-#################
-###  Install  ###
-#################
 
-all: install
-
-install:
-	@echo "--> ensure dependencies have not been modified"
-	@go mod verify
-	@echo "--> installing $(APPNAME)d"
-	@go install $(BUILD_FLAGS) -mod=readonly ./cmd/$(APPNAME)d
-
-.PHONY: all install
-
-##################
-###  Protobuf  ###
-##################
-
-# Use this target if you do not want to use Ignite for generating proto files
-
-proto-deps:
-	@echo "Installing proto deps"
-	@echo "Proto deps present, run 'go tool' to see them"
-
-proto-gen:
-	@echo "Generating protobuf files..."
-	@ignite generate proto-go --yes
-
-.PHONY: proto-gen
-
-#################
-###  Linting  ###
-#################
+#####  Linting  #####
 
 lint:
 	@echo "--> Running linter"
@@ -89,9 +118,8 @@ lint-fix:
 
 .PHONY: lint lint-fix
 
-###################
-### Development ###
-###################
+
+##### Development #####
 
 govet:
 	@echo Running go vet...
