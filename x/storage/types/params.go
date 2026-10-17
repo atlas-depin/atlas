@@ -19,7 +19,7 @@ func DefaultParams() Params {
 		ProviderDeposit:   10000,
 		ProofWindowBlocks: 50,
 		ProofRoundBlocks:  10,
-		PriceUpdater:      "atl1wwrfl6n5qfrhldpjngp7stshnd9tgcv0u2qzvu",
+		PriceUpdater:      "atl1lxzfcx0h22tuqk6feq594n59suhm6rk6h0r5n7",
 	}
 }
 
