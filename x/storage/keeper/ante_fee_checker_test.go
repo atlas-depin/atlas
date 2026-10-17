@@ -150,3 +150,89 @@ func (suite *KeeperTestSuite) TestFeeChecker_CheckTx_MinGasPrice() {
 	_, _, err := checker.Check(memCtx, tx)
 	suite.Require().ErrorContains(err, "insufficient fees")
 }
+
+func (suite *KeeperTestSuite) TestFeeChecker_UpdatePrice_Exempt() {
+	updater := suite.CreateTestAddress(0)
+	params := types.DefaultParams()
+	params.PriceUpdater = updater
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
+	updaterAcc := sdk.MustAccAddressFromBech32(updater)
+
+	checker := ante.NewProveFileExemptChecker(&suite.keeper, 100)
+	tx := fakeFeeTx{
+		msgs:     []sdk.Msg{&types.MsgUpdatePrice{Creator: updater, Price: "1.5"}},
+		fee:      sdk.NewCoins(sdk.NewCoin("uatl", math.NewInt(1_000_000))),
+		gas:      1_000_000,
+		feePayer: updaterAcc,
+	}
+
+	fee, priority, err := checker.Check(suite.ctx, tx)
+	suite.Require().NoError(err)
+	suite.Require().Empty(fee, "price updater pays zero fees for UpdatePrice")
+	suite.Require().Equal(int64(0), priority)
+}
+
+func (suite *KeeperTestSuite) TestFeeChecker_UpdatePrice_NotUpdater_FallsThrough() {
+	updater := suite.CreateTestAddress(0)
+	other := suite.CreateTestAddress(1)
+	params := types.DefaultParams()
+	params.PriceUpdater = updater
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
+	otherAcc := sdk.MustAccAddressFromBech32(other)
+
+	checker := ante.NewProveFileExemptChecker(&suite.keeper, 100)
+	tx := fakeFeeTx{
+		msgs:     []sdk.Msg{&types.MsgUpdatePrice{Creator: other, Price: "1.5"}},
+		fee:      sdk.NewCoins(sdk.NewCoin("uatl", math.NewInt(1_000))),
+		gas:      100,
+		feePayer: otherAcc,
+	}
+
+	fee, priority, err := checker.Check(suite.ctx, tx)
+	suite.Require().NoError(err)
+	suite.Require().Equal(tx.fee, fee, "non-updater is not exempt")
+	suite.Require().Equal(int64(10), priority) // 1000uatl / 100 gas
+}
+
+func (suite *KeeperTestSuite) TestFeeChecker_UpdatePrice_NoUpdater_FallsThrough() {
+	updater := suite.CreateTestAddress(0)
+	params := types.DefaultParams()
+	params.PriceUpdater = "" // no updater configured
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
+	updaterAcc := sdk.MustAccAddressFromBech32(updater)
+
+	checker := ante.NewProveFileExemptChecker(&suite.keeper, 100)
+	tx := fakeFeeTx{
+		msgs:     []sdk.Msg{&types.MsgUpdatePrice{Creator: updater, Price: "1.5"}},
+		fee:      sdk.NewCoins(sdk.NewCoin("uatl", math.NewInt(1_000))),
+		gas:      100,
+		feePayer: updaterAcc,
+	}
+
+	fee, _, err := checker.Check(suite.ctx, tx)
+	suite.Require().NoError(err)
+	suite.Require().Equal(tx.fee, fee, "no configured updater -> default fee")
+}
+
+func (suite *KeeperTestSuite) TestFeeChecker_UpdatePrice_MixedMsgs_FallsThrough() {
+	updater := suite.CreateTestAddress(0)
+	params := types.DefaultParams()
+	params.PriceUpdater = updater
+	suite.Require().NoError(suite.keeper.Params.Set(suite.ctx, params))
+	updaterAcc := sdk.MustAccAddressFromBech32(updater)
+
+	checker := ante.NewProveFileExemptChecker(&suite.keeper, 100)
+	tx := fakeFeeTx{
+		msgs: []sdk.Msg{
+			&types.MsgUpdatePrice{Creator: updater, Price: "1.5"},
+			&types.MsgDeleteFile{Creator: updater, FileId: "f"},
+		},
+		fee:      sdk.NewCoins(sdk.NewCoin("uatl", math.NewInt(1_000))),
+		gas:      100,
+		feePayer: updaterAcc,
+	}
+
+	fee, _, err := checker.Check(suite.ctx, tx)
+	suite.Require().NoError(err)
+	suite.Require().Equal(tx.fee, fee, "mixed txs are not exempt")
+}

@@ -17,7 +17,8 @@ import (
 const DefaultMaxProveFilePerBlock = 100
 
 // ProveFileExemptChecker is a TxFeeChecker that exempts registered providers
-// from fees when submitting only MsgProveFile transactions.
+// submitting only MsgProveFile transactions, and the designated price updater
+// submitting only MsgUpdatePrice transactions, from fees.
 type ProveFileExemptChecker struct {
 	storageKeeper *keeper.Keeper
 	maxPerBlock   int
@@ -39,7 +40,8 @@ func NewProveFileExemptChecker(sk *keeper.Keeper, maxPerBlock int) *ProveFileExe
 }
 
 // Check implements the TxFeeChecker signature.
-// For registered providers submitting only MsgProveFile, it returns zero fee.
+// For registered providers submitting only MsgProveFile, and for the
+// designated price updater submitting only MsgUpdatePrice, it returns zero fee.
 // All other transactions fall through to the standard fee check logic.
 func (c *ProveFileExemptChecker) Check(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
@@ -47,12 +49,24 @@ func (c *ProveFileExemptChecker) Check(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, i
 		return nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	// all msgs must be MsgProveFile
 	msgs := feeTx.GetMsgs()
-	if !allProveFileMsgs(msgs) {
-		return defaultFeeCheck(ctx, tx)
+
+	// Provider exemption: only MsgProveFile txs from a registered provider.
+	if allProveFileMsgs(msgs) {
+		return c.checkProveFileExempt(ctx, tx, feeTx)
 	}
 
+	// Price updater exemption: only MsgUpdatePrice txs from the designated updater.
+	if allUpdatePriceMsgs(msgs) {
+		return c.checkUpdatePriceExempt(ctx, tx, feeTx)
+	}
+
+	return defaultFeeCheck(ctx, tx)
+}
+
+// checkProveFileExempt grants zero-fee to registered providers submitting only
+// MsgProveFile txs, subject to a per-block rate limit.
+func (c *ProveFileExemptChecker) checkProveFileExempt(ctx sdk.Context, tx sdk.Tx, feeTx sdk.FeeTx) (sdk.Coins, int64, error) {
 	// fee payer must be a registered provider
 	feePayer := feeTx.FeePayer()
 	if feePayer == nil {
@@ -77,7 +91,30 @@ func (c *ProveFileExemptChecker) Check(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, i
 		)
 	}
 
-	// exempt: zero fee, zero priority
+	return sdk.Coins{}, 0, nil
+}
+
+// checkUpdatePriceExempt grants zero-fee to the designated price updater
+// (params.PriceUpdater) when submitting only MsgUpdatePrice txs.
+//
+// No per-block rate limit is applied: only the single trusted updater account
+// can produce valid updates (the msg handler rejects any other creator), so
+// there is no spam vector beyond that account itself.
+func (c *ProveFileExemptChecker) checkUpdatePriceExempt(ctx sdk.Context, tx sdk.Tx, feeTx sdk.FeeTx) (sdk.Coins, int64, error) {
+	feePayer := feeTx.FeePayer()
+	if feePayer == nil {
+		return defaultFeeCheck(ctx, tx)
+	}
+
+	params, err := c.storageKeeper.Params.Get(ctx)
+	if err != nil || params.PriceUpdater == "" {
+		return defaultFeeCheck(ctx, tx)
+	}
+
+	if sdk.AccAddress(feePayer).String() != params.PriceUpdater {
+		return defaultFeeCheck(ctx, tx)
+	}
+
 	return sdk.Coins{}, 0, nil
 }
 
@@ -88,6 +125,19 @@ func allProveFileMsgs(msgs []sdk.Msg) bool {
 	}
 	for _, msg := range msgs {
 		if _, ok := msg.(*types.MsgProveFile); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// allUpdatePriceMsgs returns true only if every message is MsgUpdatePrice.
+func allUpdatePriceMsgs(msgs []sdk.Msg) bool {
+	if len(msgs) == 0 {
+		return false
+	}
+	for _, msg := range msgs {
+		if _, ok := msg.(*types.MsgUpdatePrice); !ok {
 			return false
 		}
 	}
