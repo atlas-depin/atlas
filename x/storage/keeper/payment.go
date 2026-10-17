@@ -34,9 +34,9 @@ func (k Keeper) GetStorageCost(ctx sdk.Context, gbs int64, days int64) math.Int 
 // "0.0004" means 1 ATL = $0.0004. canine-chain style "price:marketCap"
 // strings are tolerated by only reading the part before the colon.
 //
-// Falls back to $1 until a valid price is set, which preserves the previous
-// behavior and keeps the chain functional while the genesis seed
-// ("0.000000") is still in place.
+// Falls back to $1 until a valid price is set, keeping the chain functional
+// before the first MsgUpdatePrice. The genesis seed is types.DefaultPrice
+// ("1.000000").
 func (k Keeper) getATLPrice(ctx context.Context) math.LegacyDec {
 	raw, err := k.Price.Get(ctx)
 	if err != nil {
