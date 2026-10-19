@@ -58,7 +58,7 @@ Upon expiry, all remaining storage credits are sent to a "dump". Storage credits
 Currently, subscriptions are based on a fixed duration, while storage credits exist to support effective rewards distribution, file replica management, and subscription expansion. In a future development, a new type of subscription that does not have an expiry could be added. In this case, as long as the user has storage credits remaining, they may use them on-demand. These storage credits would be billed at a premium rate since they offer immense flexibility and have no contributions to the POL. The premium would be routed to POL.
 
 ## 4. File Management
-Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<file_id>`. The file id (fid) is a sha256 hash of the following: `<merkle root>:<creator_address>:<de-duplication index>`. The de-duplication index  is necessary in case a user chooses to upload several copies of the same file. It is calculated by Atlas Protocol and is equal to the `total file count + blockchain height`.
+Files are indexed in a kvstore under the following following prefix schema within the storage module: `files/<creator_address>/<subscription_id>/<file_id>`. The file id (fid) is a sha256 hash of the following: `<merkle root>:<creator_address>:<de-duplication index>`. The de-duplication index  is necessary in case a user chooses to upload several copies of the same file. It is calculated by Atlas DePIN and is equal to the `total file count + blockchain height`.
 
 ### File Object
 ```proto
@@ -88,7 +88,7 @@ When a file is deleted on-chain, the remaining storage credits until its expiry 
 
 
 ## 5. DePIN Security Strategy
-Atlas Protocol challenges all files within a proof window. To reduce chain congestion, a proof window consists of several proof rounds of N blocks. At the start of a proof window, an index of files to prove is populated with all files. When a file is proven, it gets removed from this index. 80% of the files to prove within a proof round are selected at random from the index, while the other 20% is selected at random from all files. This distribution of sources mitigates the feasibility of "store-on-demand" attacks, while also maintaining an efficient mechanism to ensure all files are proven within a certain proof window. "store-on-demand" attacks are still possible; however, the risks strongly outweight the rewards due to the provider rewards slashing mechanism.
+Atlas DePIN challenges all files within a proof window. To reduce chain congestion, a proof window consists of several proof rounds of N blocks. At the start of a proof window, an index of files to prove is populated with all files. When a file is proven, it gets removed from this index. 80% of the files to prove within a proof round are selected at random from the index, while the other 20% is selected at random from all files. This distribution of sources mitigates the feasibility of "store-on-demand" attacks, while also maintaining an efficient mechanism to ensure all files are proven within a certain proof window. "store-on-demand" attacks are still possible; however, the risks strongly outweight the rewards due to the provider rewards slashing mechanism.
 
 
 1D blocks / (total_files / 500 files/block) == intervals
